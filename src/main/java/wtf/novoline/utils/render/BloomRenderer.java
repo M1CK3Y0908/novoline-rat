@@ -56,6 +56,9 @@ public class BloomRenderer {
       GlStateManager.alphaFunc(516, 0.1F);
       blurFramebuffer.release();
       this.blurRenderer.releaseResult();
+      ARBShaderObjects.glUseProgramObjectARB(0);
+      RenderUtils.resetColor();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
    public void submit(Runnable runnable) {

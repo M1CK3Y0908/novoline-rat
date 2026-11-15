@@ -143,6 +143,8 @@ public class BlurRenderer {
 
    public void blur(String text, BlurFramebuffer blurFramebuffer2, ScaledResolution scaledResolution, int radius, float sigma) {
       if (radius < 1) {
+         GlStateManager.enableTexture2D();
+         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          this.blurFramebuffer = this.framebufferManager.reuseOrAcquire(this.blurFramebuffer, text + " no blur fallback");
          this.blurFramebuffer.bindFramebuffer();
          blurFramebuffer2.bindTexture();
@@ -167,6 +169,8 @@ public class BlurRenderer {
 
    public void blur(String text, Framebuffer framebuffer, ScaledResolution scaledResolution, int radius, float sigma, int step) {
       if (radius < 1) {
+         GlStateManager.enableTexture2D();
+         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          this.blurFramebuffer = this.framebufferManager.reuseOrAcquire(this.blurFramebuffer, text + " no blur fallback");
          this.blurFramebuffer.bindFramebuffer();
          framebuffer.bindFramebufferTexture();
@@ -188,11 +192,15 @@ public class BlurRenderer {
    }
 
    public void drawResult(ScaledResolution scaledResolution) {
+      GlStateManager.enableTexture2D();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.bindResultTexture();
       RenderUtils.drawFullscreenQuad(scaledResolution);
    }
 
    public void drawResultRegion(ScaledResolution scaledResolution, double d, double d2, double d3, double d4) {
+      GlStateManager.enableTexture2D();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.bindResultTexture();
       RenderUtils.drawFlippedTexturedQuad(scaledResolution, d, d2, d3, d4);
    }

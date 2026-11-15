@@ -103,6 +103,10 @@ public class MenuClickGuiScreen extends GuiScreen {
    }
 
    private void releaseResources() {
+      if (this.blurRenderer != null) {
+         this.blurRenderer.releaseResult();
+      }
+
       if (this.framebuffer != null) {
          this.framebuffer.deleteFramebuffer();
          this.framebuffer = null;
@@ -114,6 +118,12 @@ public class MenuClickGuiScreen extends GuiScreen {
       while (iterator2.hasNext()) {
          ((MenuCategoryPanel)iterator2.next()).reset();
       }
+
+      Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
+      RenderUtils.resetColor();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.enableTexture2D();
+      ARBShaderObjects.glUseProgramObjectARB(0);
    }
 
    public void handleFramebuffer(Framebuffer framebuffer3, float f) {
@@ -128,6 +138,7 @@ public class MenuClickGuiScreen extends GuiScreen {
       ScaledResolution scaledResolution2 = new ScaledResolution(Minecraft.getMinecraft());
       if (this.visibility > 0.0F && clickGui2.backgroundSettings.isSelected(3)) {
          RenderUtils.resetColor();
+         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          Entry entry2 = clickGui2.entry;
          if (entry2 != null && entry2.getMetadata() != null) {
             this.backgroundManager.loadTexture(entry2);
@@ -145,6 +156,7 @@ public class MenuClickGuiScreen extends GuiScreen {
                scaledResolution2.getScaledWidth() - i + (int)this.animation2.getValue(), scaledResolution2.getScaledHeight() - i2 + 5, 1.0F, 1.0F, i, i2, i, i2
             );
             RenderUtils.resetColor();
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          }
       }
 
@@ -155,7 +167,7 @@ public class MenuClickGuiScreen extends GuiScreen {
             this.releaseResources();
             this.resourcesReleased = true;
          }
-      } else {
+      } else if (this.mc.currentScreen == this || this.clickGui.isEnabled()) {
          int scaledWidth = scaledResolution2.getScaledWidth();
          int scaledHeight = scaledResolution2.getScaledHeight();
          int i3 = Mouse.getX() * scaledWidth / this.mc.displayWidth;
@@ -235,6 +247,9 @@ public class MenuClickGuiScreen extends GuiScreen {
       GL11.glTexParameteri(3553, 10242, 10497);
       GL11.glTexParameteri(3553, 10243, 10497);
       float f2 = Math.min(this.visibility / 100.0F, 1.0F);
+      RenderUtils.resetColor();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.enableTexture2D();
       boolean isPanelAnimating = this.buttons.stream().anyMatch(MenuCategoryPanel::isAnimating);
       boolean flag = this.mouseHeld || this.tickCount < 60L || this.redrawPending || this.dashboardOpen || isPanelAnimating;
       this.redrawPending = false;
@@ -248,15 +263,17 @@ public class MenuClickGuiScreen extends GuiScreen {
       ScaledResolution scaledResolution2 = new ScaledResolution(this.mc);
       int backgroundBlurRadius = this.menuLayout.getBackgroundBlurRadius();
       float backgroundBlurSigma = this.menuLayout.getBackgroundBlurSigma();
-      boolean flag4 = backgroundBlurRadius > 0 && backgroundBlurSigma > 0.0 && shadersEnabled && this.clickGui.backgroundSettings.getElements().get(0).isSelected();
+      int effectiveBlurRadius = (int)(f2 * backgroundBlurRadius);
+      boolean flag4 = effectiveBlurRadius > 0 && backgroundBlurSigma > 0.0 && shadersEnabled && this.clickGui.backgroundSettings.getElements().get(0).isSelected();
       if (flag4) {
-         this.blurRenderer.blur("Background", framebuffer3, scaledResolution2, (int)(f2 * backgroundBlurRadius), backgroundBlurSigma, 1);
+         this.blurRenderer.blur("Background", framebuffer3, scaledResolution2, effectiveBlurRadius, backgroundBlurSigma, 1);
          framebuffer3.bindFramebuffer(true);
       }
 
       int desaturationColor = this.menuLayout.getDesaturationColor();
       float desaturationFactor = this.menuLayout.getDesaturationFactor();
-      boolean flag5 = desaturationFactor != 0.0 && shadersEnabled && this.clickGui.backgroundSettings.getElements().get(1).isSelected();
+      float effectiveDesaturation = f2 < 0.02F ? 0.0F : desaturationFactor * f2;
+      boolean flag5 = effectiveDesaturation > 0.0F && shadersEnabled && this.clickGui.backgroundSettings.getElements().get(1).isSelected();
       if (flag5) {
          BlurFramebuffer blurFramebuffer = null;
          if (!flag4) {
@@ -272,7 +289,7 @@ public class MenuClickGuiScreen extends GuiScreen {
          desaturationShader2.use();
          ARBShaderObjects.glUniform1iARB(desaturationShader2.getUniformLocation("u_texture"), 0);
          ARBShaderObjects.glUniform3fARB(desaturationShader2.getUniformLocation("u_color"), fArray[0], fArray[1], fArray[2]);
-         ARBShaderObjects.glUniform1fARB(desaturationShader2.getUniformLocation("u_factor"), desaturationFactor * f2);
+         ARBShaderObjects.glUniform1fARB(desaturationShader2.getUniformLocation("u_factor"), effectiveDesaturation);
          if (blurFramebuffer != null) {
             blurFramebuffer.drawFullscreen(scaledResolution2);
             blurFramebuffer.release();
@@ -281,13 +298,14 @@ public class MenuClickGuiScreen extends GuiScreen {
 
       if (flag4) {
          this.blurRenderer.drawResult(scaledResolution2);
+         this.blurRenderer.releaseResult();
       }
 
       if (flag5) {
          ARBShaderObjects.glUseProgramObjectARB(0);
       }
 
-      if (flag3 && this.clickGui.backgroundSettings.getElements().get(2).isSelected()) {
+      if (flag3 && f2 >= 0.02F && this.clickGui.backgroundSettings.getElements().get(2).isSelected()) {
          int i3 = RenderUtils.withAlpha(0, (int)(255.0F * backgroundDimAmount * f2));
          RenderUtils.drawRect(0.0F, 0.0F, scaledResolution2.getScaledWidth(), scaledResolution2.getScaledHeight(), i3);
       }
@@ -436,7 +454,10 @@ public class MenuClickGuiScreen extends GuiScreen {
 
       Novoline.framebufferManager.assertAllReleased();
       GlStateManager.popMatrix();
+      ARBShaderObjects.glUseProgramObjectARB(0);
       RenderUtils.resetColor();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.enableTexture2D();
    }
 
    public void rebuildPanels() {

@@ -60,16 +60,17 @@ public class FramebufferManager {
    }
 
    public BlurFramebuffer acquire(String text) {
-      return this.acquire(text, 16777215);
+      return this.acquire(text, 0);
    }
 
    public BlurFramebuffer reuseOrAcquire(BlurFramebuffer blurFramebuffer, String text) {
       if (blurFramebuffer != null) {
+         blurFramebuffer.getFramebuffer().setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
          blurFramebuffer.clear();
          blurFramebuffer.setLabel(text);
          return blurFramebuffer;
       } else {
-         return this.acquire(text, 16777215);
+         return this.acquire(text, 0);
       }
    }
 
