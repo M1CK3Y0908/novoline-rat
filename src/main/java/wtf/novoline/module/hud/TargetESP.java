@@ -99,7 +99,7 @@ public class TargetESP extends Module {
    };
 
    public TargetESP() {
-      super(Category.CLIENT, "TargetESP", "");
+      super(Category.VISUAL, "TargetESP", "");
       this.setEnabled(true);
    }
 }

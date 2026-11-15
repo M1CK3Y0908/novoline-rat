@@ -31,7 +31,7 @@ public class Watermark extends Module {
    }
 
    public Watermark() {
-      super(Category.CLIENT, "Watermark", "");
+      super(Category.VISUAL, "Watermark", "");
       this.setEnabled(true);
    }
 }

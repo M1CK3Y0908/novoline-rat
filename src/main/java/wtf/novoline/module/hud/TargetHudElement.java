@@ -22,6 +22,7 @@ import wtf.novoline.utils.animation.Easing;
 import wtf.novoline.utils.math.SmoothingUtils;
 import wtf.novoline.utils.render.BlurRenderer;
 import wtf.novoline.utils.render.RenderUtils;
+import wtf.novoline.utils.render.ShadowRenderer;
 import wtf.novoline.utils.render.shape.GradientRectRenderer;
 import wtf.novoline.utils.render.shape.RoundedRectRenderer;
 
@@ -29,6 +30,7 @@ public class TargetHudElement extends HudElement {
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    public boolean shown;
    private final BlurRenderer blurRenderer = new BlurRenderer(Novoline.framebufferManager);
+   private final ShadowRenderer shadowRenderer = new ShadowRenderer(Novoline.framebufferManager);
    private ResourceLocation skin;
    private float nameWidth;
    private ScaledResolution scaledResolution;
@@ -115,14 +117,15 @@ public class TargetHudElement extends HudElement {
             int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
             this.nameWidth = ModuleManager.targetHUD.getTitleFont().getStringWidth(name);
 
-            if (ModuleManager.targetHUD.addons.isSelected(0)) {
+            PostProcessing postProcessing = ModuleManager.postProcessing;
+            if (postProcessing != null && postProcessing.isBlurEnabled("TargetHUD")) {
                this.blurRenderer
                   .blur(
                      "Panel",
                      minecraft.getFramebuffer(),
                      scaledResolution2,
-                     (int)ModuleManager.targetHUD.blurRadius.getCurrentValue(),
-                     ModuleManager.targetHUD.blurSigma.getCurrentValue(),
+                     postProcessing.getBlurRadius(),
+                     postProcessing.getBlurSigma(),
                      1
                   );
                minecraft.getFramebuffer().bindFramebuffer(true);
@@ -142,8 +145,14 @@ public class TargetHudElement extends HudElement {
                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
 
-            if (ModuleManager.targetHUD.addons.isSelected(1)) {
+            if (ModuleManager.targetHUD.addons.isSelected("Shadow") || ModuleManager.targetHUD.addons.isSelected(0)) {
                RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 2.0F, 1073741824);
+            }
+
+            if (postProcessing != null && postProcessing.isBloomEnabled("TargetHUD")) {
+               int col = ModuleManager.themeColor.getColor(this.getX(), this.getY());
+               this.shadowRenderer.submit(() -> RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), RenderUtils.withAlphaFraction(col, postProcessing.getBloomAlpha() / 255.0F)));
+               this.shadowRenderer.render(minecraft.getFramebuffer(), scaledResolution2, RenderUtils.withAlphaFraction(col, postProcessing.getBloomAlpha() / 255.0F), postProcessing.getBloomRadius(), postProcessing.getBloomSigma(), 1.0F, false);
             }
 
             if (currentElement == 0) {

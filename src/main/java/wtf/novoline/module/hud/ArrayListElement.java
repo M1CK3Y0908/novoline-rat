@@ -33,6 +33,9 @@ public class ArrayListElement extends HudElement {
    }
 
    private boolean isFilteredOut(boolean flag, boolean flag2, Module module2) {
+      if (module2 instanceof ArrayList || module2 instanceof Watermark || module2 instanceof Notifications || module2 instanceof TargetHUD || module2 instanceof PostProcessing || module2 instanceof ClickGui) {
+         return true;
+      }
       return flag2 && module2.getKeyBind() == 0 || flag && module2.getCategory() == Category.VISUAL || module2.getCategory() == Category.CLIENT;
    }
 
@@ -147,7 +150,9 @@ public class ArrayListElement extends HudElement {
                      RenderUtils.drawRect(f5 + f7, this.getY() + arrayListOffsetY, f5 + f7 + currentValue3, this.getY() + arrayListOffsetY + f2, color3);
                   }
 
-                  if (arrayList2.textGlow.isEnabled()) {
+                  PostProcessing postProcessing = ModuleManager.postProcessing;
+                  boolean textGlow = postProcessing != null && postProcessing.isBloomEnabled("ArrayList");
+                  if (textGlow) {
                      this.textGlowShadow
                         .submit(
                            () -> RenderUtils.drawRect(
@@ -155,7 +160,7 @@ public class ArrayListElement extends HudElement {
                               this.y + arrayListOffsetY,
                               f5 + f6,
                               this.y + arrayListOffsetY + f2,
-                              RenderUtils.withAlphaFraction(finalColor, arrayList2.textGlowAlpha.getCurrentValue() / 255.0F)
+                              RenderUtils.withAlphaFraction(finalColor, postProcessing.getBloomAlpha() / 255.0F)
                            )
                         );
                   }
@@ -177,14 +182,16 @@ public class ArrayListElement extends HudElement {
             }
          }
 
-         if (arrayList2.textGlow.isEnabled()) {
+         PostProcessing postProcessing = ModuleManager.postProcessing;
+         boolean textGlow = postProcessing != null && postProcessing.isBloomEnabled("ArrayList");
+         if (textGlow) {
             this.textGlowShadow
                .render(
                   Minecraft.getMinecraft().getFramebuffer(),
                   scaledResolution2,
-                  RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F),
-                  arrayList2.textGlowRadius.getCurrentValue(),
-                  arrayList2.textGlowSigma.getCurrentValue(),
+                  RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(), postProcessing.getBloomAlpha() / 255.0F),
+                  postProcessing.getBloomRadius(),
+                  postProcessing.getBloomSigma(),
                   1.0F,
                   false
                );

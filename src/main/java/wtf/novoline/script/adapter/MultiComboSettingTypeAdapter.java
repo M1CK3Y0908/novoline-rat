@@ -11,7 +11,7 @@ import wtf.novoline.setting.MultiComboSetting.Option;
 public final class MultiComboSettingTypeAdapter extends AbstractTypeAdapter<MultiComboSetting> {
    public ScriptValue put(ScriptValue scriptValue, MultiComboSetting multiComboSetting) {
       scriptValue.putBiConsumer("add", multiComboSetting::add);
-      scriptValue.putFunction("isSelected", multiComboSetting::isSelected);
+      scriptValue.putFunction("isSelected", (Integer i) -> multiComboSetting.isSelected(i));
       scriptValue.putFunction("byName", MappingUtils.o2mMappingFunction(Option.class, multiComboSetting::byName));
       scriptValue.putSupplier("getElements", MappingUtils.mappingListSupplier(Option.class, multiComboSetting::getElements));
       return scriptValue;

@@ -26,6 +26,7 @@ import wtf.novoline.module.hud.ArrayList;
 import wtf.novoline.module.hud.ClickGui;
 import wtf.novoline.module.hud.HUD;
 import wtf.novoline.module.hud.Notifications;
+import wtf.novoline.module.hud.PostProcessing;
 import wtf.novoline.module.hud.TargetESP;
 import wtf.novoline.module.hud.TargetHUD;
 import wtf.novoline.module.hud.ThemeColor;
@@ -127,6 +128,7 @@ public class ModuleManager {
    public static final ThemeColor themeColor = new ThemeColor();
    public static final Watermark watermark = new Watermark();
    public static final ClickGui clickGui = new ClickGui();
+   public static final PostProcessing postProcessing = new PostProcessing();
    public static final Notifications notifications = new Notifications();
    public static final TargetHUD targetHUD = new TargetHUD();
    public static final TargetESP targetESP = new TargetESP();

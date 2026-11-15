@@ -255,6 +255,9 @@ public class MenuClickGuiScreen extends GuiScreen {
       this.redrawPending = false;
       boolean flag2 = this.menuLayout.getBloomRadius() > 0 && this.menuLayout.getBloomSigma() > 0.0;
       if (shadersEnabled) {
+         if (ModuleManager.postProcessing != null && !ModuleManager.postProcessing.isBloomEnabled("ClickGui")) {
+            flag2 = false;
+         }
          this.bloomRenderer.setEnabled(flag2);
       }
 
@@ -264,7 +267,8 @@ public class MenuClickGuiScreen extends GuiScreen {
       int backgroundBlurRadius = this.menuLayout.getBackgroundBlurRadius();
       float backgroundBlurSigma = this.menuLayout.getBackgroundBlurSigma();
       int effectiveBlurRadius = (int)(f2 * backgroundBlurRadius);
-      boolean flag4 = effectiveBlurRadius > 0 && backgroundBlurSigma > 0.0 && shadersEnabled && this.clickGui.backgroundSettings.getElements().get(0).isSelected();
+      boolean clickGuiBlurAllowed = ModuleManager.postProcessing == null || ModuleManager.postProcessing.isBlurEnabled("ClickGui");
+      boolean flag4 = effectiveBlurRadius > 0 && backgroundBlurSigma > 0.0 && shadersEnabled && clickGuiBlurAllowed && this.clickGui.backgroundSettings.getElements().get(0).isSelected();
       if (flag4) {
          this.blurRenderer.blur("Background", framebuffer3, scaledResolution2, effectiveBlurRadius, backgroundBlurSigma, 1);
          framebuffer3.bindFramebuffer(true);
@@ -313,7 +317,7 @@ public class MenuClickGuiScreen extends GuiScreen {
       float panelOpacity = this.menuLayout.getPanelOpacity();
       if (shadersEnabled) {
          boolean flag6 = panelOpacity < 1.0;
-         this.panelBlurActive = flag6 && (flag4 || flag3) && flag && this.clickGui.panelsSettings.getElements().get(0).isSelected();
+         this.panelBlurActive = flag6 && (flag4 || flag3) && flag && clickGuiBlurAllowed && this.clickGui.panelsSettings.getElements().get(0).isSelected();
          if (this.panelBlurActive) {
             this.blurRenderer.blur("Panel", framebuffer3, scaledResolution2, this.menuLayout.getPanelBlurRadius(), this.menuLayout.getPanelBlurSigma(), 1);
             framebuffer3.bindFramebuffer(true);

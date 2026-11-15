@@ -10,12 +10,17 @@ public class MultiComboSetting extends ModuleSetting {
 
    public MultiComboSetting.Option byName(String text) {
       for (MultiComboSetting.Option option : this.elements) {
-         if (option.getName().equals(text)) {
+         if (option.getName().equalsIgnoreCase(text)) {
             return option;
          }
       }
 
       return null;
+   }
+
+   public boolean isSelected(String text) {
+      MultiComboSetting.Option option = this.byName(text);
+      return option != null && option.isSelected();
    }
 
    public List<MultiComboSetting.Option> getElements() {

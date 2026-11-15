@@ -43,25 +43,6 @@ public class ArrayList extends Module {
    });
    public final NumberSetting widthPadding = settingManager.register(new NumberSetting(this, "Width Padding", 4, 0, 10));
    public final NumberSetting heightPadding = settingManager.register(new NumberSetting(this, "Height Padding", 5, 0, 10));
-   public final CheckboxSetting textGlow = settingManager.register(new CheckboxSetting(this, "Text Glow", false));
-   public final NumberSetting textGlowRadius = settingManager.register(new NumberSetting(this, "Text Glow Radius", 20, 0, 40) {
-      @Override
-      public boolean shouldShow() {
-         return ArrayList.this.textGlow.isEnabled();
-      }
-   });
-   public final NumberSetting textGlowSigma = settingManager.register(new NumberSetting(this, "Text Glow Sigma", 18.0F, 0.0F, 40.0F) {
-      @Override
-      public boolean shouldShow() {
-         return ArrayList.this.textGlow.isEnabled();
-      }
-   });
-   public final NumberSetting textGlowAlpha = settingManager.register(new NumberSetting(this, "Text Glow Alpha", 230, 0, 255) {
-      @Override
-      public boolean shouldShow() {
-         return ArrayList.this.textGlow.isEnabled();
-      }
-   });
    public final CheckboxSetting rightLine = settingManager.register(new CheckboxSetting(this, "Right Line", true));
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", true));
    public final CheckboxSetting backgroundShadow = settingManager.register(new CheckboxSetting(this, "Background Shadow", true));
@@ -74,7 +55,7 @@ public class ArrayList extends Module {
    });
 
    public ArrayList() {
-      super(Category.CLIENT, "ArrayList", "");
+      super(Category.VISUAL, "ArrayList", "");
       this.setEnabled(true);
    }
 }

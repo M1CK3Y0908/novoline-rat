@@ -9,6 +9,7 @@ import wtf.novoline.Novoline;
 import wtf.novoline.Novoline.Fonts;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.module.hud.Notifications;
+import wtf.novoline.module.hud.PostProcessing;
 import wtf.novoline.utils.math.SmoothingUtils;
 import wtf.novoline.utils.render.BloomRenderer;
 import wtf.novoline.utils.render.BlurRenderer;
@@ -48,12 +49,13 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
    public void renderAll(ScaledResolution scaledResolution) {
       Notifications notifications2 = ModuleManager.notifications;
       if (notifications2.isEnabled() && !this.isEmpty()) {
-         boolean enabled = notifications2.blur.isEnabled();
-         boolean enabled2 = notifications2.notifications.isEnabled();
+         PostProcessing postProcessing = ModuleManager.postProcessing;
+         boolean enabled = postProcessing != null && postProcessing.isBlurEnabled("Notifications");
+         boolean enabled2 = postProcessing != null && postProcessing.isBloomEnabled("Notifications");
          boolean enabled3 = notifications2.shadow.isEnabled();
          Framebuffer framebuffer = Minecraft.getMinecraft().getFramebuffer();
          if (enabled) {
-            this.blurRenderer.blur("notifications-blur", framebuffer, scaledResolution, 10, 0.6F, 1);
+            this.blurRenderer.blur("notifications-blur", framebuffer, scaledResolution, postProcessing.getBlurRadius(), postProcessing.getBlurSigma(), 1);
          }
 
          framebuffer.bindFramebuffer(true);
@@ -105,9 +107,10 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
             }
          }
 
-         if (enabled2) {
-            int i2 = (int)notifications2.glowIntensity.getCurrentValue();
-            this.bloomRenderer.applyBloom(framebuffer, scaledResolution, "notifications-bloom", -1, i2, 0.6F, 1.0F, 1.5F, 1.0F);
+         if (enabled2 && postProcessing != null) {
+            int i2 = postProcessing.getBloomRadius();
+            float sigma = postProcessing.getBloomSigma();
+            this.bloomRenderer.applyBloom(framebuffer, scaledResolution, "notifications-bloom", -1, i2, sigma, 1.0F, 1.5F, 1.0F);
          }
 
          if (enabled) {
