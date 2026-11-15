@@ -48,6 +48,7 @@ public class Killaura extends Module {
 
    public enum AutoBlockMode {
       Off(false, false, false),
+      Packet(true, true, false),
       Vanilla(false, false, false),
       Damage(false, false, false),
       Fake(false, false, false),
@@ -74,7 +75,7 @@ public class Killaura extends Module {
    private final ComboSetting sort = settingManager.register(new ComboSetting(this, "Sort By", 0, "Distance", "Health", "Hurt Time", "Yaw"));
    private final ComboSetting rotationMode = settingManager.register(new ComboSetting(this, "Rotation", 0, "Silent", "Lock View", "None"));
    private final ComboSetting autoBlockMode = settingManager.register(
-      new ComboSetting(this, "Auto Block Mode", 4, "Off", "Vanilla", "Damage", "Fake", "Interact A", "Interact B", "Interact C", "Interact D", "Swap", "Dual")
+      new ComboSetting(this, "Auto Block Mode", 1, "Off", "Packet", "Vanilla", "Damage", "Fake", "Interact A", "Interact B", "Interact C", "Interact D", "Swap", "Dual")
    );
    private final NumberSetting aps = settingManager.register(new NumberSetting(this, "APS", 12.0F, 1.0F, 20.0F));
    private final NumberSetting autoBlockAps = settingManager.register(new NumberSetting(this, "Auto Block APS", 10.0F, 1.0F, 20.0F));
@@ -150,7 +151,7 @@ public class Killaura extends Module {
    private long damageBlockAt;
 
    public Killaura() {
-      super(Category.COMBAT, "Kill Aura", "Automatically attacks entities with RavenXD mechanics");
+      super(Category.COMBAT, "KillAura", "Automatically attacks entities with RavenXD mechanics");
    }
 
    public AutoBlockMode getAutoBlockMode() {
@@ -242,7 +243,7 @@ public class Killaura extends Module {
 
       if (!minecraft.thePlayer.isEntityAlive() && this.disableRules.isSelected(1)) {
          this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "Kill Aura", Language.translate("feature.killaura.disable_rules.notification.death"), 2500L);
+         this.showNotification(NotificationType.INFO, "KillAura", Language.translate("feature.killaura.disable_rules.notification.death"), 2500L);
          return;
       }
 
@@ -279,7 +280,7 @@ public class Killaura extends Module {
          AutoBlockMode ab = getAutoBlockMode();
          if (ab.packet) {
             if (!blockAllowed() || !PlayerUtils.holdingSword()) {
-               if (this.blockState != -1) {
+               if (this.blockState != -1 || this.serverBlocking || this.autoBlocked) {
                   releaseFlow(this.blockState);
                   this.blockState = -1;
                   this.fakeBlocking = false;
@@ -287,6 +288,14 @@ public class Killaura extends Module {
                   this.autoBlocked = false;
                   ItemRenderer.flag = false;
                   canAttack = false;
+               }
+            } else if (ab == AutoBlockMode.Packet) {
+               if (inBlockRange(this.target)) {
+                  if (!this.serverBlocking || !this.autoBlocked) {
+                     setBlocking(true, true);
+                  }
+               } else if (this.serverBlocking || this.autoBlocked) {
+                  setBlocking(false, true);
                }
             } else {
                handlePacketAutoBlockPre(ab);
@@ -333,26 +342,32 @@ public class Killaura extends Module {
             minecraft.thePlayer.rotationYaw = this.rotations[0];
             minecraft.thePlayer.rotationPitch = this.rotations[1];
          }
-         if (blockAllowed() && !getAutoBlockMode().packet) {
-            AutoBlockMode ab = getAutoBlockMode();
-            switch (ab) {
-               case Vanilla:
-                  setBlocking(true, false);
-                  break;
-               case Damage:
-                  if (System.currentTimeMillis() - this.damageBlockAt < 800L) {
+         AutoBlockMode ab = getAutoBlockMode();
+         if (blockAllowed()) {
+            if (!ab.packet) {
+               switch (ab) {
+                  case Vanilla:
                      setBlocking(true, false);
-                  } else if (!isRightDown()) {
-                     setBlocking(false, false);
-                  }
-                  break;
-               case Fake:
-                  this.fakeBlocking = true;
-                  this.autoBlocked = true;
-                  ItemRenderer.flag = true;
-                  break;
-               default:
-                  break;
+                     break;
+                  case Damage:
+                     if (System.currentTimeMillis() - this.damageBlockAt < 800L) {
+                        setBlocking(true, false);
+                     } else if (!isRightDown()) {
+                        setBlocking(false, false);
+                     }
+                     break;
+                  case Fake:
+                     this.fakeBlocking = true;
+                     this.autoBlocked = true;
+                     ItemRenderer.flag = true;
+                     break;
+                  default:
+                     break;
+               }
+            } else if (ab == AutoBlockMode.Packet && PlayerUtils.holdingSword() && inBlockRange(this.target)) {
+               if (!this.serverBlocking || !this.autoBlocked) {
+                  setBlocking(true, true);
+               }
             }
          }
       }
@@ -380,6 +395,13 @@ public class Killaura extends Module {
             attack = false;
          }
 
+         AutoBlockMode ab = getAutoBlockMode();
+         if (ab == AutoBlockMode.Packet) {
+            if (this.serverBlocking || this.autoBlocked) {
+               setBlocking(false, true);
+            }
+         }
+
          if (attack) {
             this.attackedThisTick = true;
             this.attacking = true;
@@ -405,8 +427,17 @@ public class Killaura extends Module {
             }
          }
 
-         AutoBlockMode ab = getAutoBlockMode();
-         if (blockAllowed() && this.blockState == 1 && ab.interacts && inReach) {
+         if (ab == AutoBlockMode.Packet) {
+            if (PlayerUtils.holdingSword() && blockAllowed() && inBlockRange(entity)) {
+               MovingObjectPosition hit = RotationUtils.rayTraceEntity(entity, (double) this.range.getCurrentValue() + 0.3, currentRot[0], currentRot[1]);
+               if (hit != null && hit.hitVec != null) {
+                  Vec3 vec3 = new Vec3(hit.hitVec.xCoord - entity.posX, hit.hitVec.yCoord - entity.posY, hit.hitVec.zCoord - entity.posZ);
+                  sendPacketUnregistered(new C02PacketUseEntity(entity, vec3));
+                  sendPacketUnregistered(new C02PacketUseEntity(entity, C02PacketUseEntity.Action.INTERACT));
+               }
+               setBlocking(true, true);
+            }
+         } else if (blockAllowed() && this.blockState == 1 && ab.interacts && inReach) {
             MovingObjectPosition hit = RotationUtils.rayTraceEntity(entity, (double) this.range.getCurrentValue() + 0.3, currentRot[0], currentRot[1]);
             if (hit != null && hit.hitVec != null) {
                Vec3 vec3 = new Vec3(hit.hitVec.xCoord - entity.posX, hit.hitVec.yCoord - entity.posY, hit.hitVec.zCoord - entity.posZ);
@@ -675,7 +706,7 @@ public class Killaura extends Module {
    public final Listener<GameEndEvent> onGameEnd = gameEndEvent -> {
       if (this.disableRules.isSelected(2)) {
          this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "Kill Aura", Language.translate("feature.killaura.disable_rules.notification.game_end"), 2500L);
+         this.showNotification(NotificationType.INFO, "KillAura", Language.translate("feature.killaura.disable_rules.notification.game_end"), 2500L);
       }
    };
 
@@ -683,7 +714,7 @@ public class Killaura extends Module {
    public final Listener<LoadWorldEvent> onLoadWorld = loadWorldEvent -> {
       if (this.disableRules.isSelected(0)) {
          this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "Kill Aura", Language.translate("feature.killaura.disable_rules.notification.world_change"), 2500L);
+         this.showNotification(NotificationType.INFO, "KillAura", Language.translate("feature.killaura.disable_rules.notification.world_change"), 2500L);
       }
    };
 
@@ -957,6 +988,12 @@ public class Killaura extends Module {
 
    public boolean blockAllowed() {
       return getAutoBlockMode() != AutoBlockMode.Off;
+   }
+
+   public boolean inBlockRange(Entity entity) {
+      if (entity == null || minecraft.thePlayer == null) return false;
+      double maxBlockDist = (double) this.blockRange.getCurrentValue();
+      return minecraft.thePlayer.getDistanceSqToEntity(entity) <= maxBlockDist * maxBlockDist;
    }
 
    private boolean isRightDown() {
