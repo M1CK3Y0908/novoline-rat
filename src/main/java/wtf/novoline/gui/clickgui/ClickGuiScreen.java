@@ -23,9 +23,6 @@ import wtf.novoline.setting.ComboSetting;
 import wtf.novoline.setting.ModuleSetting;
 import wtf.novoline.setting.MultiComboSetting;
 import wtf.novoline.setting.NumberSetting;
-import net.minecraft.client.renderer.GlStateManager;
-import wtf.novoline.utils.animation.Animation;
-import wtf.novoline.utils.animation.Easing;
 import wtf.novoline.utils.math.SmoothingUtils;
 import wtf.novoline.utils.render.RenderUtils;
 
@@ -44,7 +41,6 @@ public class ClickGuiScreen extends GuiScreen {
    private float y;
    private float dragOffsetY;
    private static final ResourceLocation SEARCH_ICON = new ResourceLocation("novoline", "images/clickgui/neverlose/search.png");
-   private final Animation openAnimation = new Animation();
    private float x;
    public float scrollTarget;
 
@@ -307,15 +303,6 @@ public class ClickGuiScreen extends GuiScreen {
       this.categoryTab = new CategoryTab("Search", SEARCH_ICON, this.x, this.y, 200.0F, 20.0F);
       this.initialized = true;
       this.categoryPanels.clear();
-      this.openAnimation.unlock();
-      int animMode = ModuleManager.clickGui.animation.getCurrentElement();
-      if (animMode == 4) {
-         this.openAnimation.setValue(100.0);
-      } else {
-         long duration = (long) ModuleManager.clickGui.animationSpeed.getCurrentValue();
-         Easing easing = (animMode == 0 || animMode == 1) ? Easing.backOut : Easing.cubicOut;
-         this.openAnimation.start(0.0, 100.0, duration, easing);
-      }
       float f = 0.0F;
 
       for (Category category2 : Category.values()) {
@@ -371,27 +358,10 @@ public class ClickGuiScreen extends GuiScreen {
 
    @Override
    public void drawScreen(int i, int i2, float f) {
-      this.openAnimation.update();
       this.scrollOffset = SmoothingUtils.approachWithMinimumStep(this.scrollOffset, this.scrollTarget, 10.0F, 0.05F);
       if (this.dragging) {
          this.x = this.dragOffsetX + i;
          this.y = this.dragOffsetY + i2;
-      }
-
-      int animMode = ModuleManager.clickGui.animation.getCurrentElement();
-      GlStateManager.pushMatrix();
-      if (animMode == 0) {
-         double animVal = this.openAnimation.getValue() / 100.0;
-         double scale = Math.max(0.001, animVal);
-         float centerX = this.x + getWidth() / 2.0F;
-         float centerY = this.y + getHeight() / 2.0F;
-         GlStateManager.translate(centerX, centerY, 0.0);
-         GlStateManager.scale(scale, scale, 1.0);
-         GlStateManager.translate(-centerX, -centerY, 0.0);
-      } else if (animMode == 1 || animMode == 2) {
-         double animVal = this.openAnimation.getValue() / 100.0;
-         double offsetY = (1.0 - Math.min(1.0, animVal)) * -120.0;
-         GlStateManager.translate(0.0, offsetY, 0.0);
       }
 
       this.categoryTab.setHeight(ModulePanel.getRowHeight());
@@ -450,7 +420,6 @@ public class ClickGuiScreen extends GuiScreen {
       RenderUtils.drawTextureWithAlpha(
          10.0F, new ScaledResolution(this.mc).getScaledHeight() - 20.0F - 10.0F, 20.0F, 20.0F, 1.0F, new ResourceLocation("novoline", "gui/script.png")
       );
-      GlStateManager.popMatrix();
    }
 
    public static float getHeaderHeight() {

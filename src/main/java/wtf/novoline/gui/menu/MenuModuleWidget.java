@@ -40,6 +40,9 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
    private float expandProgress = 0.0F;
 
    public boolean isAnimating() {
+      if (!ModuleManager.clickGui.moduleAnimation.isEnabled()) {
+         return false;
+      }
       float target = this.expanded ? 1.0F : 0.0F;
       return Math.abs(this.expandProgress - target) > 0.005F;
    }
@@ -93,25 +96,37 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
    }
 
    public float getBottomY() {
-      return this.bottomY;
+      return this.y + getHeaderHeight() + this.getSettingsHeight() * this.expandProgress;
    }
 
-   public float getTotalHeight(float f, float f2, float f3) {
+   public float getSettingsHeight() {
+      return this.getSettingsHeight(0.0F, 0.0F, 0.0F);
+   }
+
+   public float getSettingsHeight(float f, float f2, float f3) {
       float f4 = 0.0F;
       for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
          if (menuSettingWidget.getModuleSetting().shouldShow()) {
             f4 += menuSettingWidget.getTotalHeight(f, f2, f3);
          }
       }
+      return f4;
+   }
 
-      if (ModuleManager.clickGui.accordionExpand.isEnabled()) {
+   public float getTotalHeight(float f, float f2, float f3) {
+      float totalSettingsHeight = this.getSettingsHeight(f, f2, f3);
+
+      if (ModuleManager.clickGui.moduleAnimation.isEnabled()) {
          float target = this.expanded ? 1.0F : 0.0F;
-         this.expandProgress = SmoothingUtils.approachWithMinimumStep(this.expandProgress, target, 16.0F, 0.002F);
+         this.expandProgress = SmoothingUtils.approachWithMinimumStep(this.expandProgress, target, 16.0F, 0.001F);
+         if (Math.abs(this.expandProgress - target) <= 0.005F) {
+            this.expandProgress = target;
+         }
       } else {
          this.expandProgress = this.expanded ? 1.0F : 0.0F;
       }
 
-      return getHeaderHeight() + f4 * this.expandProgress;
+      return getHeaderHeight() + totalSettingsHeight * this.expandProgress;
    }
 
    public boolean isExpanded() {
@@ -152,30 +167,22 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
 
       if (this.expandProgress > 0.01F) {
          this.layoutSettings();
+         float visibleBottom = this.y + getHeaderHeight() + this.getSettingsHeight(f, f2, f3) * this.expandProgress;
 
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= this.bottomY + 1.0F) {
+            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= visibleBottom + 0.5F) {
                menuSettingWidget.render(f, f2, f3);
             }
          }
 
-         if (!this.settingWidgets.isEmpty()) {
+         float settingsVisibleHeight = this.getSettingsHeight(f, f2, f3) * this.expandProgress;
+         if (!this.settingWidgets.isEmpty() && settingsVisibleHeight >= 4.0F) {
             RenderUtils.drawVerticalGradientRect(
                this.x, this.y + getHeaderHeight(), this.x + getWidth(), this.y + getHeaderHeight() + 4.0F, 1610612736, 3092790
             );
-            MenuSettingWidget menuSettingWidget2 = null;
-
-            for (MenuSettingWidget menuSettingWidget3 : this.settingWidgets) {
-               if (menuSettingWidget3.getModuleSetting().shouldShow() && menuSettingWidget3.getY() + menuSettingWidget3.getHeight() <= this.bottomY + 1.0F) {
-                  menuSettingWidget2 = menuSettingWidget3;
-               }
-            }
-
-            if (menuSettingWidget2 != null) {
-               RenderUtils.drawVerticalGradientRect(
-                  this.x, menuSettingWidget2.getY() + menuSettingWidget2.getHeight() - 4.0F, this.x + getWidth(), menuSettingWidget2.getY() + menuSettingWidget2.getHeight(), 3092790, 1610612736
-               );
-            }
+            RenderUtils.drawVerticalGradientRect(
+               this.x, visibleBottom - 4.0F, this.x + getWidth(), visibleBottom, 3092790, 1610612736
+            );
          }
       }
    }
@@ -205,13 +212,15 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
             this.menuClickGuiScreen.buttons.stream().flatMap(menuCategoryPanel -> menuCategoryPanel.moduleWidgets.stream()).forEach(menuModuleWidget -> menuModuleWidget.awaitingKeyBind = false);
             this.awaitingKeyBind = true;
          }
+         return;
       }
 
-      if (this.expandProgress > 0.5F && f2 <= this.bottomY) {
-         Iterator iterator2 = this.settingWidgets.iterator();
-
-         while (iterator2.hasNext()) {
-            ((MenuWidget)iterator2.next()).handleMouseClick(f, f2, i);
+      float visibleBottom = this.y + getHeaderHeight() + this.getSettingsHeight() * this.expandProgress;
+      if (this.expandProgress > 0.01F && f2 >= this.y + getHeaderHeight() && f2 <= visibleBottom) {
+         for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
+            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= visibleBottom + 0.5F) {
+               menuSettingWidget.handleMouseClick(f, f2, i);
+            }
          }
       }
    }
@@ -232,12 +241,15 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          iRectRenderer.addRect(this.x, this.y, getWidth(), getHeaderHeight(), this.menuClickGuiScreen.getClickGuiTheme().getModuleBackgroundColor());
       }
 
-      if (this.expandProgress > 0.01F) {
-         for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= this.bottomY + 1.0F) {
-               menuSettingWidget.addRects(iRectRenderer, f);
-            }
-         }
+      float settingsVisibleHeight = this.getSettingsHeight() * this.expandProgress;
+      if (settingsVisibleHeight > 0.5F) {
+         iRectRenderer.addRect(
+            this.x,
+            this.y + getHeaderHeight(),
+            getWidth(),
+            settingsVisibleHeight,
+            this.menuClickGuiScreen.getClickGuiTheme().getSettingBackgroundColor()
+         );
       }
    }
 
@@ -321,8 +333,9 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
       }
 
       if (this.expandProgress > 0.01F) {
+         float visibleBottom = this.y + getHeaderHeight() + this.getSettingsHeight() * this.expandProgress;
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= this.bottomY + 1.0F) {
+            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= visibleBottom + 0.5F) {
                menuSettingWidget.renderText(floatSupplier, widgetType, f, flag);
             }
          }

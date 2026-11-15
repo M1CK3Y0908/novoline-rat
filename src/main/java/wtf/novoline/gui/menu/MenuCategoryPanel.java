@@ -13,7 +13,6 @@ import wtf.novoline.module.ModuleManager;
 import wtf.novoline.utils.render.CFontRenderer;
 import wtf.novoline.utils.render.RenderUtils;
 import wtf.novoline.utils.render.shader.FloatSupplier;
-import wtf.novoline.utils.math.SmoothingUtils;
 import wtf.novoline.utils.render.shape.IRectRenderer;
 
 public class MenuCategoryPanel implements MenuWidget {
@@ -27,13 +26,8 @@ public class MenuCategoryPanel implements MenuWidget {
    private float x;
    private float y;
    private boolean expanded;
-   private float expandProgress = 1.0F;
 
    public boolean isAnimating() {
-      float target = this.expanded ? 1.0F : 0.0F;
-      if (Math.abs(this.expandProgress - target) > 0.005F) {
-         return true;
-      }
       for (MenuModuleWidget widget : this.moduleWidgets) {
          if (widget.isAnimating()) {
             return true;
@@ -53,26 +47,24 @@ public class MenuCategoryPanel implements MenuWidget {
       float f4 = 10.0F;
       RenderUtils.drawTextureWithAlpha(this.x + 3.0F, this.y + getHeaderHeight() / 2.0F - f4 / 2.0F, f4, f4, 0.85F, this.category.getIcon());
       int secondaryColor = this.menuClickGuiScreen.getClickGuiTheme().getSecondaryColor(this.expanded);
-      if (this.expandProgress > 0.01F && !this.moduleWidgets.isEmpty()) {
+      if (this.expanded && !this.moduleWidgets.isEmpty()) {
          int i = 0;
-         float bottomY = this.getBottomY();
 
          for (int size2 = this.moduleWidgets.size(); i < size2; i++) {
             MenuModuleWidget menuModuleWidget = this.moduleWidgets.get(i);
-            if (menuModuleWidget.getY() < bottomY) {
-               if (i == size2 - 1) {
-                  float f5 = bottomY - 2.5F;
-                  if (MenuClickGuiScreen.shadersEnabled && ModuleManager.clickGui.glowSettings.getElements().get(2).isSelected()) {
-                     this.menuClickGuiScreen
-                        .bloomRenderer
-                        .submit(() -> RenderUtils.drawRect(menuModuleWidget.getX(), f5, menuModuleWidget.getX() + MenuModuleWidget.getWidth(), bottomY, secondaryColor));
-                  } else {
-                     RenderUtils.drawRect(menuModuleWidget.getX(), f5, menuModuleWidget.getX() + MenuModuleWidget.getWidth(), bottomY, secondaryColor);
-                  }
+            if (i == size2 - 1) {
+               float bottomY = this.getBottomY();
+               float f5 = bottomY - 2.5F;
+               if (MenuClickGuiScreen.shadersEnabled && ModuleManager.clickGui.glowSettings.getElements().get(2).isSelected()) {
+                  this.menuClickGuiScreen
+                     .bloomRenderer
+                     .submit(() -> RenderUtils.drawRect(menuModuleWidget.getX(), f5, menuModuleWidget.getX() + MenuModuleWidget.getWidth(), bottomY, secondaryColor));
+               } else {
+                  RenderUtils.drawRect(menuModuleWidget.getX(), f5, menuModuleWidget.getX() + MenuModuleWidget.getWidth(), bottomY, secondaryColor);
                }
-
-               menuModuleWidget.render(f, f2, f3);
             }
+
+            menuModuleWidget.render(f, f2, f3);
          }
 
          RenderUtils.drawVerticalGradientRect(this.x, this.y + getHeaderHeight(), this.x + getWidth(), this.y + getHeaderHeight() + 6.0F, 1879048192, 3092790);
@@ -103,10 +95,9 @@ public class MenuCategoryPanel implements MenuWidget {
          } else if (i == 1) {
             this.expanded = !this.expanded;
          }
-         return;
       }
 
-      if (this.expandProgress > 0.5F && f2 < this.getBottomY()) {
+      if (this.expanded) {
          Iterator iterator2 = this.moduleWidgets.iterator();
 
          while (iterator2.hasNext()) {
@@ -199,12 +190,11 @@ public class MenuCategoryPanel implements MenuWidget {
          floatSupplier.drawStringLeftMiddle(displayName, this.x + 18.0F, this.y + getHeaderHeight() / 2.0F + 1.0F, -2039584);
       }
 
-      if (this.expandProgress > 0.01F) {
-         float bottomY = this.getBottomY();
-         for (MenuModuleWidget widget : this.moduleWidgets) {
-            if (widget.getY() + MenuModuleWidget.getHeaderHeight() <= bottomY + 2.0F) {
-               widget.renderText(floatSupplier, widgetType, f, flag);
-            }
+      if (this.expanded) {
+         Iterator iterator2 = this.moduleWidgets.iterator();
+
+         while (iterator2.hasNext()) {
+            ((MenuModuleWidget)iterator2.next()).renderText(floatSupplier, widgetType, f, flag);
          }
       }
    }
@@ -221,20 +211,15 @@ public class MenuCategoryPanel implements MenuWidget {
 
       float f4 = 0.0F;
       float f5 = this.y + getHeaderHeight();
-      for (MenuModuleWidget menuModuleWidget : this.moduleWidgets) {
-         menuModuleWidget.setPosition(this.x, f5 + f4);
-         float totalHeight = menuModuleWidget.getTotalHeight(f, f2, f3);
-         f4 += totalHeight;
+      if (this.expanded) {
+         for (MenuModuleWidget menuModuleWidget : this.moduleWidgets) {
+            menuModuleWidget.setPosition(this.x, f5 + f4);
+            float totalHeight = menuModuleWidget.getTotalHeight(f, f2, f3);
+            f4 += totalHeight;
+         }
       }
 
-      if (ModuleManager.clickGui.accordionExpand.isEnabled()) {
-         float target = this.expanded ? 1.0F : 0.0F;
-         this.expandProgress = SmoothingUtils.approachWithMinimumStep(this.expandProgress, target, 16.0F, 0.002F);
-      } else {
-         this.expandProgress = this.expanded ? 1.0F : 0.0F;
-      }
-
-      this.contentHeight = (f4 * this.expandProgress) + 2.5F;
+      this.contentHeight = f4 + 2.5F;
       return getHeaderHeight() + this.contentHeight;
    }
 
@@ -244,12 +229,11 @@ public class MenuCategoryPanel implements MenuWidget {
 
    public void addRects(IRectRenderer iRectRenderer, float f) {
       iRectRenderer.addRect(this.x - 2.0F, this.y, getWidth() + 4.0F, getHeaderHeight(), this.menuClickGuiScreen.getClickGuiTheme().getCategoryBackgroundColor());
-      if (this.expandProgress > 0.01F) {
-         float bottomY = this.getBottomY();
-         for (MenuModuleWidget widget : this.moduleWidgets) {
-            if (widget.getY() + MenuModuleWidget.getHeaderHeight() <= bottomY + 2.0F) {
-               widget.addRects(iRectRenderer, f);
-            }
+      if (this.expanded) {
+         Iterator iterator2 = this.moduleWidgets.iterator();
+
+         while (iterator2.hasNext()) {
+            ((MenuModuleWidget)iterator2.next()).addRects(iRectRenderer, f);
          }
       }
    }
