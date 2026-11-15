@@ -25,6 +25,14 @@ public class ClickGui extends Module {
          ClickGui.this.onEnable();
       }
    });
+   public final ComboSetting animation = settingManager.register(new ComboSetting(this, "Animation", 0, "Scale", "Dropdown", "Slide", "Fade", "None"));
+   public final CheckboxSetting accordionExpand = settingManager.register(new CheckboxSetting(this, "Accordion Expand", true) {
+      @Override
+      public boolean shouldShow() {
+         return ClickGui.this.clickGui.getCurrentElement() == 0;
+      }
+   });
+   public final NumberSetting animationSpeed = settingManager.register(new NumberSetting(this, "Animation Speed", 350, 150, 800));
    public final MultiComboSetting glowSettings = settingManager.register((new MultiComboSetting(this, "Glow settings") {
       @Override
       public boolean shouldShow() {

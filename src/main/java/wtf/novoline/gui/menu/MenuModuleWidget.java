@@ -13,6 +13,7 @@ import wtf.novoline.Novoline;
 import wtf.novoline.enums.WidgetType;
 import wtf.novoline.gui.TextSelection;
 import wtf.novoline.module.Module;
+import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.CheckboxSetting;
 import wtf.novoline.setting.ColorSetting;
 import wtf.novoline.setting.ComboSetting;
@@ -36,6 +37,12 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
    private float x;
    private float y;
    private boolean expanded;
+   private float expandProgress = 0.0F;
+
+   public boolean isAnimating() {
+      float target = this.expanded ? 1.0F : 0.0F;
+      return Math.abs(this.expandProgress - target) > 0.005F;
+   }
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    public final List<MenuSettingWidget> settingWidgets;
    private int labelColor;
@@ -91,15 +98,20 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
 
    public float getTotalHeight(float f, float f2, float f3) {
       float f4 = 0.0F;
-      if (this.expanded) {
-         for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (menuSettingWidget.getModuleSetting().shouldShow()) {
-               f4 += menuSettingWidget.getTotalHeight(f, f2, f3);
-            }
+      for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
+         if (menuSettingWidget.getModuleSetting().shouldShow()) {
+            f4 += menuSettingWidget.getTotalHeight(f, f2, f3);
          }
       }
 
-      return getHeaderHeight() + f4;
+      if (ModuleManager.clickGui.accordionExpand.isEnabled()) {
+         float target = this.expanded ? 1.0F : 0.0F;
+         this.expandProgress = SmoothingUtils.approachWithMinimumStep(this.expandProgress, target, 16.0F, 0.002F);
+      } else {
+         this.expandProgress = this.expanded ? 1.0F : 0.0F;
+      }
+
+      return getHeaderHeight() + f4 * this.expandProgress;
    }
 
    public boolean isExpanded() {
@@ -138,11 +150,11 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          GlStateManager.disableBlend();
       }
 
-      if (this.expanded) {
+      if (this.expandProgress > 0.01F) {
          this.layoutSettings();
 
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (menuSettingWidget.getModuleSetting().shouldShow()) {
+            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= this.bottomY + 1.0F) {
                menuSettingWidget.render(f, f2, f3);
             }
          }
@@ -154,7 +166,7 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
             MenuSettingWidget menuSettingWidget2 = null;
 
             for (MenuSettingWidget menuSettingWidget3 : this.settingWidgets) {
-               if (menuSettingWidget3.getModuleSetting().shouldShow()) {
+               if (menuSettingWidget3.getModuleSetting().shouldShow() && menuSettingWidget3.getY() + menuSettingWidget3.getHeight() <= this.bottomY + 1.0F) {
                   menuSettingWidget2 = menuSettingWidget3;
                }
             }
@@ -195,7 +207,7 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          }
       }
 
-      if (this.expanded) {
+      if (this.expandProgress > 0.5F && f2 <= this.bottomY) {
          Iterator iterator2 = this.settingWidgets.iterator();
 
          while (iterator2.hasNext()) {
@@ -220,9 +232,9 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          iRectRenderer.addRect(this.x, this.y, getWidth(), getHeaderHeight(), this.menuClickGuiScreen.getClickGuiTheme().getModuleBackgroundColor());
       }
 
-      if (this.expanded) {
+      if (this.expandProgress > 0.01F) {
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (menuSettingWidget.getModuleSetting().shouldShow()) {
+            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= this.bottomY + 1.0F) {
                menuSettingWidget.addRects(iRectRenderer, f);
             }
          }
@@ -270,7 +282,7 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
 
    @Override
    public void handleMouseRelease(float f, float f2, int i) {
-      if (this.expanded) {
+      if (this.expandProgress > 0.01F) {
          Iterator iterator2 = this.settingWidgets.iterator();
 
          while (iterator2.hasNext()) {
@@ -308,9 +320,9 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          floatSupplier.drawStringCentered(text, this.x + getWidth() / 2.0F, this.y + getHeaderHeight() / 2.0F + 1.0F, this.labelColor);
       }
 
-      if (this.expanded) {
+      if (this.expandProgress > 0.01F) {
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (menuSettingWidget.getModuleSetting().shouldShow()) {
+            if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.getY() + menuSettingWidget.getHeight() <= this.bottomY + 1.0F) {
                menuSettingWidget.renderText(floatSupplier, widgetType, f, flag);
             }
          }

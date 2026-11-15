@@ -89,6 +89,11 @@ public class Animation {
       this.finished = true;
    }
 
+   public void setValue(double d) {
+      this.value = this.previousValue = this.start = this.end = d;
+      this.finished = true;
+   }
+
    public boolean isAnimating() {
       return !this.hasFinished() && !this.isPaused();
    }

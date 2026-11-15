@@ -231,7 +231,8 @@ public class MenuClickGuiScreen extends GuiScreen {
       GL11.glTexParameteri(3553, 10242, 10497);
       GL11.glTexParameteri(3553, 10243, 10497);
       float f2 = Math.min(this.visibility / 100.0F, 1.0F);
-      boolean flag = this.mouseHeld || this.tickCount < 60L || this.redrawPending || this.dashboardOpen;
+      boolean isPanelAnimating = this.buttons.stream().anyMatch(MenuCategoryPanel::isAnimating);
+      boolean flag = this.mouseHeld || this.tickCount < 90L || this.redrawPending || this.dashboardOpen || this.animation.isAnimating() || isPanelAnimating;
       this.redrawPending = false;
       boolean flag2 = this.menuLayout.getBloomRadius() > 0 && this.menuLayout.getBloomSigma() > 0.0;
       if (shadersEnabled) {
@@ -417,10 +418,34 @@ public class MenuClickGuiScreen extends GuiScreen {
          GlStateManager.enableTexture2D();
          this.framebuffer.bindFramebufferTexture();
          GlStateManager.pushMatrix();
-         double d3 = this.animation.getValue() / 100.0 * 0.2 + 0.8;
-         GlStateManager.translate(scaledResolution2.getScaledWidth_double() / 2.0, scaledResolution2.getScaledHeight_double() / 2.0, 0.0);
-         GlStateManager.scale(d3, d3, 1.0);
-         GlStateManager.translate(-scaledResolution2.getScaledWidth_double() / 2.0, -scaledResolution2.getScaledHeight_double() / 2.0, 0.0);
+         double animVal = this.animation.getValue() / 100.0;
+         int animMode = ModuleManager.clickGui.animation.getCurrentElement();
+         switch (animMode) {
+            case 0: { // Scale (中心弹性展开)
+               double s = Math.max(0.001, animVal);
+               GlStateManager.translate(scaledResolution2.getScaledWidth_double() / 2.0, scaledResolution2.getScaledHeight_double() / 2.0, 0.0);
+               GlStateManager.scale(s, s, 1.0);
+               GlStateManager.translate(-scaledResolution2.getScaledWidth_double() / 2.0, -scaledResolution2.getScaledHeight_double() / 2.0, 0.0);
+               break;
+            }
+            case 1: { // Dropdown (顶部向下展开)
+               double sy = Math.max(0.001, animVal);
+               double sx = Math.max(0.001, 0.8 + 0.2 * Math.min(1.0, animVal));
+               GlStateManager.translate(scaledResolution2.getScaledWidth_double() / 2.0, 0.0, 0.0);
+               GlStateManager.scale(sx, sy, 1.0);
+               GlStateManager.translate(-scaledResolution2.getScaledWidth_double() / 2.0, 0.0, 0.0);
+               break;
+            }
+            case 2: { // Slide (滑入展开)
+               double offsetY = (1.0 - Math.min(1.0, animVal)) * -scaledResolution2.getScaledHeight_double() * 0.35;
+               GlStateManager.translate(0.0, offsetY, 0.0);
+               break;
+            }
+            case 3: // Fade
+            case 4: // None
+            default:
+               break;
+         }
          RenderUtils.drawFullscreenQuad(scaledResolution2);
          GlStateManager.popMatrix();
          GlStateManager.alphaFunc(516, 0.1F);
@@ -445,8 +470,17 @@ public class MenuClickGuiScreen extends GuiScreen {
    public void open() {
       this.closing = this.mouseHeld = this.resourcesReleased = false;
       this.visibility = (float)(this.tickCount = 0L);
-      this.animation.unlock();
-      this.animation.start(this.animation.getValue(), 100.0, 500L, Easing.backOut);
+      long duration = (long) ModuleManager.clickGui.animationSpeed.getCurrentValue();
+      int mode = ModuleManager.clickGui.animation.getCurrentElement();
+      Easing easing = (mode == 0 || mode == 1) ? Easing.backOut : Easing.cubicOut;
+      if (mode == 4) {
+         this.animation.unlock();
+         this.animation.setValue(100.0);
+         this.visibility = 100.0F;
+      } else {
+         this.animation.unlock();
+         this.animation.start(0.0, 100.0, duration, easing);
+      }
       this.animation2.unlock();
       this.animation2.start(this.animation2.getValue(), 0.0, 400L, Easing.cubicInOut);
    }
@@ -455,8 +489,16 @@ public class MenuClickGuiScreen extends GuiScreen {
    public void startClosing() {
       this.closing = true;
       this.clickGui.setEnabled(false);
-      this.animation.unlock();
-      this.animation.start(this.animation.getValue(), 0.0, 500L, Easing.backInOut);
+      int mode = ModuleManager.clickGui.animation.getCurrentElement();
+      if (mode == 4) {
+         this.animation.unlock();
+         this.animation.setValue(0.0);
+         this.visibility = 0.0F;
+      } else {
+         long duration = (long) (ModuleManager.clickGui.animationSpeed.getCurrentValue() * 0.8F);
+         this.animation.unlock();
+         this.animation.start(this.animation.getValue(), 0.0, duration, Easing.cubicInOut);
+      }
       Entry entry2 = this.clickGui.entry;
       this.animation2.unlock();
       this.animation2.start(this.animation2.getValue(), entry2.getMetadata().getWidth(), 400L, Easing.cubicInOut);
