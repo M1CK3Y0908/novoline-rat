@@ -40,46 +40,21 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
    public void renderAll(ScaledResolution scaledResolution) {
       Notifications notifications2 = ModuleManager.notifications;
       if (notifications2.isEnabled() && !this.isEmpty()) {
-         this.removeIf(Notification::hasExpired);
-         if (this.isEmpty()) {
-            return;
-         }
-
          boolean enabled = notifications2.blur.isEnabled();
          boolean enabled2 = notifications2.notifications.isEnabled();
          boolean enabled3 = notifications2.shadow.isEnabled();
          Framebuffer framebuffer = Minecraft.getMinecraft().getFramebuffer();
+         if (enabled) {
+            this.blurRenderer.blur("notifications-blur", framebuffer, scaledResolution, 10, 0.6F, 1);
+         }
+
+         framebuffer.bindFramebuffer(true);
          float scaledWidth = scaledResolution.getScaledWidth();
          float scaledHeight = scaledResolution.getScaledHeight();
          float f = 5.0F;
          float f2 = 44.0F;
          float f3 = 30.0F;
-
-         if (enabled) {
-            float notifMinX = scaledWidth;
-            float notifMinY = scaledHeight;
-            float notifMaxX = 0.0F;
-            float notifMaxY = 0.0F;
-
-            for (int i = 0; i < Math.min(this.size(), 15); i++) {
-               Notification notification2 = this.get(i);
-               float f4 = Math.max(170.0F, cFontRenderer2.getStringWidth(notification2.getSubText()) + 36.0F);
-               float f5 = scaledWidth - notification2.offsetX;
-               float f6 = scaledHeight - notification2.offsetY;
-               notifMinX = Math.min(notifMinX, f5);
-               notifMinY = Math.min(notifMinY, f6);
-               notifMaxX = Math.max(notifMaxX, f5 + f4);
-               notifMaxY = Math.max(notifMaxY, f6 + f3);
-            }
-
-            if (notifMaxX > notifMinX && notifMaxY > notifMinY) {
-               this.blurRenderer.blur("notifications-blur", framebuffer, scaledResolution, 10, 0.6F, 1, notifMinX, notifMinY, notifMaxX, notifMaxY);
-            } else {
-               this.blurRenderer.blur("notifications-blur", framebuffer, scaledResolution, 10, 0.6F, 1);
-            }
-         }
-
-         framebuffer.bindFramebuffer(true);
+         this.removeIf(Notification::hasExpired);
 
          for (int i = 0; i < Math.min(this.size(), 15); i++) {
             Notification notification2 = this.get(i);

@@ -4,10 +4,6 @@ import java.nio.charset.StandardCharsets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.ARBShaderObjects;
@@ -21,14 +17,12 @@ public class ShaderProgram {
    private final String vertexSource;
 
    public void drawClipSpaceQuad() {
-      Tessellator tessellator = Tessellator.getInstance();
-      WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-      worldRenderer.begin(7, DefaultVertexFormats.POSITION);
-      worldRenderer.pos(-1.0, -1.0, 0.0).endVertex();
-      worldRenderer.pos(-1.0, 1.0, 0.0).endVertex();
-      worldRenderer.pos(1.0, 1.0, 0.0).endVertex();
-      worldRenderer.pos(1.0, -1.0, 0.0).endVertex();
-      tessellator.draw();
+      GL11.glBegin(7);
+      GL11.glVertex2f(-1.0F, -1.0F);
+      GL11.glVertex2f(-1.0F, 1.0F);
+      GL11.glVertex2f(1.0F, 1.0F);
+      GL11.glVertex2f(1.0F, -1.0F);
+      GL11.glEnd();
       ARBShaderObjects.glUseProgramObjectARB(0);
    }
 
@@ -52,14 +46,16 @@ public class ShaderProgram {
 
    public void drawQuad(float f, float f2) {
       GlStateManager.enableBlend();
-      Tessellator tessellator = Tessellator.getInstance();
-      WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-      worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-      worldRenderer.pos(0.0, 0.0, 0.0).tex(0.0, 1.0).endVertex();
-      worldRenderer.pos(0.0, f2, 0.0).tex(0.0, 0.0).endVertex();
-      worldRenderer.pos(f, f2, 0.0).tex(1.0, 0.0).endVertex();
-      worldRenderer.pos(f, 0.0, 0.0).tex(1.0, 1.0).endVertex();
-      tessellator.draw();
+      GL11.glBegin(7);
+      GL11.glTexCoord2d(0.0, 1.0);
+      GL11.glVertex2d(0.0, 0.0);
+      GL11.glTexCoord2d(0.0, 0.0);
+      GL11.glVertex2d(0.0, f2);
+      GL11.glTexCoord2d(1.0, 0.0);
+      GL11.glVertex2d(f, f2);
+      GL11.glTexCoord2d(1.0, 1.0);
+      GL11.glVertex2d(f, 0.0);
+      GL11.glEnd();
       GlStateManager.disableBlend();
       ARBShaderObjects.glUseProgramObjectARB(0);
    }
