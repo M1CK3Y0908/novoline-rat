@@ -184,10 +184,12 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
    public void handleMouseClick(float f, float f2, int i) {
       if (f > this.x && f < this.x + getWidth() && f2 >= this.y && f2 < this.y + getHeaderHeight()) {
          if (i == 0) {
-            this.module.toggle();
+            if (this.module.canBeToggled()) {
+               this.module.toggle();
+            }
          } else if (i == 1) {
             this.expanded = !this.expanded;
-         } else if (i == 2) {
+         } else if (i == 2 && this.module.canBeToggled()) {
             this.menuClickGuiScreen.buttons.stream().flatMap(menuCategoryPanel -> menuCategoryPanel.moduleWidgets.stream()).forEach(menuModuleWidget -> menuModuleWidget.awaitingKeyBind = false);
             this.awaitingKeyBind = true;
          }

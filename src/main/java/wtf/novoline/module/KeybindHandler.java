@@ -14,7 +14,7 @@ public class KeybindHandler {
    private final Listener<PreUpdateEvent> onPreUpdate = preUpdateEvent -> {
       for (Module module2 : ModuleManager.modules) {
          int keyBind = module2.getKeyBind();
-         if (module2.getPressType() == PressType.HOLD && keyBind != 0) {
+         if (module2.canBeToggled() && module2.getPressType() == PressType.HOLD && keyBind != 0) {
             module2.setEnabled(keyBind < 0 ? Mouse.isButtonDown(Math.abs(keyBind) - 1) : Keyboard.isKeyDown(keyBind));
          }
       }
@@ -22,7 +22,7 @@ public class KeybindHandler {
    @EventLink
    private final Listener<DeviceButtonDownEvent> onDeviceButtonDown = deviceButtonDownEvent -> {
       for (Module module2 : ModuleManager.modules) {
-         if (module2.getPressType() == PressType.PRESS) {
+         if (module2.canBeToggled() && module2.getPressType() == PressType.PRESS) {
             int keyBind = module2.getKeyBind();
             if (keyBind != 0) {
                int i = Math.abs(keyBind) - 1;

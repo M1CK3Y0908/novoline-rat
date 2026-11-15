@@ -77,8 +77,10 @@ public class ModulePanel extends CopyOnWriteArrayList<SettingRow> implements Cli
          }
       }
 
-      RenderUtils.drawColoredTexture(f4 + this.width - 12.0F, f5 + 5.0F, 8.0F, 8.0F, RenderUtils.withAlpha(-1, 100), BIND_ICON);
-      Fonts.museoSans500Size11.drawString("Bind", f4 + this.width - 25.0F, f5 + 8.0F, RenderUtils.withAlpha(-1, 100));
+      if (this.module != null && this.module.canBeToggled()) {
+         RenderUtils.drawColoredTexture(f4 + this.width - 12.0F, f5 + 5.0F, 8.0F, 8.0F, RenderUtils.withAlpha(-1, 100), BIND_ICON);
+         Fonts.museoSans500Size11.drawString("Bind", f4 + this.width - 25.0F, f5 + 8.0F, RenderUtils.withAlpha(-1, 100));
+      }
    }
 
    public void refreshSettings() {
@@ -107,13 +109,15 @@ public class ModulePanel extends CopyOnWriteArrayList<SettingRow> implements Cli
             })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-         CheckboxSettingRow checkboxSettingRow = new CheckboxSettingRow(new CheckboxSetting(this.module, "Enable", this.module.isEnabled()) {
-            @Override
-            public void interactCallback() {
-               this.getModule().toggle();
-            }
-         }, this.width);
-         list.add(0, checkboxSettingRow);
+         if (this.module.canBeToggled()) {
+            CheckboxSettingRow checkboxSettingRow = new CheckboxSettingRow(new CheckboxSetting(this.module, "Enable", this.module.isEnabled()) {
+               @Override
+               public void interactCallback() {
+                  this.getModule().toggle();
+               }
+            }, this.width);
+            list.add(0, checkboxSettingRow);
+         }
 
          for (SettingRow settingRow2 : (Iterable<SettingRow>) list) {
             if (!this.containsSetting(this, settingRow2)) {
@@ -152,7 +156,8 @@ public class ModulePanel extends CopyOnWriteArrayList<SettingRow> implements Cli
    public boolean handleMouseClick(float f, float f2, int i) {
       float f3 = clickGuiScreen.getX() + this.x;
       float f4 = clickGuiScreen.getY() - clickGuiScreen.getScrollOffset() + this.y;
-      if ((i == 1 || i == 0)
+      if (this.module != null && this.module.canBeToggled()
+         && (i == 1 || i == 0)
          && f >= f3 + this.getWidth() - 30.0F
          && f <= f3 + this.getWidth()
          && f2 >= f4

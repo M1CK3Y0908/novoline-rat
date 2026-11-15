@@ -5,26 +5,36 @@ import io.github.nevalackin.homoBus.annotations.EventLink;
 import wtf.novoline.event.RenderScreenEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
+import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.CheckboxSetting;
 import wtf.novoline.setting.ColorSetting;
+import wtf.novoline.setting.ComboSetting;
 import wtf.novoline.setting.NumberSetting;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class Crosshair extends Module {
-   private final CheckboxSetting crosshair = settingManager.register(new CheckboxSetting(this, "Center dot", false));
+   public final ComboSetting colorMode = settingManager.register(new ComboSetting(this, "Color Mode", 0, "Theme", "Custom"));
+   private final CheckboxSetting crosshair = settingManager.register(new CheckboxSetting(this, "Center Dot", false));
    private final CheckboxSetting tStyle = settingManager.register(new CheckboxSetting(this, "T-Style", false));
    private final CheckboxSetting outline = settingManager.register(new CheckboxSetting(this, "Outline", true));
    private final CheckboxSetting dynamic = settingManager.register(new CheckboxSetting(this, "Dynamic", true));
    private final NumberSetting length = settingManager.register(new NumberSetting(this, "Length", 2.65F, 0.0F, 10.0F));
    private final NumberSetting gap = settingManager.register(new NumberSetting(this, "Gap", 2.15F, 0.0F, 10.0F));
-   private final ColorSetting color = settingManager.register(new ColorSetting(this, "Color", -8286984));
+   private final ColorSetting color = settingManager.register(new ColorSetting(this, "Color", -8286984) {
+      @Override
+      public boolean shouldShow() {
+         return Crosshair.this.colorMode.getCurrentElementAsString().equals("Custom");
+      }
+   });
    @EventLink
    public final Listener<RenderScreenEvent> onRenderScreen = renderScreenEvent -> {
       float f = (float)(renderScreenEvent.scaledResolution.getScaledWidth_double() / 2.0);
       float f2 = (float)(renderScreenEvent.scaledResolution.getScaledHeight_double() / 2.0);
       boolean enabled = this.outline.isEnabled();
       float f3 = enabled ? 0.5F : 0.0F;
-      int color2 = this.color.getColor();
+      int color2 = this.colorMode.getCurrentElementAsString().equals("Theme")
+         ? ModuleManager.themeColor.getColor(f, f2)
+         : this.color.getColor();
       float f4 = ((int)(this.length.getCurrentValue() * 10.0F) + 4) / 5 * 5 / 10.0F;
       float f5 = ((int)(this.gap.getCurrentValue() * 10.0F) + 4) / 5 * 5 / 10.0F;
       int i = this.crosshair.isEnabled() ? 1 : 0;

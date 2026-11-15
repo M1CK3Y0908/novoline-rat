@@ -77,6 +77,11 @@ public class BindCommand extends Command {
                return;
             }
 
+            if (!module3.canBeToggled()) {
+               this.sendMessage("§cThis module cannot be bound.");
+               return;
+            }
+
             if (i == 0 && !flag) {
                this.sendLocalized("command.bind.wrong_key");
                return;

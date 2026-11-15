@@ -127,15 +127,19 @@ public class ArrayListElement extends HudElement {
                int color = arrayList2.main.getColor();
                int color2 = arrayList2.status.getColor();
                int color3 = arrayList2.rightLineColor.getColor();
-               if (currentElement == 1) {
+               String mode = arrayList2.colorMode.getCurrentElementAsString();
+               if (mode.equals("Theme")) {
+                  color = color3 = ModuleManager.themeColor.getColor(f5, this.getY() + arrayListOffsetY);
+               } else if (mode.equals("Fade")) {
                   color = color3 = RenderUtils.pulseBrightness(color, currentValue4, currentValue5, i2, i, l);
-               } else if (currentElement == 2) {
+               } else if (mode.equals("Rainbow")) {
                   color = color3 = RenderUtils.indexedHsbColor(i2, i, currentValue6, currentValue7, l);
-               } else if (currentElement == 3) {
+               } else if (mode.equals("Astolfo")) {
                   color = color3 = RenderUtils.indexedHsbColorMirrored(i2, i, currentValue6, currentValue7, l);
-               } else if (currentElement == 4) {
+               } else if (mode.equals("Gradient")) {
                   color = color3 = RenderUtils.pulseBetweenColors(arrayList2.gradientFirst.getColor(), arrayList2.gradientSecond.getColor(), i2, i, l);
                }
+               final int finalColor = color;
 
                if (arrayListOffsetX > -2.0F) {
                   if (this.maxEntryWidth < f3) {
@@ -169,7 +173,7 @@ public class ArrayListElement extends HudElement {
                               this.y + arrayListOffsetY,
                               f5 + f6,
                               this.y + arrayListOffsetY + f2,
-                              RenderUtils.withAlphaFraction(arrayList2.main.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F)
+                              RenderUtils.withAlphaFraction(mode.equals("Theme") ? finalColor : arrayList2.main.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F)
                            )
                         );
                   }
@@ -196,7 +200,7 @@ public class ArrayListElement extends HudElement {
                .render(
                   Minecraft.getMinecraft().getFramebuffer(),
                   scaledResolution2,
-                  RenderUtils.withAlphaFraction(arrayList2.main.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F),
+                  RenderUtils.withAlphaFraction(arrayList2.colorMode.getCurrentElementAsString().equals("Theme") ? ModuleManager.themeColor.getColor() : arrayList2.main.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F),
                   arrayList2.textGlowRadius.getCurrentValue(),
                   arrayList2.textGlowSigma.getCurrentValue(),
                   1.0F,

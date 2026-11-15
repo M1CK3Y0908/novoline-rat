@@ -21,15 +21,24 @@ public class HypixelStatsElement extends HudElement {
       if (this.hypixelStats.isEnabled() && this.hypixelStats.isVisible()) {
          RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 1.5F, 1610612736);
          RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), -1155456735);
-         int color = ModuleManager.watermark.main.getColor();
+         int c1;
+         int c2;
+         if (ModuleManager.watermark.colorMode.getCurrentElementAsString().equals("Theme")) {
+            c1 = ModuleManager.themeColor.getColor(this.getX(), this.getY());
+            c2 = ModuleManager.themeColor.getColor(this.getX() + this.getWidth(), this.getY());
+         } else {
+            int color = ModuleManager.watermark.main.getColor();
+            c1 = RenderUtils.pulseBrightness(color, 0.5F, 1.0F, 1, 3, 2500L);
+            c2 = RenderUtils.pulseBrightness(color, 0.5F, 1.0F, 1, 1, 2500L);
+         }
          RenderUtils.drawGradientLine(
             this.getX(),
             this.getY(),
             this.getX() + this.getWidth(),
             this.getY(),
             3.0F,
-            RenderUtils.pulseBrightness(color, 0.5F, 1.0F, 1, 3, 2500L),
-            RenderUtils.pulseBrightness(color, 0.5F, 1.0F, 1, 1, 2500L),
+            c1,
+            c2,
             false
          );
          Fonts.rubikSemiboldSize16.drawStringWithShadow("Hypixel Stats", this.getX() + 3.0F, this.getY() + 7.0F, -1);

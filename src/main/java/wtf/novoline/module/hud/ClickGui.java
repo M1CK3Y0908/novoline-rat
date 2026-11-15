@@ -61,40 +61,46 @@ public class ClickGui extends Module {
          return ClickGui.this.backgroundSettings.isSelected(3) && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    };
-   public final CheckboxSetting performanceMode = settingManager.register(new CheckboxSetting(this, "Performance mode", false) {
+   public final ComboSetting colorMode = settingManager.register(new ComboSetting(this, "Color Mode", 0, "Theme", "Custom") {
       @Override
       public boolean shouldShow() {
          return ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    });
-   public final CheckboxSetting astolfoMode = settingManager.register(new CheckboxSetting(this, "Astolfo mode", false) {
+   public final CheckboxSetting performanceMode = settingManager.register(new CheckboxSetting(this, "Performance Mode", false) {
       @Override
       public boolean shouldShow() {
          return ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    });
-   public final NumberSetting astolfoCycleTime = settingManager.register(new NumberSetting(this, "Astolfo cycle time", 10000, 1, 20000) {
+   public final CheckboxSetting astolfoMode = settingManager.register(new CheckboxSetting(this, "Astolfo Mode", false) {
       @Override
       public boolean shouldShow() {
-         return ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
+         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && ClickGui.this.clickGui.getCurrentElement() == 0;
+      }
+   });
+   public final NumberSetting astolfoCycleTime = settingManager.register(new NumberSetting(this, "Astolfo Cycle Time", 10000, 1, 20000) {
+      @Override
+      public boolean shouldShow() {
+         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    });
    public final ColorSetting primary = settingManager.register(new ColorSetting(this, "Primary", -8286984) {
       @Override
       public boolean shouldShow() {
-         return !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
+         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    });
    public final ColorSetting extra = settingManager.register(new ColorSetting(this, "Extra", -10262799) {
       @Override
       public boolean shouldShow() {
-         return !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
+         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    });
    public final ColorSetting desaturation = settingManager.register(new ColorSetting(this, "Desaturation", -13554047) {
       @Override
       public boolean shouldShow() {
-         return !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
+         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    });
    private final Stopwatch toggleTimer = new Stopwatch();

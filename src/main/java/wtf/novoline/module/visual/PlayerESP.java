@@ -54,14 +54,14 @@ public class PlayerESP extends Module {
       new MultiComboSetting(this, "Ignore rules").add("Self", false).add("Invisible", false).add("Bots", true).add("Team", false)
    );
    public static boolean renderingEsp;
-   public final ComboSetting boxType = settingManager.register(new ComboSetting(this, "Box type", 3, "Colored", "Health based", "Rainbow", "Astolfo") {
+   public final ComboSetting boxType = settingManager.register(new ComboSetting(this, "Box Type", 0, "Theme", "Colored", "Health Based", "Rainbow", "Astolfo") {
       @Override
       public boolean shouldShow() {
          return PlayerESP.this.playerESP.getCurrentElement() == 3 && PlayerESP.this.elements.getElements().get(1).isSelected();
       }
    });
    public final ComboSetting healthType = settingManager.register(
-      new ComboSetting(this, "Health type", 5, "Colored", "Health based", "Health gradient", "Custom gradient", "Rainbow", "Astolfo") {
+      new ComboSetting(this, "Health Type", 0, "Theme", "Colored", "Health Based", "Health Gradient", "Custom Gradient", "Rainbow", "Astolfo") {
          @Override
          public boolean shouldShow() {
             return PlayerESP.this.playerESP.getCurrentElement() == 3 && PlayerESP.this.elements.getElements().get(2).isSelected();
@@ -78,17 +78,17 @@ public class PlayerESP extends Module {
       @Override
       public boolean shouldShow() {
          int currentElement = PlayerESP.this.playerESP.getCurrentElement();
-         int currentElement2 = PlayerESP.this.boxType.getCurrentElement();
-         return currentElement == 3 && currentElement2 == 0 && PlayerESP.this.elements.getElements().get(1).isSelected();
+         String m = PlayerESP.this.boxType.getCurrentElementAsString();
+         return currentElement == 3 && m.equals("Colored") && PlayerESP.this.elements.getElements().get(1).isSelected();
       }
    });
-   private final ColorSetting healthText = settingManager.register(new ColorSetting(this, "Health text", -1) {
+   private final ColorSetting healthText = settingManager.register(new ColorSetting(this, "Health Text", -1) {
       @Override
       public boolean shouldShow() {
          return PlayerESP.this.playerESP.getCurrentElement() == 3 && PlayerESP.this.elements.getElements().get(3).isSelected();
       }
    });
-   private final ColorSetting itemInHand = settingManager.register(new ColorSetting(this, "Item in hand", -4144960) {
+   private final ColorSetting itemInHand = settingManager.register(new ColorSetting(this, "Item In Hand", -4144960) {
       @Override
       public boolean shouldShow() {
          return PlayerESP.this.playerESP.getCurrentElement() == 3 && PlayerESP.this.elements.getElements().get(4).isSelected();
@@ -98,24 +98,24 @@ public class PlayerESP extends Module {
       @Override
       public boolean shouldShow() {
          int currentElement = PlayerESP.this.playerESP.getCurrentElement();
-         int currentElement2 = PlayerESP.this.healthType.getCurrentElement();
-         return currentElement == 3 && currentElement2 == 0 && PlayerESP.this.elements.getElements().get(2).isSelected();
+         String m = PlayerESP.this.healthType.getCurrentElementAsString();
+         return currentElement == 3 && m.equals("Colored") && PlayerESP.this.elements.getElements().get(2).isSelected();
       }
    });
-   private final ColorSetting gradientUp = settingManager.register(new ColorSetting(this, "Gradient up", -12657535) {
+   private final ColorSetting gradientUp = settingManager.register(new ColorSetting(this, "Gradient Up", -12657535) {
       @Override
       public boolean shouldShow() {
          int currentElement = PlayerESP.this.playerESP.getCurrentElement();
-         int currentElement2 = PlayerESP.this.healthType.getCurrentElement();
-         return currentElement == 3 && currentElement2 == 3 && PlayerESP.this.elements.getElements().get(2).isSelected();
+         String m = PlayerESP.this.healthType.getCurrentElementAsString();
+         return currentElement == 3 && m.equals("Custom Gradient") && PlayerESP.this.elements.getElements().get(2).isSelected();
       }
    });
-   private final ColorSetting gradientDown = settingManager.register(new ColorSetting(this, "Gradient down", -12657535) {
+   private final ColorSetting gradientDown = settingManager.register(new ColorSetting(this, "Gradient Down", -12657535) {
       @Override
       public boolean shouldShow() {
          int currentElement = PlayerESP.this.playerESP.getCurrentElement();
-         int currentElement2 = PlayerESP.this.healthType.getCurrentElement();
-         return currentElement == 3 && currentElement2 == 3 && PlayerESP.this.elements.getElements().get(2).isSelected();
+         String m = PlayerESP.this.healthType.getCurrentElementAsString();
+         return currentElement == 3 && m.equals("Custom Gradient") && PlayerESP.this.elements.getElements().get(2).isSelected();
       }
    });
    private final ColorSetting main = settingManager.register(new ColorSetting(this, "Main", -14506000) {
@@ -278,12 +278,19 @@ public class PlayerESP extends Module {
                      RenderUtils.drawLine(f3 - 0.5F, f2 - 0.5F, f3 - 0.5F, f4 + 0.5F, Integer.MIN_VALUE, false);
                      RenderUtils.drawLine(f3 - 0.5F, f4 + 0.5F, f + 0.5F, f4 + 0.5F, Integer.MIN_VALUE, false);
                      if (relationType == null && !entityPlayer.equals(ModuleManager.bowAimbot.getEntity())) {
-                        int currentElement3 = this.boxType.getCurrentElement();
-                        if (currentElement3 != 2 && currentElement3 != 3) {
+                        String bMode = this.boxType.getCurrentElementAsString();
+                        if (bMode.equals("Theme")) {
+                           int i3 = ModuleManager.themeColor.getColor(f, f4);
+                           int i4 = ModuleManager.themeColor.getColor(f, f2);
+                           int i5 = ModuleManager.themeColor.getColor(f3, f2);
+                           int i6 = ModuleManager.themeColor.getColor(f3, f4);
+                           RenderUtils.drawGradientLine(f, f4, f, f2, 1.0F, i3, i4, false);
+                           RenderUtils.drawGradientLine(f, f2, f3, f2, 1.0F, i4, i5, false);
+                           RenderUtils.drawGradientLine(f3, f2, f3, f4, 1.0F, i5, i6, false);
+                           RenderUtils.drawGradientLine(f3, f4, f, f4, 1.0F, i6, i3, false);
+                        } else if (!bMode.equals("Rainbow") && !bMode.equals("Astolfo")) {
                            int i2 = -1;
-                           if (currentElement3 == 0) {
-                              i2 = this.box.getColor();
-                           } else if (currentElement3 == 1) {
+                           if (bMode.equals("Colored") || bMode.equals("Health Based")) {
                               i2 = this.box.getColor();
                            }
 
@@ -296,28 +303,28 @@ public class PlayerESP extends Module {
                            RenderUtils.drawLine(f3, f2, f3, f4, i2, false);
                            RenderUtils.drawLine(f3, f4, f, f4, i2, false);
                         } else {
-                           int i3 = currentElement3 == 2
+                           int i3 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 1, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, 2500L);
-                           int i4 = currentElement3 == 2
+                           int i4 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 8, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 8, 0.6F, 1.0F, 2500L);
-                           int i5 = currentElement3 == 2
+                           int i5 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 16, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 16, 0.6F, 1.0F, 2500L);
-                           int i6 = currentElement3 == 2
+                           int i6 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 32, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 32, 0.6F, 1.0F, 2500L);
-                           int i7 = currentElement3 == 2
+                           int i7 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 64, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 64, 0.6F, 1.0F, 2500L);
-                           int i8 = currentElement3 == 2
+                           int i8 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 128, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 128, 0.6F, 1.0F, 2500L);
-                           int i9 = currentElement3 == 2
+                           int i9 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 256, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 256, 0.6F, 1.0F, 2500L);
-                           int i10 = currentElement3 == 2
+                           int i10 = bMode.equals("Rainbow")
                               ? RenderUtils.indexedHsbColor(1, 512, 0.6F, 1.0F, 2500L)
                               : RenderUtils.indexedHsbColorMirrored(1, 512, 0.6F, 1.0F, 2500L);
                            RenderUtils.drawGradientLine(f, f4, f, f2, 1.0F, i3, i4, false);
@@ -341,30 +348,32 @@ public class PlayerESP extends Module {
                      RenderUtils.drawLine(f5 - 0.5F, f4 - 0.5F, f5 - 0.5F, f2 + 0.5F, 2.0F, Integer.MIN_VALUE, false);
                      RenderUtils.drawLine(f5 + 0.5F, f4 - 0.5F, f5 + 0.5F, f2 + 0.5F, 2.0F, Integer.MIN_VALUE, false);
                      RenderUtils.drawLine(f5, f4 - 0.5F, f5, f2 + 0.5F, 2.0F, Integer.MIN_VALUE, false);
-                     int currentElement4 = this.healthType.getCurrentElement();
-                     if (currentElement4 == 3 || currentElement4 == 4 || currentElement4 == 5) {
+                     String hMode = this.healthType.getCurrentElementAsString();
+                     if (hMode.equals("Theme")) {
+                        int i11 = ModuleManager.themeColor.getColor(f5, f4);
+                        int i12 = ModuleManager.themeColor.getColor(f5, f2);
+                        RenderUtils.drawGradientLine(f5, f4, f5, f2, 2.0F, i11, i12, false);
+                     } else if (hMode.equals("Custom Gradient") || hMode.equals("Rainbow") || hMode.equals("Astolfo")) {
                         int i11 = -1;
                         int i12 = -1;
-                        if (currentElement4 == 3) {
+                        if (hMode.equals("Custom Gradient")) {
                            i11 = this.gradientUp.getColor();
                            i12 = this.gradientDown.getColor();
-                        } else if (currentElement4 == 4) {
+                        } else if (hMode.equals("Rainbow")) {
                            i11 = RenderUtils.indexedHsbColor(1, 1, 0.6F, 1.0F, 2500L);
                            i12 = RenderUtils.indexedHsbColor(1, 8, 0.6F, 1.0F, 2500L);
-                        } else if (currentElement4 == 5) {
+                        } else if (hMode.equals("Astolfo")) {
                            i11 = RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, 2500L);
                            i12 = RenderUtils.indexedHsbColorMirrored(1, 8, 0.6F, 1.0F, 2500L);
                         }
 
                         RenderUtils.drawGradientLine(f5, f4, f5, f2, 2.0F, i11, i12, false);
-                     } else if (currentElement4 == 2) {
+                     } else if (hMode.equals("Health Gradient")) {
                         RenderUtils.drawGradientLine(f5, f4, f5, f4 + f6 * entityPlayer.getMaxHealth() / 2.0F, 2.0F, -12657535, -12469, false);
                         RenderUtils.drawGradientLine(f5, f4 + f6 * entityPlayer.getMaxHealth() / 2.0F, f5, f2, 2.0F, -12469, -1618884, false);
                      } else {
                         int i13 = -1;
-                        if (currentElement4 == 0) {
-                           i13 = this.health.getColor();
-                        } else if (currentElement4 == 1) {
+                        if (hMode.equals("Colored") || hMode.equals("Health Based")) {
                            i13 = this.health.getColor();
                         }
 
@@ -484,7 +493,7 @@ public class PlayerESP extends Module {
 
    private int getEntityColor(Entity entity2) {
       RelationType relationType = novoline.getRelationManager().get(entity2.getName());
-      int color = this.main.getColor();
+      int color = this.boxType.getCurrentElementAsString().equals("Theme") ? ModuleManager.themeColor.getColor() : this.main.getColor();
       if (relationType == RelationType.FRIEND) {
          color = this.friend.getColor();
       } else if (relationType == RelationType.TARGET) {

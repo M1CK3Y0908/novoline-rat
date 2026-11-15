@@ -28,6 +28,7 @@ import wtf.novoline.module.hud.HUD;
 import wtf.novoline.module.hud.Notifications;
 import wtf.novoline.module.hud.TargetESP;
 import wtf.novoline.module.hud.TargetHUD;
+import wtf.novoline.module.hud.ThemeColor;
 import wtf.novoline.module.hud.Watermark;
 import wtf.novoline.module.misc.AutoHypixel;
 import wtf.novoline.module.misc.AutoRegister;
@@ -121,6 +122,7 @@ public class ModuleManager {
    public static final FastBow fastBow = new FastBow();
    public static final KeepSprint keepSprint = new KeepSprint();
    public static final ArrayList arrayList = new ArrayList();
+   public static final ThemeColor themeColor = new ThemeColor();
    public static final Watermark watermark = new Watermark();
    public static final ClickGui clickGui = new ClickGui();
    public static final Notifications notifications = new Notifications();

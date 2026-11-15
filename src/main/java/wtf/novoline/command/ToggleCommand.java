@@ -25,6 +25,10 @@ public class ToggleCommand extends Command {
          String text = texts[1];
          Module module2 = this.getModule(text.toLowerCase(Locale.ROOT));
          if (module2 != null) {
+            if (!module2.canBeToggled()) {
+               Novoline.getNovoline().sendChatMessage("§cThis module cannot be toggled.");
+               return;
+            }
             text = module2.getName();
             switch (texts.length) {
                case 2:

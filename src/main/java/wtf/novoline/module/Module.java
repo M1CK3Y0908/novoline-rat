@@ -35,6 +35,10 @@ public abstract class Module {
    private MultiComboSetting multiComboSetting;
    private final String description;
 
+   public boolean canBeToggled() {
+      return true;
+   }
+
    public boolean wasEnabledAtInit() {
       return this.enabledAtInit;
    }
@@ -190,7 +194,9 @@ public abstract class Module {
    }
 
    public void toggle() {
-      this.setEnabled(!this.isEnabled());
+      if (this.canBeToggled()) {
+         this.setEnabled(!this.isEnabled());
+      }
    }
 
    public List<Module> getAutoDisableTargets() {
@@ -278,6 +284,10 @@ public abstract class Module {
    }
 
    public void setKeyBind(int i) {
+      if (!this.canBeToggled()) {
+         this.keyBind = 0;
+         return;
+      }
       this.keyBind = i;
    }
 

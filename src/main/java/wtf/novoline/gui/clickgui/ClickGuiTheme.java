@@ -9,13 +9,15 @@ public class ClickGuiTheme {
    }
 
    public int getSecondaryColor(boolean flag) {
-      return flag
-         ? (
-            ModuleManager.clickGui.astolfoMode.isEnabled()
-               ? RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, (long)ModuleManager.clickGui.astolfoCycleTime.getCurrentValue())
-               : ModuleManager.clickGui.extra.getColor()
-         )
-         : -1438102703;
+      if (flag) {
+         if (ModuleManager.clickGui.colorMode.getCurrentElementAsString().equals("Theme")) {
+            return ModuleManager.themeColor.getColor();
+         }
+         return ModuleManager.clickGui.astolfoMode.isEnabled()
+            ? RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, (long)ModuleManager.clickGui.astolfoCycleTime.getCurrentValue())
+            : ModuleManager.clickGui.extra.getColor();
+      }
+      return -1438102703;
    }
 
    public int getSettingBackgroundColor() {
@@ -27,13 +29,15 @@ public class ClickGuiTheme {
    }
 
    public int getPrimaryColor(boolean flag) {
-      return flag
-         ? (
-            ModuleManager.clickGui.astolfoMode.isEnabled()
-               ? RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, (long)ModuleManager.clickGui.astolfoCycleTime.getCurrentValue())
-               : ModuleManager.clickGui.primary.getColor()
-         )
-         : -1434550140;
+      if (flag) {
+         if (ModuleManager.clickGui.colorMode.getCurrentElementAsString().equals("Theme")) {
+            return ModuleManager.themeColor.getColor();
+         }
+         return ModuleManager.clickGui.astolfoMode.isEnabled()
+            ? RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, (long)ModuleManager.clickGui.astolfoCycleTime.getCurrentValue())
+            : ModuleManager.clickGui.primary.getColor();
+      }
+      return -1434550140;
    }
 
    public int getTextColor() {

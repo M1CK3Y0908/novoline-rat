@@ -21,49 +21,49 @@ import wtf.novoline.setting.NumberSetting;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class Trails extends Module {
-   private final ComboSetting trails = settingManager.register(new ComboSetting(this, "Color type", 4, "Colored", "Fade", "Gradient", "Rainbow", "Astolfo"));
-   private final CheckboxSetting applyForAll = settingManager.register(new CheckboxSetting(this, "Apply for all", true));
-   private final CheckboxSetting hideInFirstPerson = settingManager.register(new CheckboxSetting(this, "Hide in first person", false));
-   private final NumberSetting maxDistance = settingManager.register(new NumberSetting(this, "Max distance", 3, 1, 15));
+   private final ComboSetting trails = settingManager.register(new ComboSetting(this, "Color Type", 0, "Theme", "Colored", "Fade", "Gradient", "Rainbow", "Astolfo"));
+   private final CheckboxSetting applyForAll = settingManager.register(new CheckboxSetting(this, "Apply For All", true));
+   private final CheckboxSetting hideInFirstPerson = settingManager.register(new CheckboxSetting(this, "Hide In First Person", false));
+   private final NumberSetting maxDistance = settingManager.register(new NumberSetting(this, "Max Distance", 3, 1, 15));
    private final NumberSetting step = settingManager.register(new NumberSetting(this, "Step", 1, 1, 10) {
       @Override
       public boolean shouldShow() {
-         int currentElement = Trails.this.trails.getCurrentElement();
-         return currentElement == 1 || currentElement == 2 || currentElement == 3 || currentElement == 4;
+         String m = Trails.this.trails.getCurrentElementAsString();
+         return m.equals("Fade") || m.equals("Gradient") || m.equals("Rainbow") || m.equals("Astolfo");
       }
    });
-   private final NumberSetting cycleTime = settingManager.register(new NumberSetting(this, "Cycle time", 1000, 1, 20000) {
+   private final NumberSetting cycleTime = settingManager.register(new NumberSetting(this, "Cycle Time", 1000, 1, 20000) {
       @Override
       public boolean shouldShow() {
-         int currentElement = Trails.this.trails.getCurrentElement();
-         return currentElement == 1 || currentElement == 2 || currentElement == 3 || currentElement == 4;
+         String m = Trails.this.trails.getCurrentElementAsString();
+         return m.equals("Fade") || m.equals("Gradient") || m.equals("Rainbow") || m.equals("Astolfo");
       }
    });
    private final ColorSetting main = settingManager.register(new ColorSetting(this, "Main", -14039553) {
       @Override
       public boolean shouldShow() {
-         int currentElement = Trails.this.trails.getCurrentElement();
-         return currentElement == 0 || currentElement == 1;
+         String m = Trails.this.trails.getCurrentElementAsString();
+         return m.equals("Colored") || m.equals("Fade");
       }
    });
    private static final ResourceLocation SHIELD_BASE_TEXTURE = new ResourceLocation("novoline", "images/trail.png");
-   private final ColorSetting gradientFirst = settingManager.register(new ColorSetting(this, "Gradient first", -14039553) {
+   private final ColorSetting gradientFirst = settingManager.register(new ColorSetting(this, "Gradient First", -14039553) {
       @Override
       public boolean shouldShow() {
-         return Trails.this.trails.getCurrentElement() == 2;
+         return Trails.this.trails.getCurrentElementAsString().equals("Gradient");
       }
    });
-   private final ColorSetting gradientSecond = settingManager.register(new ColorSetting(this, "Gradient second", -12469) {
+   private final ColorSetting gradientSecond = settingManager.register(new ColorSetting(this, "Gradient Second", -12469) {
       @Override
       public boolean shouldShow() {
-         return Trails.this.trails.getCurrentElement() == 2;
+         return Trails.this.trails.getCurrentElementAsString().equals("Gradient");
       }
    });
    @EventLink
    public final Listener<RenderWorldEvent> onRenderWorld = renderWorldEvent -> {
       RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
       long l = (long)this.cycleTime.getCurrentValue();
-      int currentElement = this.trails.getCurrentElement();
+      String mode = this.trails.getCurrentElementAsString();
 
       for (EntityPlayer entityPlayer : minecraft.theWorld.playerEntities) {
          double d = 0.0;
@@ -101,13 +101,14 @@ public class Trails extends Module {
             minecraft.getTextureManager().bindTexture(SHIELD_BASE_TEXTURE);
             GL11.glBegin(7);
 
-            RenderUtils.setColor(RenderUtils.withAlpha(switch (currentElement) {
-               case 0 -> this.main.getColor();
-               case 1 -> RenderUtils.pulseBrightness(this.main.getColor(), 0.4F, 1.0F, 1, entityPlayer.arrayDeque.size(), l);
-               case 2 -> RenderUtils.pulseBetweenColors(this.gradientFirst.getColor(), this.gradientSecond.getColor(), 1, entityPlayer.arrayDeque.size(), l);
-               case 3 -> RenderUtils.timedHsbColor(1.0, 0.6F, 1.0F, l);
-               case 4 -> RenderUtils.timedHsbColorMirrored(1.0, 0.6F, 1.0F, l);
-               default -> throw new IllegalArgumentException("Unexpected value: " + currentElement);
+            RenderUtils.setColor(RenderUtils.withAlpha(switch (mode) {
+               case "Theme" -> ModuleManager.themeColor.getColor();
+               case "Colored" -> this.main.getColor();
+               case "Fade" -> RenderUtils.pulseBrightness(this.main.getColor(), 0.4F, 1.0F, 1, entityPlayer.arrayDeque.size(), l);
+               case "Gradient" -> RenderUtils.pulseBetweenColors(this.gradientFirst.getColor(), this.gradientSecond.getColor(), 1, entityPlayer.arrayDeque.size(), l);
+               case "Rainbow" -> RenderUtils.timedHsbColor(1.0, 0.6F, 1.0F, l);
+               case "Astolfo" -> RenderUtils.timedHsbColorMirrored(1.0, 0.6F, 1.0F, l);
+               default -> this.main.getColor();
             }, 0));
             GL11.glTexCoord2f(f, 0.703125F);
             GL11.glVertex3d(d2, d3, d4);
@@ -143,17 +144,18 @@ public class Trails extends Module {
 
                RenderUtils.setColor(
                   RenderUtils.withAlphaFraction(
-                     switch (currentElement) {
-                        case 0 -> this.main.getColor();
-                        case 1 -> RenderUtils.pulseBrightness(
+                     switch (mode) {
+                        case "Theme" -> ModuleManager.themeColor.getColor((long)(i * 20L));
+                        case "Colored" -> this.main.getColor();
+                        case "Fade" -> RenderUtils.pulseBrightness(
                            this.main.getColor(), 0.4F, 1.0F, (int)(i * this.step.getCurrentValue()), entityPlayer.arrayDeque.size(), l
                         );
-                        case 2 -> RenderUtils.pulseBetweenColors(
+                        case "Gradient" -> RenderUtils.pulseBetweenColors(
                            this.gradientFirst.getColor(), this.gradientSecond.getColor(), i, entityPlayer.arrayDeque.size(), l
                         );
-                        case 3 -> RenderUtils.timedHsbColor(-f3 / this.step.getCurrentValue(), 0.6F, 1.0F, l);
-                        case 4 -> RenderUtils.timedHsbColorMirrored(-f3 / this.step.getCurrentValue(), 0.6F, 1.0F, l);
-                        default -> throw new IllegalArgumentException("Unexpected value: " + currentElement);
+                        case "Rainbow" -> RenderUtils.timedHsbColor(-f3 / this.step.getCurrentValue(), 0.6F, 1.0F, l);
+                        case "Astolfo" -> RenderUtils.timedHsbColorMirrored(-f3 / this.step.getCurrentValue(), 0.6F, 1.0F, l);
+                        default -> this.main.getColor();
                      },
                      (float)(d6 / 0.3)
                   )
