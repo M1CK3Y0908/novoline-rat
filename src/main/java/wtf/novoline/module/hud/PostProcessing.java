@@ -101,7 +101,7 @@ public class PostProcessing extends Module {
       GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
 
       if (ModuleManager.targetHUD != null && ModuleManager.targetHUD.isEnabled()) {
-         TargetHudElement.renderTargetHudEffects(bloom, this.glowOptions.isSelected("TargetHUD"));
+         TargetHudElement.renderTargetHudEffects(bloom, this.glowOptions.isSelected("TargetHUD"), sr);
       }
 
       if (ModuleManager.arrayList != null && ModuleManager.arrayList.isEnabled()) {

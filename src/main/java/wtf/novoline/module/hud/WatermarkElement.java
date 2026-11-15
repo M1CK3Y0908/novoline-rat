@@ -60,7 +60,10 @@ public class WatermarkElement extends HudElement {
             FontAdapter cFontRenderer = customFont != null ? customFont : Fonts.robotoRegularSize14;
             int c1 = ModuleManager.themeColor.getColor(this.getX(), this.getY());
             int c2 = ModuleManager.themeColor.getColor(this.getX() + this.getWidth(), this.getY());
-            RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 1.5F, 1610612736);
+            boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
+            if (!postProcessingActive) {
+               RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 1.5F, 1610612736);
+            }
             RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), -14606047);
             RenderUtils.drawGradientLine(
                this.getX(),
@@ -101,9 +104,12 @@ public class WatermarkElement extends HudElement {
             FontAdapter cFontRenderer3 = customNorm != null ? customNorm : Fonts.museoSans700Size14;
             String text3 = "Novoline".toUpperCase(Locale.ROOT);
             this.width = cFontRenderer2.getStringWidth(text3) + cFontRenderer3.getStringWidth(this.watermarkText) + 9.0F;
-            RenderUtils.drawShadow(
-               this.getX() + 1.0F, this.getY() + 1.0F, this.getX() + this.getWidth() - 1.0F, this.getY() + this.getHeight(), 2.5F, -285212672
-            );
+            boolean postProcessingActive2 = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
+            if (!postProcessingActive2) {
+               RenderUtils.drawShadow(
+                  this.getX() + 1.0F, this.getY() + 1.0F, this.getX() + this.getWidth() - 1.0F, this.getY() + this.getHeight(), 2.5F, -285212672
+               );
+            }
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
             filledPolygonRenderer.putRoundedRect(this.getX(), this.getY(), this.width, 14.0F, 1.0F, -15395563);
             filledPolygonRenderer.draw();

@@ -155,14 +155,47 @@ public class ArrayListElement extends HudElement {
                   }
                }
 
-               module3.setArrayListOffsetY(SmoothingUtils.approachWithMinimumStep(module3.getArrayListOffsetY(), this.height, 10.0F, 0.02F));
                if (module3.isEnabled()) {
-                  module3.setArrayListOffsetX(SmoothingUtils.approachWithMinimumStep(module3.getArrayListOffsetX(), f3, 10.0F, 0.02F));
                   this.height = this.height + (cFontRenderer.getHeight() + currentValue2);
                   i2++;
-               } else {
-                  module3.setArrayListOffsetX(SmoothingUtils.approachWithMinimumStep(module3.getArrayListOffsetX(), -3.0F - currentValue3, 10.0F, 0.02F));
                }
+            }
+         }
+      }
+   }
+
+   public static void updatePositions(ScaledResolution sr) {
+      if (Minecraft.getMinecraft().gameSettings.showDebugInfo || ModuleManager.arrayList == null || !ModuleManager.arrayList.isEnabled()) {
+         return;
+      }
+      ArrayList arrayList2 = ModuleManager.arrayList;
+      boolean flag3 = sr.getFloat2() / 2.0F < (instance != null ? instance.getY() : 0.0F);
+      List elements = arrayList2.arrayList.getElements();
+      boolean selected = ((Option)elements.get(0)).isSelected();
+      boolean selected2 = ((Option)elements.get(1)).isSelected();
+      boolean selected3 = ((Option)elements.get(2)).isSelected();
+      FontAdapter cFontRenderer = arrayList2.getFont();
+      List list = flag3 ? ModuleManager.modulesByWidthReversed : ModuleManager.modulesByWidth;
+      float currentValue = arrayList2.widthPadding.getCurrentValue();
+      float currentValue2 = arrayList2.heightPadding.getCurrentValue();
+      float currentValue3 = arrayList2.rightLineWidth.getCurrentValue();
+      float f2 = cFontRenderer.getHeight() + currentValue2;
+      float height = 0.0F;
+
+      for (Module module3 : (Iterable<Module>) list) {
+         if (!isFilteredOut(selected2, selected3, module3)) {
+            String name = module3.getName();
+            String suffix = module3.getSuffix();
+            boolean visibleSuffix2 = !selected && !suffix.isEmpty();
+            float stringWidth = cFontRenderer.getStringWidth(name);
+            float f3 = stringWidth + currentValue + (visibleSuffix2 ? cFontRenderer.getStringWidth(suffix) : 0.0F);
+
+            module3.setArrayListOffsetY(SmoothingUtils.approachWithMinimumStep(module3.getArrayListOffsetY(), height, 10.0F, 0.02F));
+            if (module3.isEnabled()) {
+               module3.setArrayListOffsetX(SmoothingUtils.approachWithMinimumStep(module3.getArrayListOffsetX(), f3, 10.0F, 0.02F));
+               height += f2;
+            } else {
+               module3.setArrayListOffsetX(SmoothingUtils.approachWithMinimumStep(module3.getArrayListOffsetX(), -3.0F - currentValue3, 10.0F, 0.02F));
             }
          }
       }

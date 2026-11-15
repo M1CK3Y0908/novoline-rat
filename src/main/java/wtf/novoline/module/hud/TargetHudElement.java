@@ -53,6 +53,38 @@ public class TargetHudElement extends HudElement {
       return this.x + sr.getScaledWidth() / 2.0F - this.getWidth() / 2.0F;
    }
 
+   public static void updateTarget(ScaledResolution sr) {
+      if (instance == null || ModuleManager.targetHUD == null || !ModuleManager.targetHUD.isEnabled()) {
+         return;
+      }
+      instance.scaledResolution = sr;
+      Killaura killaura2 = ModuleManager.killaura;
+      boolean flag2 = killaura2 != null && killaura2.isEnabled() && killaura2.entityLivingBase instanceof EntityPlayer;
+      if (flag2) {
+         instance.entityPlayer = (EntityPlayer)killaura2.entityLivingBase;
+      }
+
+      if (!flag2) {
+         if (instance.shown) {
+            instance.shown = false;
+            instance.animation.unlock();
+            instance.animation.start(instance.animation.getValue(), 0.0, 250L, Easing.backInOut);
+            if (instance.entityPlayer == minecraft.thePlayer) {
+               instance.animation.stop();
+            }
+         }
+      } else if (!instance.shown) {
+         instance.shown = true;
+         instance.animation.unlock();
+         instance.animation.start(instance.animation.getValue(), 100.0, 250L, Easing.backInOut);
+         if (instance.entityPlayer == minecraft.thePlayer) {
+            instance.animation.stop();
+         }
+      }
+
+      instance.animation.update();
+   }
+
    @Override
    public void draw(ScaledResolution scaledResolution2, float f2, boolean flag) {
       this.scaledResolution = scaledResolution2;
@@ -112,7 +144,8 @@ public class TargetHudElement extends HudElement {
             int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
             this.nameWidth = ModuleManager.targetHUD.getTitleFont().getStringWidth(name);
 
-            if (ModuleManager.targetHUD.addons.isSelected("Shadow") || ModuleManager.targetHUD.addons.isSelected(0)) {
+            boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
+            if (!postProcessingActive && (ModuleManager.targetHUD.addons.isSelected("Shadow") || ModuleManager.targetHUD.addons.isSelected(0))) {
                RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 2.0F, 1073741824);
             }
 
@@ -233,14 +266,16 @@ public class TargetHudElement extends HudElement {
                float f8 = this.getWidth() - 34.0F - 4.0F;
                float f9 = f8 * (this.animatedHealth / maxHealth3);
                RenderUtils.drawRect(this.getX() + 34.0F, this.getY() + 24.5F, this.getX() + this.getWidth() - 4.0F, this.getY() + 26.5F + 1.5F, -1876942816);
-               RenderUtils.drawShadow(
-                  this.getX() + 34.0F,
-                  this.getY() + 24.5F,
-                  this.getX() + 34.0F + f9,
-                  this.getY() + 26.5F + 1.5F,
-                  2.0F,
-                  RenderUtils.withAlphaFraction(-14039553, 0.4F)
-               );
+               if (!postProcessingActive) {
+                  RenderUtils.drawShadow(
+                     this.getX() + 34.0F,
+                     this.getY() + 24.5F,
+                     this.getX() + 34.0F + f9,
+                     this.getY() + 26.5F + 1.5F,
+                     2.0F,
+                     RenderUtils.withAlphaFraction(-14039553, 0.4F)
+                  );
+               }
                RenderUtils.drawRect(this.getX() + 34.0F, this.getY() + 24.5F, this.getX() + 34.0F + f9, this.getY() + 26.5F + 1.5F, -14039553);
             } else if (currentElement == 3) {
                float hp = this.entityPlayer.getHealth() + this.entityPlayer.getAbsorptionAmount();
@@ -338,10 +373,14 @@ public class TargetHudElement extends HudElement {
       instance = this;
    }
 
-   public static void renderTargetHudEffects(boolean bloom, boolean glow) {
+   public static void renderTargetHudEffects(boolean bloom, boolean glow, ScaledResolution sr) {
       if (instance == null || ModuleManager.targetHUD == null || !ModuleManager.targetHUD.isEnabled()) {
          return;
       }
+      if (sr != null) {
+         instance.scaledResolution = sr;
+      }
+      instance.animation.update();
       if (instance.entityPlayer == null) {
          return;
       }

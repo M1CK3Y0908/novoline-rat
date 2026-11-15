@@ -44,6 +44,27 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
       subFont.drawString(notification2.getSubText(), f + 28.0F, f2 + f3 / 2.0F - subFont.getHeight() / 2.0F + 6.0F, -2039584);
    }
 
+   public void updatePositions(ScaledResolution scaledResolution) {
+      if (!this.isEmpty()) {
+         this.removeIf(Notification::hasExpired);
+         float f = 5.0F;
+         float f2 = 44.0F;
+         float f3 = 30.0F;
+
+         for (int i = 0; i < Math.min(this.size(), 15); i++) {
+            Notification notification2 = this.get(i);
+            float f4 = Math.max(170.0F, this.getSubTextFont().getStringWidth(notification2.getSubText()) + 36.0F);
+            notification2.offsetY = SmoothingUtils.approach(notification2.offsetY, f2, 10.0F);
+            if (notification2.isFinished()) {
+               notification2.offsetX = SmoothingUtils.approach(notification2.offsetX, -f, 10.0F);
+            } else {
+               notification2.offsetX = SmoothingUtils.approach(notification2.offsetX, f4 + f, 10.0F);
+               f2 += f3 + 5.0F;
+            }
+         }
+      }
+   }
+
    public void renderEffects(boolean bloom, boolean glow, ScaledResolution scaledResolution) {
       if (!this.isEmpty()) {
          float scaledWidth = scaledResolution.getScaledWidth();
@@ -77,14 +98,12 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
       Notifications notifications2 = ModuleManager.notifications;
       if (notifications2.isEnabled() && !this.isEmpty()) {
          boolean shadowEnabled = notifications2.shadow.isEnabled();
+         boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
          Framebuffer framebuffer = Minecraft.getMinecraft().getFramebuffer();
          framebuffer.bindFramebuffer(true);
          float scaledWidth = scaledResolution.getScaledWidth();
          float scaledHeight = scaledResolution.getScaledHeight();
-         float f = 5.0F;
-         float f2 = 44.0F;
          float f3 = 30.0F;
-         this.removeIf(Notification::hasExpired);
 
          for (int i = 0; i < Math.min(this.size(), 15); i++) {
             Notification notification2 = this.get(i);
@@ -93,17 +112,10 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
             ResourceLocation resourceLocation = type.getResourceLocation();
             int backgroundColor = type.getBackgroundColor();
             int accentColor = type.getAccentColor();
-            notification2.offsetY = SmoothingUtils.approach(notification2.offsetY, f2, 10.0F);
-            if (notification2.isFinished()) {
-               notification2.offsetX = SmoothingUtils.approach(notification2.offsetX, -f, 10.0F);
-            } else {
-               notification2.offsetX = SmoothingUtils.approach(notification2.offsetX, f4 + f, 10.0F);
-               f2 += f3 + 5.0F;
-            }
 
             float f5 = scaledWidth - notification2.offsetX;
             float f6 = scaledHeight - notification2.offsetY;
-            if (shadowEnabled) {
+            if (shadowEnabled && !postProcessingActive) {
                RenderUtils.drawShadow(f5 + 1.0F, f6 + 1.0F, f5 + f4 - 1.0F, f6 + f3 - 1.0F, 3.0F, 1879048192);
             }
 

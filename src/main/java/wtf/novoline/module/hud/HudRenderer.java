@@ -22,17 +22,29 @@ public class HudRenderer {
    private void renderElements(ScaledResolution scaledResolution, float f, boolean flag, float f2, float f3) {
       SmoothingUtils.updateDelta();
       if (Minecraft.getMinecraft().thePlayer != null) {
+         float scaleFactor = scaledResolution.getScaleFactor();
+         double d = scaledResolution.getScaledWidth_double();
+         double d2 = scaledResolution.getScaledHeight_double();
+         scaledResolution.handleDouble2(d / 2.0 * scaleFactor);
+         scaledResolution.handleDouble(d2 / 2.0 * scaleFactor);
+
+         if (ModuleManager.arrayList != null && ModuleManager.arrayList.isEnabled()) {
+            ArrayListElement.updatePositions(scaledResolution);
+         }
+         Novoline.getNovoline().getNotificationManager().updatePositions(scaledResolution);
+         if (Novoline.getNovoline().getMenuClickGuiScreen() != null) {
+            Novoline.getNovoline().getMenuClickGuiScreen().updateAnimations();
+         }
+         if (ModuleManager.targetHUD != null && ModuleManager.targetHUD.isEnabled()) {
+            TargetHudElement.updateTarget(scaledResolution);
+         }
+
          if (ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled()) {
             ModuleManager.postProcessing.blurScreen();
          }
 
          GlStateManager.pushMatrix();
-         float scaleFactor = scaledResolution.getScaleFactor();
          GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
-         double d = scaledResolution.getScaledWidth_double();
-         double d2 = scaledResolution.getScaledHeight_double();
-         scaledResolution.handleDouble2(d / 2.0 * scaleFactor);
-         scaledResolution.handleDouble(d2 / 2.0 * scaleFactor);
          Novoline.getNovoline().getBus().post(new RenderScreenEvent(scaledResolution, f));
 
          for (HudElement hudElement : this.hudManager.getElements()) {

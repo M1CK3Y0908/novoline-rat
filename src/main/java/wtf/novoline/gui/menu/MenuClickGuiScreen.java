@@ -237,8 +237,24 @@ public class MenuClickGuiScreen extends GuiScreen {
       return this.textSelection;
    }
 
+   public void updateAnimations() {
+      this.animation.update();
+      this.animation2.update();
+      this.visibility = MathHelper.clamp_float((float)this.animation.getValue(), 0.0F, 100.0F);
+   }
+
    public void renderEffects(boolean bloom, boolean glow, ScaledResolution sr) {
-      if (this.visibility <= 0.0F) {
+      this.updateAnimations();
+
+      if (this.visibility <= 0.01F || (this.closing && (!this.animation.isAnimating() || this.resourcesReleased))) {
+         return;
+      }
+      if (this.mc.currentScreen != this && !this.clickGui.isEnabled() && !this.animation.isAnimating()) {
+         return;
+      }
+
+      float alpha = MathHelper.clamp_float(this.visibility / 100.0F, 0.0F, 1.0F);
+      if (alpha <= 0.005F) {
          return;
       }
 
@@ -254,19 +270,30 @@ public class MenuClickGuiScreen extends GuiScreen {
       GlStateManager.translate(-midX, -midY, 0.0);
 
       int themeColor = this.clickGuiTheme != null ? this.clickGuiTheme.getSecondaryColor(true) : ModuleManager.themeColor.getColor();
+      int drawColor;
+      if (!bloom) {
+         drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
+      } else if (glow) {
+         drawColor = RenderUtils.withAlpha(themeColor, (int)(255.0F * alpha));
+      } else {
+         drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
+      }
 
-      for (MenuCategoryPanel panel : this.buttons) {
-         float px = panel.getX() - 2.0F;
-         float py = panel.getY();
-         float pw = MenuCategoryPanel.getWidth() + 4.0F;
-         float ph = panel.getBottomY() - py;
+      if (!this.dashboardOpen) {
+         for (MenuCategoryPanel panel : this.buttons) {
+            float px = panel.getX();
+            float py = panel.getY();
+            float pw = MenuCategoryPanel.getWidth();
+            float headerH = MenuCategoryPanel.getHeaderHeight();
+            float bottomY = panel.getBottomY();
 
-         if (!bloom) {
-            RenderUtils.drawRect(px, py, px + pw, py + ph, -16777216);
-         } else if (glow) {
-            RenderUtils.drawRect(px, py, px + pw, py + ph, themeColor);
-         } else {
-            RenderUtils.drawRect(px, py, px + pw, py + ph, -16777216);
+            // Header rect (width 114, x - 2 to x + 112)
+            RenderUtils.drawRect(px - 2.0F, py, px + pw + 2.0F, py + headerH, drawColor);
+
+            // Body rect (width 110, x to x + 110)
+            if (bottomY > py + headerH) {
+               RenderUtils.drawRect(px, py + headerH, px + pw, bottomY, drawColor);
+            }
          }
       }
 
@@ -437,7 +464,7 @@ public class MenuClickGuiScreen extends GuiScreen {
             for (MenuCategoryPanel menuCategoryPanel5 : this.buttons) {
                menuCategoryPanel5.render(f3, f4, f);
                float bottomY = menuCategoryPanel5.getBottomY();
-               if (this.clickGui.panelsSettings.getElements().get(1).isSelected()) {
+               if (!usePostProcessing && this.clickGui.panelsSettings.getElements().get(1).isSelected()) {
                   RenderUtils.drawShadow(
                      menuCategoryPanel5.getX(),
                      menuCategoryPanel5.getY() + MenuCategoryPanel.getHeaderHeight(),
