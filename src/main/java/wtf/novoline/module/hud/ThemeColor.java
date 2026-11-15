@@ -13,7 +13,12 @@ public class ThemeColor extends Module {
       new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
    );
    public final ComboSetting animationMode = settingManager.register(
-      new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing")
+      new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing") {
+         @Override
+         public boolean shouldShow() {
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color");
+         }
+      }
    );
    public final ColorSetting firstColor = settingManager.register(
       new ColorSetting(this, "First Color", -13204766) {
@@ -45,15 +50,17 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Gradient Speed", 3.0F, 0.5F, 10.0F) {
          @Override
          public boolean shouldShow() {
-            return ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+               && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
    );
    public final NumberSetting gradientLength = settingManager.register(
-      new NumberSetting(this, "Gradient Length", 600.0F, 50.0F, 2000.0F) {
+      new NumberSetting(this, "Gradient Length", 300, 50, 1000, "px") {
          @Override
          public boolean shouldShow() {
-            return ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+               && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
    );
@@ -61,7 +68,8 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Angle", 0.0F, 0.0F, 360.0F) {
          @Override
          public boolean shouldShow() {
-            return ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+               && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
    );
@@ -69,7 +77,8 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Breathing Speed", 1.5F, 0.2F, 5.0F) {
          @Override
          public boolean shouldShow() {
-            return ThemeColor.this.animationMode.getCurrentElementAsString().equals("Breathing");
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+               && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Breathing");
          }
       }
    );
@@ -120,20 +129,25 @@ public class ThemeColor extends Module {
    }
 
    public int getColor(int index) {
-      return this.getColor(index * 25.0, 0.0);
+      return this.getColor((double)(index * 20));
    }
 
    public int getColor(long timeOffset) {
-      return this.getColor((double)timeOffset, 0.0);
+      return this.getColor((double)timeOffset);
    }
 
    public int getColor(double offset) {
-      return this.getColor(offset, 0.0);
+      double rad = Math.toRadians(this.angle.getCurrentValue());
+      return this.getColor(offset * Math.cos(rad), offset * Math.sin(rad));
    }
 
    public int getColor(double x, double y) {
-      String animMode = this.animationMode.getCurrentElementAsString();
       String m = this.mode.getCurrentElementAsString();
+      if (m.equals("Single Color")) {
+         return this.firstColor.getColor();
+      }
+
+      String animMode = this.animationMode.getCurrentElementAsString();
 
       if (animMode.equals("Breathing")) {
          long breathMs = Math.max(200L, (long)(4000.0F / Math.max(0.1F, this.breathingSpeed.getCurrentValue())));
@@ -141,12 +155,6 @@ public class ThemeColor extends Module {
          float factor = (float)((Math.cos(timeProgress * 2.0 * Math.PI) + 1.0) / 2.0);
 
          return switch (m) {
-            case "Single Color" -> {
-               int c1 = this.firstColor.getColor();
-               float minBri = 0.45F;
-               float currentFactor = minBri + (1.0F - minBri) * factor;
-               yield this.darken(c1, currentFactor);
-            }
             case "Double Color" -> {
                int c1 = this.firstColor.getColor();
                int c2 = this.secondColor.getColor();
@@ -180,45 +188,40 @@ public class ThemeColor extends Module {
       } else {
          double rad = Math.toRadians(this.angle.getCurrentValue());
          double projected = x * Math.cos(rad) + y * Math.sin(rad);
+         double length = Math.max(10.0, (double)this.gradientLength.getCurrentValue());
          long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
          double timeProgress = (System.currentTimeMillis() % speedMs) / (double)speedMs;
-         double length = Math.max(10.0, (double)this.gradientLength.getCurrentValue());
-         double progress = (projected / length + timeProgress) % 1.0;
-         if (progress < 0.0) {
-            progress += 1.0;
-         }
-         float factor = (float)((Math.cos(progress * 2.0 * Math.PI) + 1.0) / 2.0);
+         double progress = projected / length + timeProgress;
 
          return switch (m) {
-            case "Single Color" -> {
-               int c1 = this.firstColor.getColor();
-               float minBri = 0.60F;
-               float currentFactor = minBri + (1.0F - minBri) * factor;
-               yield this.darken(c1, currentFactor);
-            }
             case "Double Color" -> {
-               int c1 = this.firstColor.getColor();
-               int c2 = this.secondColor.getColor();
-               yield RenderUtils.lerpColor(c1, c2, factor);
+               float factor = (float)((1.0 - Math.cos(progress * Math.PI)) / 2.0);
+               yield RenderUtils.lerpColor(this.firstColor.getColor(), this.secondColor.getColor(), factor);
             }
             case "Triple Color" -> {
+               double p = (progress % 3.0 + 3.0) % 3.0;
                int c1 = this.firstColor.getColor();
                int c2 = this.secondColor.getColor();
                int c3 = this.thirdColor.getColor();
-               if (progress < 1.0 / 3.0) {
-                  yield RenderUtils.lerpColor(c1, c2, (float)(progress * 3.0));
-               } else if (progress < 2.0 / 3.0) {
-                  yield RenderUtils.lerpColor(c2, c3, (float)((progress - 1.0 / 3.0) * 3.0));
+               if (p < 1.0) {
+                  float factor = (float)((1.0 - Math.cos(p * Math.PI)) / 2.0);
+                  yield RenderUtils.lerpColor(c1, c2, factor);
+               } else if (p < 2.0) {
+                  float factor = (float)((1.0 - Math.cos((p - 1.0) * Math.PI)) / 2.0);
+                  yield RenderUtils.lerpColor(c2, c3, factor);
                } else {
-                  yield RenderUtils.lerpColor(c3, c1, (float)((progress - 2.0 / 3.0) * 3.0));
+                  float factor = (float)((1.0 - Math.cos((p - 2.0) * Math.PI)) / 2.0);
+                  yield RenderUtils.lerpColor(c3, c1, factor);
                }
             }
             case "Rainbow" -> {
+               double p = (progress % 1.0 + 1.0) % 1.0;
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
-               yield Color.HSBtoRGB((float)progress, sat, bri);
+               yield Color.HSBtoRGB((float)p, sat, bri);
             }
             case "Astolfo" -> {
+               float factor = (float)((1.0 - Math.cos(progress * Math.PI)) / 2.0);
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
                float hue = 0.5F + 0.35F * factor;
@@ -227,13 +230,5 @@ public class ThemeColor extends Module {
             default -> this.firstColor.getColor();
          };
       }
-   }
-
-   private int darken(int color, float factor) {
-      int a = (color >> 24) & 0xFF;
-      int r = Math.min(255, Math.max(0, (int)(((color >> 16) & 0xFF) * factor)));
-      int g = Math.min(255, Math.max(0, (int)(((color >> 8) & 0xFF) * factor)));
-      int b = Math.min(255, Math.max(0, (int)((color & 0xFF) * factor)));
-      return (a << 24) | (r << 16) | (g << 8) | b;
    }
 }
