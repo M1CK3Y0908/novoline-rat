@@ -170,11 +170,7 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
       if (this.expandProgress > 0.001F) {
          this.layoutSettings();
          float settingsVisibleHeight = this.getSettingsHeight(f, f2, f3) * this.expandProgress;
-         boolean needScissor = this.expandProgress < 1.0F;
-
-         if (needScissor) {
-            RenderUtils.enableScissorDoubleScale(this.x, this.y + getHeaderHeight(), getWidth(), settingsVisibleHeight);
-         }
+         RenderUtils.enableScissorDoubleScale(this.x, this.y + getHeaderHeight(), getWidth(), settingsVisibleHeight);
 
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
             if (menuSettingWidget.getModuleSetting().shouldShow()) {
@@ -182,9 +178,7 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
             }
          }
 
-         if (needScissor) {
-            RenderUtils.disableScissor();
-         }
+         RenderUtils.disableScissor();
 
          if (!this.settingWidgets.isEmpty() && settingsVisibleHeight >= 4.0F) {
             RenderUtils.drawVerticalGradientRect(
@@ -347,12 +341,9 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
       }
 
       if (widgetType == WidgetType.REGULAR && this.expandProgress > 0.001F) {
-         boolean needScissor = this.expandProgress < 1.0F;
-         if (needScissor) {
-            floatSupplier.flush();
-            float settingsVisibleHeight = this.getSettingsHeight() * this.expandProgress;
-            RenderUtils.enableScissorDoubleScale(this.x, this.y + getHeaderHeight(), getWidth(), settingsVisibleHeight);
-         }
+         floatSupplier.flush();
+         float settingsVisibleHeight = this.getSettingsHeight() * this.expandProgress;
+         RenderUtils.enableScissorDoubleScale(this.x, this.y + getHeaderHeight(), getWidth(), settingsVisibleHeight);
 
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
             if (menuSettingWidget.getModuleSetting().shouldShow()) {
@@ -360,10 +351,8 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
             }
          }
 
-         if (needScissor) {
-            floatSupplier.flush();
-            RenderUtils.disableScissor();
-         }
+         floatSupplier.flush();
+         RenderUtils.disableScissor();
       }
    }
 }

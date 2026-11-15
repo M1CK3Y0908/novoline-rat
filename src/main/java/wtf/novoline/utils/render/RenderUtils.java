@@ -80,10 +80,41 @@ public class RenderUtils {
       GlStateManager.disableBlend();
    }
 
+   private static boolean scissorActive = false;
+   private static int lastScissorX = 0;
+   private static int lastScissorY = 0;
+   private static int lastScissorW = 0;
+   private static int lastScissorH = 0;
+
+   public static boolean isScissorActive() {
+      return scissorActive;
+   }
+
+   public static int getScissorX() {
+      return lastScissorX;
+   }
+
+   public static int getScissorY() {
+      return lastScissorY;
+   }
+
+   public static int getScissorW() {
+      return lastScissorW;
+   }
+
+   public static int getScissorH() {
+      return lastScissorH;
+   }
+
    public static void enableScissorDoubleScale(int i, int i2, int i3, int i4) {
       GL11.glEnable(3089);
       i2 += i4;
-      GL11.glScissor(i * 2, minecraft.displayHeight - i2 * 2, i3 * 2, i4 * 2);
+      lastScissorX = i * 2;
+      lastScissorY = minecraft.displayHeight - i2 * 2;
+      lastScissorW = Math.max(0, i3 * 2);
+      lastScissorH = Math.max(0, i4 * 2);
+      scissorActive = true;
+      GL11.glScissor(lastScissorX, lastScissorY, lastScissorW, lastScissorH);
    }
 
    public static void enableScissorDoubleScale(float f, float f2, float f3, float f4) {
@@ -92,7 +123,12 @@ public class RenderUtils {
       int i2 = Math.round((f2 + f4) * 2.0F);
       int i3 = Math.round(f3 * 2.0F);
       int i4 = Math.round(f4 * 2.0F);
-      GL11.glScissor(i, minecraft.displayHeight - i2, Math.max(0, i3), Math.max(0, i4));
+      lastScissorX = i;
+      lastScissorY = minecraft.displayHeight - i2;
+      lastScissorW = Math.max(0, i3);
+      lastScissorH = Math.max(0, i4);
+      scissorActive = true;
+      GL11.glScissor(lastScissorX, lastScissorY, lastScissorW, lastScissorH);
    }
 
    public static void drawScaledTexturedRect(
@@ -579,9 +615,12 @@ public class RenderUtils {
       ScaledResolution scaledResolution = new ScaledResolution(minecraft);
       GL11.glEnable(3089);
       i2 += i4;
-      GL11.glScissor(
-         i * scaledResolution.getScaleFactor(), minecraft.displayHeight - i2 * scaledResolution.getScaleFactor(), i3 * scaledResolution.getScaleFactor(), i4 * scaledResolution.getScaleFactor()
-      );
+      lastScissorX = i * scaledResolution.getScaleFactor();
+      lastScissorY = minecraft.displayHeight - i2 * scaledResolution.getScaleFactor();
+      lastScissorW = Math.max(0, i3 * scaledResolution.getScaleFactor());
+      lastScissorH = Math.max(0, i4 * scaledResolution.getScaleFactor());
+      scissorActive = true;
+      GL11.glScissor(lastScissorX, lastScissorY, lastScissorW, lastScissorH);
    }
 
    public static void setTextureEnvModulate() {
@@ -790,6 +829,7 @@ public class RenderUtils {
 
    public static void disableScissor() {
       GL11.glDisable(3089);
+      scissorActive = false;
    }
 
    public static void drawTextureWithAlpha(float f, float f2, float f3, float f4, float f5, ResourceLocation resourceLocation) {

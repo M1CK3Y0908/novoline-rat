@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.ARBShaderObjects;
+import org.lwjgl.opengl.GL11;
 
 public class BloomRenderer {
    private boolean enabled = true;
@@ -59,7 +60,20 @@ public class BloomRenderer {
 
    public void submit(Runnable runnable) {
       if (this.enabled) {
-         this.pendingDraws.add(runnable);
+         if (RenderUtils.isScissorActive()) {
+            int sx = RenderUtils.getScissorX();
+            int sy = RenderUtils.getScissorY();
+            int sw = RenderUtils.getScissorW();
+            int sh = RenderUtils.getScissorH();
+            this.pendingDraws.add(() -> {
+               GL11.glEnable(3089);
+               GL11.glScissor(sx, sy, sw, sh);
+               runnable.run();
+               GL11.glDisable(3089);
+            });
+         } else {
+            this.pendingDraws.add(runnable);
+         }
       } else {
          runnable.run();
       }
