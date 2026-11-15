@@ -3,6 +3,8 @@ package wtf.novoline.utils.render;
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -80,55 +82,66 @@ public class RenderUtils {
       GlStateManager.disableBlend();
    }
 
-   private static boolean scissorActive = false;
-   private static int lastScissorX = 0;
-   private static int lastScissorY = 0;
-   private static int lastScissorW = 0;
-   private static int lastScissorH = 0;
+   private static class ScissorBox {
+      final int x, y, w, h;
+      ScissorBox(int x, int y, int w, int h) {
+         this.x = x;
+         this.y = y;
+         this.w = w;
+         this.h = h;
+      }
+   }
+
+   private static final Deque<ScissorBox> scissorStack = new ArrayDeque<>();
 
    public static boolean isScissorActive() {
-      return scissorActive;
+      return !scissorStack.isEmpty();
    }
 
    public static int getScissorX() {
-      return lastScissorX;
+      return scissorStack.isEmpty() ? 0 : scissorStack.peek().x;
    }
 
    public static int getScissorY() {
-      return lastScissorY;
+      return scissorStack.isEmpty() ? 0 : scissorStack.peek().y;
    }
 
    public static int getScissorW() {
-      return lastScissorW;
+      return scissorStack.isEmpty() ? 0 : scissorStack.peek().w;
    }
 
    public static int getScissorH() {
-      return lastScissorH;
+      return scissorStack.isEmpty() ? 0 : scissorStack.peek().h;
+   }
+
+   private static void pushScissor(int x, int y, int w, int h) {
+      GL11.glEnable(3089);
+      if (!scissorStack.isEmpty()) {
+         ScissorBox parent = scissorStack.peek();
+         int x1 = Math.max(parent.x, x);
+         int y1 = Math.max(parent.y, y);
+         int x2 = Math.min(parent.x + parent.w, x + w);
+         int y2 = Math.min(parent.y + parent.h, y + h);
+         w = Math.max(0, x2 - x1);
+         h = Math.max(0, y2 - y1);
+         x = x1;
+         y = y1;
+      }
+      scissorStack.push(new ScissorBox(x, y, w, h));
+      GL11.glScissor(x, y, w, h);
    }
 
    public static void enableScissorDoubleScale(int i, int i2, int i3, int i4) {
-      GL11.glEnable(3089);
       i2 += i4;
-      lastScissorX = i * 2;
-      lastScissorY = minecraft.displayHeight - i2 * 2;
-      lastScissorW = Math.max(0, i3 * 2);
-      lastScissorH = Math.max(0, i4 * 2);
-      scissorActive = true;
-      GL11.glScissor(lastScissorX, lastScissorY, lastScissorW, lastScissorH);
+      pushScissor(i * 2, minecraft.displayHeight - i2 * 2, Math.max(0, i3 * 2), Math.max(0, i4 * 2));
    }
 
    public static void enableScissorDoubleScale(float f, float f2, float f3, float f4) {
-      GL11.glEnable(3089);
       int i = Math.round(f * 2.0F);
       int i2 = Math.round((f2 + f4) * 2.0F);
       int i3 = Math.round(f3 * 2.0F);
       int i4 = Math.round(f4 * 2.0F);
-      lastScissorX = i;
-      lastScissorY = minecraft.displayHeight - i2;
-      lastScissorW = Math.max(0, i3);
-      lastScissorH = Math.max(0, i4);
-      scissorActive = true;
-      GL11.glScissor(lastScissorX, lastScissorY, lastScissorW, lastScissorH);
+      pushScissor(i, minecraft.displayHeight - i2, Math.max(0, i3), Math.max(0, i4));
    }
 
    public static void drawScaledTexturedRect(
@@ -613,14 +626,13 @@ public class RenderUtils {
 
    public static void enableScissor(int i, int i2, int i3, int i4) {
       ScaledResolution scaledResolution = new ScaledResolution(minecraft);
-      GL11.glEnable(3089);
       i2 += i4;
-      lastScissorX = i * scaledResolution.getScaleFactor();
-      lastScissorY = minecraft.displayHeight - i2 * scaledResolution.getScaleFactor();
-      lastScissorW = Math.max(0, i3 * scaledResolution.getScaleFactor());
-      lastScissorH = Math.max(0, i4 * scaledResolution.getScaleFactor());
-      scissorActive = true;
-      GL11.glScissor(lastScissorX, lastScissorY, lastScissorW, lastScissorH);
+      pushScissor(
+         i * scaledResolution.getScaleFactor(),
+         minecraft.displayHeight - i2 * scaledResolution.getScaleFactor(),
+         Math.max(0, i3 * scaledResolution.getScaleFactor()),
+         Math.max(0, i4 * scaledResolution.getScaleFactor())
+      );
    }
 
    public static void setTextureEnvModulate() {
@@ -828,8 +840,15 @@ public class RenderUtils {
    }
 
    public static void disableScissor() {
-      GL11.glDisable(3089);
-      scissorActive = false;
+      if (!scissorStack.isEmpty()) {
+         scissorStack.pop();
+      }
+      if (!scissorStack.isEmpty()) {
+         ScissorBox prev = scissorStack.peek();
+         GL11.glScissor(prev.x, prev.y, prev.w, prev.h);
+      } else {
+         GL11.glDisable(3089);
+      }
    }
 
    public static void drawTextureWithAlpha(float f, float f2, float f3, float f4, float f5, ResourceLocation resourceLocation) {

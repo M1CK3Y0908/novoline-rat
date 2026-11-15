@@ -45,7 +45,15 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          return false;
       }
       float target = this.expanded ? 1.0F : 0.0F;
-      return this.expandProgress != target;
+      if (this.expandProgress != target) {
+         return true;
+      }
+      for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
+         if (menuSettingWidget.getModuleSetting().shouldShow() && menuSettingWidget.isAnimating()) {
+            return true;
+         }
+      }
+      return false;
    }
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    public final List<MenuSettingWidget> settingWidgets;
@@ -101,7 +109,13 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
    }
 
    public float getSettingsHeight() {
-      return this.getSettingsHeight(0.0F, 0.0F, 0.0F);
+      float f4 = 0.0F;
+      for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
+         if (menuSettingWidget.getModuleSetting().shouldShow()) {
+            f4 += menuSettingWidget.getHeight();
+         }
+      }
+      return f4;
    }
 
    public float getSettingsHeight(float f, float f2, float f3) {

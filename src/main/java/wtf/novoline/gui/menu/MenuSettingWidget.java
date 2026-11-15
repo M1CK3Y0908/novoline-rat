@@ -22,6 +22,10 @@ public abstract class MenuSettingWidget implements MenuWidget {
       return this.getHeight();
    }
 
+   public boolean isAnimating() {
+      return false;
+   }
+
    public void setY(float f) {
       this.y = f;
    }
