@@ -10,17 +10,16 @@ import wtf.novoline.module.Module;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.MultiComboSetting.Option;
 import wtf.novoline.utils.math.SmoothingUtils;
-import wtf.novoline.utils.render.CFontRenderer;
 import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.RenderUtils;
 import wtf.novoline.utils.render.ShadowRenderer;
 
 public class ArrayListElement extends HudElement {
+   public static ArrayListElement instance;
    private float width;
    private ScaledResolution scaledResolution;
    private final ShadowRenderer backgroundShadow = new ShadowRenderer(Novoline.framebufferManager);
    private float maxEntryWidth;
-   private final ShadowRenderer textGlowShadow = new ShadowRenderer(Novoline.framebufferManager);
    private float height;
 
    private boolean hasVisibleSuffix(boolean flag, Module module2) {
@@ -32,7 +31,7 @@ public class ArrayListElement extends HudElement {
       return this.scaledResolution != null ? this.x + this.scaledResolution.getFloat() - this.getWidth() : 0.0F;
    }
 
-   private boolean isFilteredOut(boolean flag, boolean flag2, Module module2) {
+   public static boolean isFilteredOut(boolean flag, boolean flag2, Module module2) {
       if (module2 instanceof ArrayList || module2 instanceof Watermark || module2 instanceof Notifications || module2 instanceof TargetHUD || module2 instanceof PostProcessing || module2 instanceof ClickGui) {
          return true;
       }
@@ -46,6 +45,7 @@ public class ArrayListElement extends HudElement {
 
    public ArrayListElement() {
       super("arraylist", 0.0F, 0.0F, true);
+      instance = this;
    }
 
    @Override
@@ -98,7 +98,7 @@ public class ArrayListElement extends HudElement {
          int i2 = 0;
          if (flag3) {
             for (Module module2 : ModuleManager.modulesByWidth) {
-               if (!this.isFilteredOut(selected2, selected3, module2)) {
+               if (!isFilteredOut(selected2, selected3, module2)) {
                   boolean visibleSuffix = this.hasVisibleSuffix(selected, module2);
                   this.width = this.measureEntry(module2, cFontRenderer, visibleSuffix, currentValue)[0];
                   break;
@@ -107,7 +107,7 @@ public class ArrayListElement extends HudElement {
          }
 
          for (Module module3 : (Iterable<Module>) list) {
-            if (!this.isFilteredOut(selected2, selected3, module3)) {
+            if (!isFilteredOut(selected2, selected3, module3)) {
                String name = module3.getName();
                String suffix = module3.getSuffix();
                boolean visibleSuffix2 = this.hasVisibleSuffix(selected, module3);
@@ -124,7 +124,6 @@ public class ArrayListElement extends HudElement {
                int color = ModuleManager.themeColor.getColor(f5, this.getY() + arrayListOffsetY);
                int color2 = arrayList2.status.getColor();
                int color3 = color;
-               final int finalColor = color;
 
                if (arrayListOffsetX > -2.0F) {
                   if (this.maxEntryWidth < f3) {
@@ -150,21 +149,6 @@ public class ArrayListElement extends HudElement {
                      RenderUtils.drawRect(f5 + f7, this.getY() + arrayListOffsetY, f5 + f7 + currentValue3, this.getY() + arrayListOffsetY + f2, color3);
                   }
 
-                  PostProcessing postProcessing = ModuleManager.postProcessing;
-                  boolean textGlow = postProcessing != null && postProcessing.isBloomEnabled("ArrayList");
-                  if (textGlow) {
-                     this.textGlowShadow
-                        .submit(
-                           () -> RenderUtils.drawRect(
-                              f5,
-                              this.y + arrayListOffsetY,
-                              f5 + f6,
-                              this.y + arrayListOffsetY + f2,
-                              RenderUtils.withAlphaFraction(finalColor, postProcessing.getBloomAlpha() / 255.0F)
-                           )
-                        );
-                  }
-
                   cFontRenderer.drawString(name, f5 + currentValue / 2.0F, this.getY() + arrayListOffsetY + (currentValue2 + cFontRenderer.getHeight() / 2.0F) / 2.0F, color);
                   if (visibleSuffix2) {
                      cFontRenderer.drawString(suffix, f5 + currentValue / 2.0F + f4, this.getY() + arrayListOffsetY + (currentValue2 + cFontRenderer.getHeight() / 2.0F) / 2.0F, color2);
@@ -181,20 +165,53 @@ public class ArrayListElement extends HudElement {
                }
             }
          }
+      }
+   }
 
-         PostProcessing postProcessing = ModuleManager.postProcessing;
-         boolean textGlow = postProcessing != null && postProcessing.isBloomEnabled("ArrayList");
-         if (textGlow) {
-            this.textGlowShadow
-               .render(
-                  Minecraft.getMinecraft().getFramebuffer(),
-                  scaledResolution2,
-                  RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(), postProcessing.getBloomAlpha() / 255.0F),
-                  postProcessing.getBloomRadius(),
-                  postProcessing.getBloomSigma(),
-                  1.0F,
-                  false
-               );
+   public static void renderArrayListEffects(boolean bloom, boolean glow, ScaledResolution sr) {
+      if (Minecraft.getMinecraft().gameSettings.showDebugInfo || ModuleManager.arrayList == null || !ModuleManager.arrayList.isEnabled()) {
+         return;
+      }
+      if (bloom && !glow) {
+         return;
+      }
+      ArrayList arrayList2 = ModuleManager.arrayList;
+      if (!bloom && !arrayList2.background.isEnabled()) {
+         return;
+      }
+      boolean flag3 = sr.getFloat2() / 2.0F < (instance != null ? instance.getY() : 0.0F);
+      List elements = arrayList2.arrayList.getElements();
+      boolean selected = ((Option)elements.get(0)).isSelected();
+      boolean selected2 = ((Option)elements.get(1)).isSelected();
+      boolean selected3 = ((Option)elements.get(2)).isSelected();
+      FontAdapter cFontRenderer = arrayList2.getFont();
+      List list = flag3 ? ModuleManager.modulesByWidthReversed : ModuleManager.modulesByWidth;
+      float currentValue = arrayList2.widthPadding.getCurrentValue();
+      float currentValue2 = arrayList2.heightPadding.getCurrentValue();
+      float currentValue3 = arrayList2.rightLineWidth.getCurrentValue();
+      float f2 = cFontRenderer.getHeight() + currentValue2;
+      float baseX = instance != null ? instance.getX() : (sr.getFloat() - (instance != null ? instance.getWidth() : 0.0F));
+      float baseY = instance != null ? instance.getY() : 0.0F;
+      boolean flag2 = baseX < sr.getScaledWidth_double() / 2.0;
+
+      for (Module module3 : (Iterable<Module>) list) {
+         if (!isFilteredOut(selected2, selected3, module3)) {
+            String name = module3.getName();
+            String suffix = module3.getSuffix();
+            boolean visibleSuffix2 = !selected && !suffix.isEmpty();
+            float stringWidth = cFontRenderer.getStringWidth(name);
+            float f3 = stringWidth + currentValue + (visibleSuffix2 ? cFontRenderer.getStringWidth(suffix) : 0.0F);
+            float arrayListOffsetY = module3.getArrayListOffsetY();
+            float arrayListOffsetX = module3.getArrayListOffsetX();
+            if (arrayListOffsetX > -2.0F) {
+               float f5 = flag2 ? baseX + arrayListOffsetX - f3 + currentValue3 : baseX + (instance != null ? instance.getWidth() : 0.0F) - arrayListOffsetX - currentValue3;
+               if (!bloom) {
+                  RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, -16777216);
+               } else {
+                  int color = ModuleManager.themeColor.getColor(f5, baseY + arrayListOffsetY);
+                  RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, color);
+               }
+            }
          }
       }
    }

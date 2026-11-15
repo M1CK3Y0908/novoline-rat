@@ -1,74 +1,63 @@
 package wtf.novoline.module.hud;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.shader.Framebuffer;
+import wtf.novoline.Novoline;
+import wtf.novoline.event.ShaderEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
+import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.CheckboxSetting;
 import wtf.novoline.setting.MultiComboSetting;
 import wtf.novoline.setting.NumberSetting;
+import wtf.novoline.utils.render.RenderUtils;
+import wtf.novoline.utils.render.blur.KawaseBloom;
+import wtf.novoline.utils.render.blur.KawaseBlur;
 
 public class PostProcessing extends Module {
    public final CheckboxSetting blur = settingManager.register(new CheckboxSetting(this, "Blur", true));
-   public final MultiComboSetting blurTargets = settingManager.register(
-      (new MultiComboSetting(this, "Blur targets") {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.blur.isEnabled();
-         }
-      }).add("TargetHUD", true).add("Notifications", true).add("ClickGui", true)
-   );
-   public final NumberSetting blurRadius = settingManager.register(
-      new NumberSetting(this, "Blur radius", 18, 1, 40) {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.blur.isEnabled();
-         }
+   public final NumberSetting iterations = settingManager.register(new NumberSetting(this, "Blur Iterations", 2, 1, 8) {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.blur.isEnabled();
       }
-   );
-   public final NumberSetting blurSigma = settingManager.register(
-      new NumberSetting(this, "Blur sigma", 0.6F, 0.01F, 10.0F) {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.blur.isEnabled();
-         }
+   });
+   public final NumberSetting offset = settingManager.register(new NumberSetting(this, "Blur Offset", 3, 1, 10) {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.blur.isEnabled();
       }
-   );
+   });
 
    public final CheckboxSetting bloom = settingManager.register(new CheckboxSetting(this, "Bloom", true));
-   public final MultiComboSetting glowTargets = settingManager.register(
-      (new MultiComboSetting(this, "Glow targets") {
+   public final MultiComboSetting glowOptions = settingManager.register(
+      (new MultiComboSetting(this, "Glow Options") {
          @Override
          public boolean shouldShow() {
             return PostProcessing.this.bloom.isEnabled();
          }
-      }).add("ArrayList", true).add("Notifications", true).add("TargetHUD", true).add("Watermark", true).add("ClickGui", true)
+      }).add("ArrayList", true).add("ClickGui", true).add("Watermark", true).add("TargetHUD", true).add("Notifications", true)
    );
-   public final NumberSetting bloomRadius = settingManager.register(
-      new NumberSetting(this, "Bloom radius", 18, 1, 50) {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.bloom.isEnabled();
-         }
+   public final NumberSetting shadowRadius = settingManager.register(new NumberSetting(this, "Bloom Iterations", 3, 1, 8) {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.bloom.isEnabled();
       }
-   );
-   public final NumberSetting bloomSigma = settingManager.register(
-      new NumberSetting(this, "Bloom sigma", 18.0F, 0.1F, 40.0F) {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.bloom.isEnabled();
-         }
+   });
+   public final NumberSetting shadowOffset = settingManager.register(new NumberSetting(this, "Bloom Offset", 1, 1, 10) {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.bloom.isEnabled();
       }
-   );
-   public final NumberSetting bloomAlpha = settingManager.register(
-      new NumberSetting(this, "Bloom alpha", 230, 0, 255) {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.bloom.isEnabled();
-         }
-      }
-   );
+   });
+
+   private static Framebuffer stencilFramebuffer = new Framebuffer(1, 1, false);
 
    public PostProcessing() {
-      super(Category.CLIENT, "PostProcessing", "Controls UI blur and glow effects");
+      super(Category.CLIENT, "PostProcessing", "Tenacity Kawase blur and bloom post-processing");
       this.setEnabled(true);
    }
 
@@ -77,7 +66,7 @@ public class PostProcessing extends Module {
    }
 
    public boolean isBlurEnabled(String target) {
-      return this.isBlurEnabled() && this.blurTargets.isSelected(target);
+      return this.isBlurEnabled();
    }
 
    public boolean isBloomEnabled() {
@@ -85,26 +74,87 @@ public class PostProcessing extends Module {
    }
 
    public boolean isBloomEnabled(String target) {
-      return this.isBloomEnabled() && this.glowTargets.isSelected(target);
+      return this.isBloomEnabled() && this.glowOptions.isSelected(target);
    }
 
-   public int getBlurRadius() {
-      return (int) this.blurRadius.getCurrentValue();
+   public static void runBloom(Runnable runnable, boolean blur, boolean bloom, int bloomRadius) {
+      if (bloom) {
+         stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
+         stencilFramebuffer.framebufferClear();
+         stencilFramebuffer.bindFramebuffer(false);
+         runnable.run();
+         stencilFramebuffer.unbindFramebuffer();
+         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, bloomRadius, 1);
+      }
    }
 
-   public float getBlurSigma() {
-      return this.blurSigma.getCurrentValue();
+   public void stuffToBlur(boolean bloom, ScaledResolution sr) {
+      Minecraft mc = Minecraft.getMinecraft();
+      float scaleFactor = sr.getScaleFactor();
+
+      if (!bloom && mc.currentScreen instanceof GuiChat) {
+         RenderUtils.drawRect(2.0F, sr.getScaledHeight() - 14.0F, sr.getScaledWidth() - 4.0F, sr.getScaledHeight() - 2.0F, -16777216);
+      }
+
+      GlStateManager.pushMatrix();
+      GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
+
+      if (ModuleManager.targetHUD != null && ModuleManager.targetHUD.isEnabled()) {
+         TargetHudElement.renderTargetHudEffects(bloom, this.glowOptions.isSelected("TargetHUD"));
+      }
+
+      if (ModuleManager.arrayList != null && ModuleManager.arrayList.isEnabled()) {
+         ArrayListElement.renderArrayListEffects(bloom, this.glowOptions.isSelected("ArrayList"), sr);
+      }
+
+      if (ModuleManager.watermark != null && ModuleManager.watermark.isEnabled()) {
+         WatermarkElement.renderWatermarkEffects(bloom, this.glowOptions.isSelected("Watermark"));
+      }
+
+      if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
+         Novoline.getNovoline().getNotificationManager().renderEffects(bloom, this.glowOptions.isSelected("Notifications"), sr);
+      }
+
+      if (Novoline.getNovoline().getMenuClickGuiScreen() != null) {
+         Novoline.getNovoline().getMenuClickGuiScreen().renderEffects(bloom, this.glowOptions.isSelected("ClickGui"), sr);
+      }
+
+      GlStateManager.popMatrix();
    }
 
-   public int getBloomRadius() {
-      return (int) this.bloomRadius.getCurrentValue();
-   }
+   public void blurScreen() {
+      if (!this.isEnabled()) return;
+      Minecraft mc = Minecraft.getMinecraft();
+      if (stencilFramebuffer == null || stencilFramebuffer.framebufferWidth != mc.displayWidth || stencilFramebuffer.framebufferHeight != mc.displayHeight) {
+         if (stencilFramebuffer != null) {
+            stencilFramebuffer.deleteFramebuffer();
+         }
+         stencilFramebuffer = new Framebuffer(mc.displayWidth, mc.displayHeight, false);
+      }
 
-   public float getBloomSigma() {
-      return this.bloomSigma.getCurrentValue();
-   }
+      ScaledResolution sr = new ScaledResolution(mc);
+      float scaleFactor = sr.getScaleFactor();
+      sr.handleDouble2(sr.getScaledWidth_double() / 2.0 * scaleFactor);
+      sr.handleDouble(sr.getScaledHeight_double() / 2.0 * scaleFactor);
 
-   public float getBloomAlpha() {
-      return this.bloomAlpha.getCurrentValue();
+      if (this.blur.isEnabled()) {
+         stencilFramebuffer.framebufferClear();
+         stencilFramebuffer.bindFramebuffer(false);
+         Novoline.getNovoline().getBus().post(new ShaderEvent(false, this.glowOptions));
+         this.stuffToBlur(false, sr);
+         stencilFramebuffer.unbindFramebuffer();
+
+         KawaseBlur.renderBlur(stencilFramebuffer.framebufferTexture, (int) this.iterations.getCurrentValue(), (int) this.offset.getCurrentValue());
+      }
+
+      if (this.bloom.isEnabled()) {
+         stencilFramebuffer.framebufferClear();
+         stencilFramebuffer.bindFramebuffer(false);
+         Novoline.getNovoline().getBus().post(new ShaderEvent(true, this.glowOptions));
+         this.stuffToBlur(true, sr);
+         stencilFramebuffer.unbindFramebuffer();
+
+         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int) this.shadowRadius.getCurrentValue(), (int) this.shadowOffset.getCurrentValue());
+      }
    }
 }

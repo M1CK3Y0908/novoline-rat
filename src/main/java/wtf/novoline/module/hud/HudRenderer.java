@@ -5,6 +5,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import wtf.novoline.Novoline;
 import wtf.novoline.event.RenderScreenEvent;
+import wtf.novoline.module.ModuleManager;
 import wtf.novoline.utils.math.SmoothingUtils;
 
 public class HudRenderer {
@@ -21,6 +22,10 @@ public class HudRenderer {
    private void renderElements(ScaledResolution scaledResolution, float f, boolean flag, float f2, float f3) {
       SmoothingUtils.updateDelta();
       if (Minecraft.getMinecraft().thePlayer != null) {
+         if (ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled()) {
+            ModuleManager.postProcessing.blurScreen();
+         }
+
          GlStateManager.pushMatrix();
          float scaleFactor = scaledResolution.getScaleFactor();
          GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);

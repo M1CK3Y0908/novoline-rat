@@ -20,17 +20,12 @@ import wtf.novoline.module.misc.NameProtect;
 import wtf.novoline.utils.animation.Animation;
 import wtf.novoline.utils.animation.Easing;
 import wtf.novoline.utils.math.SmoothingUtils;
-import wtf.novoline.utils.render.BlurRenderer;
 import wtf.novoline.utils.render.RenderUtils;
-import wtf.novoline.utils.render.ShadowRenderer;
-import wtf.novoline.utils.render.shape.GradientRectRenderer;
-import wtf.novoline.utils.render.shape.RoundedRectRenderer;
 
 public class TargetHudElement extends HudElement {
+   public static TargetHudElement instance;
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    public boolean shown;
-   private final BlurRenderer blurRenderer = new BlurRenderer(Novoline.framebufferManager);
-   private final ShadowRenderer shadowRenderer = new ShadowRenderer(Novoline.framebufferManager);
    private ResourceLocation skin;
    private float nameWidth;
    private ScaledResolution scaledResolution;
@@ -117,42 +112,8 @@ public class TargetHudElement extends HudElement {
             int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
             this.nameWidth = ModuleManager.targetHUD.getTitleFont().getStringWidth(name);
 
-            PostProcessing postProcessing = ModuleManager.postProcessing;
-            if (postProcessing != null && postProcessing.isBlurEnabled("TargetHUD")) {
-               this.blurRenderer
-                  .blur(
-                     "Panel",
-                     minecraft.getFramebuffer(),
-                     scaledResolution2,
-                     postProcessing.getBlurRadius(),
-                     postProcessing.getBlurSigma(),
-                     1
-                  );
-               minecraft.getFramebuffer().bindFramebuffer(true);
-               this.blurRenderer.bindResultTexture();
-               GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-               GradientRectRenderer gradientRectRenderer = new GradientRectRenderer((float)scaledResolution2.getScaledWidth_double(), (float)scaledResolution2.getScaledHeight_double());
-               gradientRectRenderer.addRect(this.getX(), this.getY(), this.getWidth(), this.getHeight(), -1440735200);
-               gradientRectRenderer.draw();
-               this.blurRenderer.releaseResult();
-               minecraft.getTextureManager().bindTexture(MenuClickGuiScreen.NOISE_TEXTURE);
-               GlStateManager.alphaFunc(516, 0.001F);
-               GlStateManager.color(1.0F, 1.0F, 1.0F, 0.08F);
-               RoundedRectRenderer roundedRectRenderer = new RoundedRectRenderer(128.0F, 128.0F);
-               roundedRectRenderer.addRect(this.getX(), this.getY(), this.getWidth(), this.getHeight(), -1440735200);
-               roundedRectRenderer.draw();
-               GlStateManager.alphaFunc(516, 0.1F);
-               GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-
             if (ModuleManager.targetHUD.addons.isSelected("Shadow") || ModuleManager.targetHUD.addons.isSelected(0)) {
                RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 2.0F, 1073741824);
-            }
-
-            if (postProcessing != null && postProcessing.isBloomEnabled("TargetHUD")) {
-               int col = ModuleManager.themeColor.getColor(this.getX(), this.getY());
-               this.shadowRenderer.submit(() -> RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), RenderUtils.withAlphaFraction(col, postProcessing.getBloomAlpha() / 255.0F)));
-               this.shadowRenderer.render(minecraft.getFramebuffer(), scaledResolution2, RenderUtils.withAlphaFraction(col, postProcessing.getBloomAlpha() / 255.0F), postProcessing.getBloomRadius(), postProcessing.getBloomSigma(), 1.0F, false);
             }
 
             if (currentElement == 0) {
@@ -374,6 +335,42 @@ public class TargetHudElement extends HudElement {
 
    public TargetHudElement() {
       super("target-hud", 0.0F, 0.0F, true);
+      instance = this;
+   }
+
+   public static void renderTargetHudEffects(boolean bloom, boolean glow) {
+      if (instance == null || ModuleManager.targetHUD == null || !ModuleManager.targetHUD.isEnabled()) {
+         return;
+      }
+      if (instance.entityPlayer == null) {
+         return;
+      }
+      if (instance.animation == null || instance.animation.getValue() <= 0.0) {
+         return;
+      }
+      if (bloom && !glow) {
+         return;
+      }
+
+      GlStateManager.pushMatrix();
+      GlStateManager.translate(instance.getX() + instance.getWidth() / 2.0F, instance.getY() + instance.getHeight() / 2.0F, 0.0F);
+      double d2 = Math.max(0.0, instance.animation.getValue() / 100.0);
+      GlStateManager.scale(d2, d2, 0.0);
+      GlStateManager.translate(-(instance.getX() + instance.getWidth() / 2.0F), -(instance.getY() + instance.getHeight() / 2.0F), 0.0F);
+
+      float x = instance.getX();
+      float y = instance.getY();
+      float w = instance.getWidth();
+      float h = instance.getHeight();
+
+      if (!bloom) {
+         RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
+      } else {
+         int col = ModuleManager.themeColor.getColor(x, y);
+         RenderUtils.drawRect(x, y, x + w, y + h, col);
+      }
+
+      GlStateManager.popMatrix();
    }
 
    @Override

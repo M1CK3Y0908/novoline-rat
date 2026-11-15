@@ -237,6 +237,47 @@ public class MenuClickGuiScreen extends GuiScreen {
       return this.textSelection;
    }
 
+   public void renderEffects(boolean bloom, boolean glow, ScaledResolution sr) {
+      if (this.visibility <= 0.0F) {
+         return;
+      }
+      if (bloom && !glow) {
+         return;
+      }
+
+      double d = sr.getScaledWidth_double();
+      double d2 = sr.getScaledHeight_double();
+      double midX = d / 2.0;
+      double midY = d2 / 2.0;
+
+      GlStateManager.pushMatrix();
+      double d3 = MathHelper.clamp_double(this.animation.getValue() / 100.0, 0.0, 1.0) * 0.2 + 0.8;
+      GlStateManager.translate(midX, midY, 0.0);
+      GlStateManager.scale(d3, d3, 1.0);
+      GlStateManager.translate(-midX, -midY, 0.0);
+
+      int themeColor = this.clickGuiTheme != null ? this.clickGuiTheme.getSecondaryColor(true) : ModuleManager.themeColor.getColor();
+
+      if (!bloom && this.clickGui != null && this.clickGui.backgroundSettings.getElements().get(0).isSelected()) {
+         RenderUtils.drawRect(0.0F, 0.0F, (float)d, (float)d2, -16777216);
+      }
+
+      for (MenuCategoryPanel panel : this.buttons) {
+         float px = panel.getX() - 2.0F;
+         float py = panel.getY();
+         float pw = MenuCategoryPanel.getWidth() + 4.0F;
+         float ph = panel.getBottomY() - py;
+
+         if (!bloom) {
+            RenderUtils.drawRect(px, py, px + pw, py + ph, -16777216);
+         } else {
+            RenderUtils.drawRect(px, py, px + pw, py + ph, themeColor);
+         }
+      }
+
+      GlStateManager.popMatrix();
+   }
+
    @Override
    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
    }
@@ -253,7 +294,8 @@ public class MenuClickGuiScreen extends GuiScreen {
       boolean isPanelAnimating = this.buttons.stream().anyMatch(MenuCategoryPanel::isAnimating);
       boolean flag = this.mouseHeld || this.tickCount < 60L || this.redrawPending || this.dashboardOpen || isPanelAnimating;
       this.redrawPending = false;
-      boolean flag2 = this.menuLayout.getBloomRadius() > 0 && this.menuLayout.getBloomSigma() > 0.0;
+      boolean usePostProcessing = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
+      boolean flag2 = !usePostProcessing && this.menuLayout.getBloomRadius() > 0 && this.menuLayout.getBloomSigma() > 0.0;
       if (shadersEnabled) {
          if (ModuleManager.postProcessing != null && !ModuleManager.postProcessing.isBloomEnabled("ClickGui")) {
             flag2 = false;
@@ -267,7 +309,7 @@ public class MenuClickGuiScreen extends GuiScreen {
       int backgroundBlurRadius = this.menuLayout.getBackgroundBlurRadius();
       float backgroundBlurSigma = this.menuLayout.getBackgroundBlurSigma();
       int effectiveBlurRadius = (int)(f2 * backgroundBlurRadius);
-      boolean clickGuiBlurAllowed = ModuleManager.postProcessing == null || ModuleManager.postProcessing.isBlurEnabled("ClickGui");
+      boolean clickGuiBlurAllowed = !usePostProcessing && (ModuleManager.postProcessing == null || ModuleManager.postProcessing.isBlurEnabled());
       boolean flag4 = effectiveBlurRadius > 0 && backgroundBlurSigma > 0.0 && shadersEnabled && clickGuiBlurAllowed && this.clickGui.backgroundSettings.getElements().get(0).isSelected();
       if (flag4) {
          this.blurRenderer.blur("Background", framebuffer3, scaledResolution2, effectiveBlurRadius, backgroundBlurSigma, 1);

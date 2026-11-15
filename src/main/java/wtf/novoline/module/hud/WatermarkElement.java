@@ -10,19 +10,18 @@ import wtf.novoline.Novoline;
 import wtf.novoline.Novoline.Fonts;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.utils.hypixel.HypixelState;
-import wtf.novoline.utils.render.CFontRenderer;
 import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.FilledPolygonRenderer;
 import wtf.novoline.utils.render.RenderUtils;
-import wtf.novoline.utils.render.ShadowRenderer;
 
 public class WatermarkElement extends HudElement {
+   public static WatermarkElement instance;
    private String watermarkText;
    private float width;
-   private final ShadowRenderer shadowRenderer = new ShadowRenderer(Novoline.framebufferManager);
 
    public WatermarkElement() {
       super("watermark", 5.0F, 5.0F, true, false);
+      instance = this;
    }
 
    @Override
@@ -33,8 +32,6 @@ public class WatermarkElement extends HudElement {
    @Override
    public void draw(ScaledResolution scaledResolution, float f, boolean flag) {
       if (ModuleManager.watermark.isEnabled()) {
-         PostProcessing postProcessing = ModuleManager.postProcessing;
-         boolean watermarkBloom = postProcessing != null && postProcessing.isBloomEnabled("Watermark");
          int currentElement = ModuleManager.watermark.watermark.getCurrentElement();
          if (currentElement == 0) {
             StringBuilder stringBuilder = new StringBuilder("Novoline")
@@ -75,27 +72,6 @@ public class WatermarkElement extends HudElement {
                c2,
                false
             );
-            if (watermarkBloom) {
-               this.shadowRenderer.submit(() -> RenderUtils.drawGradientLine(
-                  this.getX(),
-                  this.getY(),
-                  this.getX() + this.getWidth(),
-                  this.getY(),
-                  3.0F,
-                  c1,
-                  c2,
-                  false
-               ));
-               this.shadowRenderer.render(
-                  Minecraft.getMinecraft().getFramebuffer(),
-                  scaledResolution,
-                  RenderUtils.withAlphaFraction(c1, postProcessing.getBloomAlpha() / 255.0F),
-                  postProcessing.getBloomRadius(),
-                  postProcessing.getBloomSigma(),
-                  1.0F,
-                  false
-               );
-            }
             cFontRenderer.drawString(
                this.watermarkText,
                this.getX() + this.getWidth() / 2.0F - cFontRenderer.getStringWidth(this.watermarkText) / 2.0F,
@@ -131,26 +107,41 @@ public class WatermarkElement extends HudElement {
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
             filledPolygonRenderer.putRoundedRect(this.getX(), this.getY(), this.width, 14.0F, 1.0F, -15395563);
             filledPolygonRenderer.draw();
-            if (watermarkBloom) {
-               int cTheme = ModuleManager.themeColor.getColor(this.getX(), this.getY());
-               this.shadowRenderer.submit(() -> {
-                  FilledPolygonRenderer fpr = new FilledPolygonRenderer();
-                  fpr.putRoundedRect(this.getX(), this.getY(), this.width, 14.0F, 1.0F, RenderUtils.withAlphaFraction(cTheme, postProcessing.getBloomAlpha() / 255.0F));
-                  fpr.draw();
-               });
-               this.shadowRenderer.render(
-                  Minecraft.getMinecraft().getFramebuffer(),
-                  scaledResolution,
-                  RenderUtils.withAlphaFraction(cTheme, postProcessing.getBloomAlpha() / 255.0F),
-                  postProcessing.getBloomRadius(),
-                  postProcessing.getBloomSigma(),
-                  1.0F,
-                  false
-               );
-            }
             cFontRenderer2.drawString(text3, this.getX() + 3.0F, this.getY() + 5.0F, -16611376);
             cFontRenderer2.drawString(text3, this.getX() + 3.0F + 0.5F, this.getY() + 5.0F + 0.5F, -1);
             cFontRenderer3.drawString(this.watermarkText, this.getX() + 3.0F + cFontRenderer2.getStringWidth(text3) + 3.0F, this.getY() + 5.0F + 0.5F, -1);
+         }
+      }
+   }
+
+   public static void renderWatermarkEffects(boolean bloom, boolean glow) {
+      if (instance == null || ModuleManager.watermark == null || !ModuleManager.watermark.isEnabled()) {
+         return;
+      }
+      float x = instance.getX();
+      float y = instance.getY();
+      float w = instance.getWidth();
+      float h = instance.getHeight();
+      int currentElement = ModuleManager.watermark.watermark.getCurrentElement();
+
+      if (!bloom) {
+         if (currentElement == 0) {
+            RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
+         } else if (currentElement == 1) {
+            FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
+            filledPolygonRenderer.putRoundedRect(x, y, w, 14.0F, 1.0F, -16777216);
+            filledPolygonRenderer.draw();
+         }
+      } else if (glow) {
+         if (currentElement == 0) {
+            int c1 = ModuleManager.themeColor.getColor(x, y);
+            int c2 = ModuleManager.themeColor.getColor(x + w, y);
+            RenderUtils.drawGradientLine(x, y, x + w, y, 3.0F, c1, c2, false);
+         } else if (currentElement == 1) {
+            int cTheme = ModuleManager.themeColor.getColor(x, y);
+            FilledPolygonRenderer fpr = new FilledPolygonRenderer();
+            fpr.putRoundedRect(x, y, w, 14.0F, 1.0F, cTheme);
+            fpr.draw();
          }
       }
    }

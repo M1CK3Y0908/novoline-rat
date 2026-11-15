@@ -27,8 +27,6 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
    private FontAdapter getSubTextFont() {
       return ModuleManager.notifications != null ? ModuleManager.notifications.getSubTextFont() : Fonts.rubikRegularSize16;
    }
-   private final BlurRenderer blurRenderer = new BlurRenderer(Novoline.framebufferManager);
-   private final BloomRenderer bloomRenderer = new BloomRenderer(Novoline.framebufferManager);
 
    public void show(Notification notification2) {
       this.add(notification2);
@@ -46,18 +44,37 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
       subFont.drawString(notification2.getSubText(), f + 28.0F, f2 + f3 / 2.0F - subFont.getHeight() / 2.0F + 6.0F, -2039584);
    }
 
+   public void renderEffects(boolean bloom, boolean glow, ScaledResolution scaledResolution) {
+      if (!this.isEmpty()) {
+         float scaledWidth = scaledResolution.getScaledWidth();
+         float scaledHeight = scaledResolution.getScaledHeight();
+         for (int i = 0; i < Math.min(this.size(), 15); i++) {
+            Notification notification2 = this.get(i);
+            float f4 = Math.max(170.0F, this.getSubTextFont().getStringWidth(notification2.getSubText()) + 36.0F);
+            float f3 = 30.0F;
+            float f5 = scaledWidth - notification2.offsetX;
+            float f6 = scaledHeight - notification2.offsetY;
+            if (!bloom) {
+               FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
+               filledPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, -16777216);
+               filledPolygonRenderer.draw();
+            } else if (glow) {
+               NotificationType type = notification2.getType();
+               int accentColor = type.getAccentColor();
+               FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
+               filledPolygonRenderer.putCustomRoundedRect(f5, f6, 24.0F, f3, 3.0F, 3.0F, 0.0F, 0.0F, accentColor);
+               filledPolygonRenderer.draw();
+               this.drawNotificationContent(notification2, f5, f6, f3, type.getResourceLocation());
+            }
+         }
+      }
+   }
+
    public void renderAll(ScaledResolution scaledResolution) {
       Notifications notifications2 = ModuleManager.notifications;
       if (notifications2.isEnabled() && !this.isEmpty()) {
-         PostProcessing postProcessing = ModuleManager.postProcessing;
-         boolean enabled = postProcessing != null && postProcessing.isBlurEnabled("Notifications");
-         boolean enabled2 = postProcessing != null && postProcessing.isBloomEnabled("Notifications");
-         boolean enabled3 = notifications2.shadow.isEnabled();
+         boolean shadowEnabled = notifications2.shadow.isEnabled();
          Framebuffer framebuffer = Minecraft.getMinecraft().getFramebuffer();
-         if (enabled) {
-            this.blurRenderer.blur("notifications-blur", framebuffer, scaledResolution, postProcessing.getBlurRadius(), postProcessing.getBlurSigma(), 1);
-         }
-
          framebuffer.bindFramebuffer(true);
          float scaledWidth = scaledResolution.getScaledWidth();
          float scaledHeight = scaledResolution.getScaledHeight();
@@ -83,15 +100,8 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
 
             float f5 = scaledWidth - notification2.offsetX;
             float f6 = scaledHeight - notification2.offsetY;
-            if (enabled3) {
+            if (shadowEnabled) {
                RenderUtils.drawShadow(f5 + 1.0F, f6 + 1.0F, f5 + f4 - 1.0F, f6 + f3 - 1.0F, 3.0F, 1879048192);
-            }
-
-            if (enabled) {
-               RoundedPolygonRenderer roundedPolygonRenderer = new RoundedPolygonRenderer(scaledResolution.getFloat(), scaledResolution.getFloat2());
-               this.blurRenderer.bindResultTexture();
-               roundedPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, -1337);
-               roundedPolygonRenderer.draw();
             }
 
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
@@ -100,21 +110,7 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
             filledPolygonRenderer = new FilledPolygonRenderer();
             filledPolygonRenderer.putCustomRoundedRect(f5, f6, 24.0F, f3, 3.0F, 3.0F, 0.0F, 0.0F, accentColor);
             filledPolygonRenderer.draw();
-            if (enabled2) {
-               this.bloomRenderer.submit(() -> this.drawNotificationContent(notification2, f5, f6, f3, resourceLocation));
-            } else {
-               this.drawNotificationContent(notification2, f5, f6, f3, resourceLocation);
-            }
-         }
-
-         if (enabled2 && postProcessing != null) {
-            int i2 = postProcessing.getBloomRadius();
-            float sigma = postProcessing.getBloomSigma();
-            this.bloomRenderer.applyBloom(framebuffer, scaledResolution, "notifications-bloom", -1, i2, sigma, 1.0F, 1.5F, 1.0F);
-         }
-
-         if (enabled) {
-            this.blurRenderer.releaseResult();
+            this.drawNotificationContent(notification2, f5, f6, f3, resourceLocation);
          }
       }
    }
