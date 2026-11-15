@@ -24,7 +24,7 @@ public class Sprint extends Module {
    private final CheckboxSetting cancelStopState = settingManager.register(new CheckboxSetting(this, "Cancel stop state", false));
    @EventLink
    private final Listener<UpdateEvent> onUpdate = updateEvent -> {
-      if (ModuleManager.scaffold.isEnabled() && ModuleManager.scaffold.moveAddons.isSelected(5)) {
+      if (ModuleManager.scaffold.isEnabled() && !ModuleManager.scaffold.canSprint()) {
          minecraft.thePlayer.setSprinting(false);
       } else if (!minecraft.thePlayer.isSneaking()
          && !minecraft.thePlayer.isCollidedHorizontally

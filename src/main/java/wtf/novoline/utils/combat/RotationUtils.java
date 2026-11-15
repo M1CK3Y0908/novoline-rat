@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
@@ -442,6 +443,82 @@ public class RotationUtils {
       float f = entity.getCollisionBorderSize();
       AxisAlignedBB box = entity.getEntityBoundingBox().expand(f, f, f);
       return box.calculateIntercept(eyes, to);
+   }
+
+   public enum Precision {
+      Low(40.0f),
+      Medium(20.0f),
+      High(5.0f),
+      Very_High(1.5f);
+
+      public final float offsetYaw;
+
+      Precision(float offsetYaw) {
+         this.offsetYaw = offsetYaw;
+      }
+
+      public float getOffsetYaw() {
+         return this.offsetYaw;
+      }
+
+      public float getOffsetPitch(float pitch) {
+         if (pitch > 75.0f) {
+            return 1.0f;
+         }
+         if (pitch > 60.0f) {
+            return 2.0f;
+         }
+         return 5.0f;
+      }
+   }
+
+   public static float randomOffset() {
+      return (float) ((Math.random() - 0.5) * 0.1);
+   }
+
+   public static boolean awayFromEdge(float f) {
+      return f == 0.0f || f == 1.0f || ((double) f > 0.06 && (double) f < 0.94);
+   }
+
+   public static float[] searchBlockRotation(BlockPos pos, EnumFacing facing, float offset, Precision precision, float airYaw, boolean playerYaw) {
+      if (minecraft.thePlayer == null || minecraft.theWorld == null || minecraft.playerController == null) return null;
+      float bestYaw = 0.0f;
+      float bestPitch = 0.0f;
+      float base = playerYaw ? minecraft.thePlayer.rotationYaw : (minecraft.thePlayer.onGround ? wtf.novoline.utils.player.MoveUtils.movementAngle() : airYaw);
+      float from = base + offset;
+      float to = base + 170.0f;
+      float reach = minecraft.playerController.getBlockReachDistance();
+      float best = 360.0f;
+      for (float yaw = from; yaw <= to; yaw += precision.getOffsetYaw()) {
+         float y = (float) ((double) yaw + (Math.random() - 0.5));
+         for (float pitch = 90.0f; pitch > 30.0f; pitch -= precision.getOffsetPitch(pitch)) {
+            float p = MathHelper.clamp_float((float) ((double) pitch + (Math.random() - 0.5)), -90.0f, 90.0f);
+            Vec3 eyes = minecraft.thePlayer.getPositionEyes(1.0f);
+            Vec3 dir = getVectorForRotation(y, p);
+            Vec3 end = eyes.addVector(dir.xCoord * reach, dir.yCoord * reach, dir.zCoord * reach);
+            MovingObjectPosition hit = minecraft.theWorld.rayTraceBlocks(eyes, end, false, false, false);
+            if (hit == null || hit.typeOfHit != MovingObjectType.BLOCK) continue;
+            if (facing != null && hit.sideHit != facing) continue;
+            BlockPos hitPos = hit.getBlockPos();
+            if (!hitPos.equals(pos)) continue;
+            if (!awayFromEdge((float) (hit.hitVec.yCoord - (double) hitPos.getY()))) continue;
+            if (!awayFromEdge((float) (hit.hitVec.xCoord - (double) hitPos.getX()))) continue;
+            if (!awayFromEdge((float) (hit.hitVec.zCoord - (double) hitPos.getZ()))) continue;
+            float diff = Math.abs(base - y);
+            if (diff < best) {
+               best = diff;
+               bestYaw = y;
+               bestPitch = p;
+            }
+         }
+      }
+      if (best == 360.0f) {
+         return null;
+      }
+      if (playerYaw && best > 70.0f) {
+         return null;
+      }
+      return new float[]{bestYaw, bestPitch};
    }
 
 }
