@@ -1,12 +1,15 @@
 package wtf.novoline.module.hud;
 
+import java.awt.Color;
 import java.util.Locale;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import wtf.novoline.Novoline;
 import wtf.novoline.Novoline.Fonts;
@@ -33,15 +36,24 @@ public class TargetHudElement extends HudElement {
    private EntityPlayer entityPlayer;
    private final Animation animation = new Animation();
    private float animatedHealth;
+   private double lastP = 0.0;
+   private double diffP = 0.0;
+   private EntityPlayer lastTarget = null;
 
    @Override
    public float getWidth() {
-      return ModuleManager.targetHUD.targetHUD.getCurrentElement() == 2 ? Math.max(130.0F, 38.0F + this.nameWidth) : Math.max(100.0F, 30.0F + this.nameWidth);
+      int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
+      if (currentElement == 3) {
+         return Math.max(120.0F, 35.0F + this.nameWidth + 34.0F);
+      } else {
+         return currentElement == 2 ? Math.max(130.0F, 38.0F + this.nameWidth) : Math.max(100.0F, 30.0F + this.nameWidth);
+      }
    }
 
    @Override
    public float getX() {
-      return this.x + this.scaledResolution.getScaledWidth() / 2.0F - this.getWidth() / 2.0F;
+      ScaledResolution sr = this.scaledResolution != null ? this.scaledResolution : new ScaledResolution(minecraft);
+      return this.x + sr.getScaledWidth() / 2.0F - this.getWidth() / 2.0F;
    }
 
    @Override
@@ -83,15 +95,28 @@ public class TargetHudElement extends HudElement {
          GlStateManager.scale(d2, d2, 0.0);
          GlStateManager.translate(-(this.getX() + this.getWidth() / 2.0F), -(this.getY() + this.getHeight() / 2.0F), 0.0F);
          if (this.entityPlayer != null) {
-            NetworkPlayerInfo playerInfo = minecraft.thePlayer.sendQueue.getPlayerInfo(this.entityPlayer.getUniqueID());
-            if (playerInfo != null) {
-               this.skin = playerInfo.getLocationSkin();
+            if (minecraft.thePlayer != null && minecraft.thePlayer.sendQueue != null) {
+               NetworkPlayerInfo playerInfo = minecraft.thePlayer.sendQueue.getPlayerInfo(this.entityPlayer.getUniqueID());
+               if (playerInfo != null) {
+                  this.skin = playerInfo.getLocationSkin();
+               } else if (this.entityPlayer instanceof AbstractClientPlayer) {
+                  this.skin = ((AbstractClientPlayer)this.entityPlayer).getLocationSkin();
+               }
+            } else if (this.entityPlayer instanceof AbstractClientPlayer) {
+               this.skin = ((AbstractClientPlayer)this.entityPlayer).getLocationSkin();
             }
 
             String name = this.entityPlayer.getName();
             NameProtect nameProtect2 = ModuleManager.nameProtect;
             if (nameProtect2.isEnabled() && nameProtect2.getHideIn().isSelected(1)) {
                name = nameProtect2.protectText(name);
+            }
+
+            int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
+            if (currentElement == 3) {
+               this.nameWidth = (float)minecraft.fontRendererObj.getInt3(name);
+            } else {
+               this.nameWidth = Fonts.rubikSemiboldSize18.getStringWidth(name);
             }
 
             if (ModuleManager.targetHUD.addons.isSelected(0)) {
@@ -125,9 +150,7 @@ public class TargetHudElement extends HudElement {
                RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 2.0F, 1073741824);
             }
 
-            int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
             if (currentElement == 0) {
-               this.nameWidth = Fonts.rubikSemiboldSize18.getStringWidth(name);
                float maxHealth = this.entityPlayer.getMaxHealth();
                this.animatedHealth = SmoothingUtils.approachWithMinimumStep(this.animatedHealth, this.entityPlayer.getHealth(), 10.0F, 0.01F);
                this.animatedArmor = SmoothingUtils.approachWithMinimumStep(this.animatedArmor, this.entityPlayer.getTotalArmorValue(), 10.0F, 0.01F);
@@ -180,7 +203,6 @@ public class TargetHudElement extends HudElement {
                   this.getX() + 2.0F, this.getY() + 29.0F + 3.0F, this.getX() + f5, this.getY() + 29.0F + 3.0F + 1.5F, -16750672, -12986881
                );
             } else if (currentElement == 1) {
-               this.nameWidth = Fonts.rubikSemiboldSize18.getStringWidth(name);
                float maxHealth2 = this.entityPlayer.getMaxHealth();
                this.animatedHealth = SmoothingUtils.approachWithMinimumStep(this.animatedHealth, this.entityPlayer.getHealth(), 10.0F, 0.01F);
                this.animatedArmor = SmoothingUtils.approachWithMinimumStep(this.animatedArmor, this.entityPlayer.getTotalArmorValue(), 10.0F, 0.01F);
@@ -220,7 +242,6 @@ public class TargetHudElement extends HudElement {
                   this.getX() + 28.0F, this.getY() + 21.0F, this.getX() + 28.0F + f7, this.getY() + 24.0F + 1.5F, -3527576, -33608
                );
             } else if (currentElement == 2) {
-               this.nameWidth = Fonts.rubikSemiboldSize18.getStringWidth(name);
                float maxHealth3 = this.entityPlayer.getMaxHealth();
                this.animatedHealth = SmoothingUtils.approachWithMinimumStep(this.animatedHealth, this.entityPlayer.getHealth(), 10.0F, 0.01F);
                this.animatedArmor = SmoothingUtils.approachWithMinimumStep(this.animatedArmor, this.entityPlayer.getTotalArmorValue(), 10.0F, 0.01F);
@@ -259,6 +280,74 @@ public class TargetHudElement extends HudElement {
                   RenderUtils.withAlphaFraction(-14039553, 0.4F)
                );
                RenderUtils.drawRect(this.getX() + 34.0F, this.getY() + 24.5F, this.getX() + 34.0F + f9, this.getY() + 26.5F + 1.5F, -14039553);
+            } else if (currentElement == 3) {
+               float hp = this.entityPlayer.getHealth() + this.entityPlayer.getAbsorptionAmount();
+               float maxHP = this.entityPlayer.getMaxHealth() + this.entityPlayer.getAbsorptionAmount() - 0.05F;
+               float health = (float)(Math.round(hp * 100.0) / 100.0);
+               if (health > maxHP) {
+                  health = maxHP;
+               }
+
+               float amplifier = 100.0F / maxHP;
+               float percent = MathHelper.clamp_float(health * amplifier, 0.0F, 100.0F);
+               float rectLength = this.getWidth() + 6.0F;
+               float space = (rectLength - 50.0F) / 100.0F;
+
+               if (this.lastTarget != this.entityPlayer) {
+                  this.lastTarget = this.entityPlayer;
+                  this.lastP = (double)percent;
+                  this.diffP = 0.0;
+               }
+
+               if ((double)percent < this.lastP) {
+                  this.diffP += this.lastP - (double)percent;
+               }
+               this.lastP = (double)percent;
+               if (this.diffP > 0.0) {
+                  this.diffP += (0.0 - this.diffP) * 0.05;
+                  if (this.diffP < 0.001) {
+                     this.diffP = 0.0;
+                  }
+               }
+               this.diffP = MathHelper.clamp_double(this.diffP, 0.0, (double)(100.0F - percent));
+
+               float x = this.getX();
+               float y = this.getY();
+               float width = this.getWidth();
+               float height = this.getHeight();
+
+               RenderUtils.drawBorderedRect(x, y, x + width, y + height, 1.0F, new Color(29, 29, 29, 130).getRGB(), new Color(0, 0, 0, 50).getRGB());
+               RenderUtils.drawRect(x + 1.0F, y + 1.5F, x + width - 1.0F, y + height - 1.5F, new Color(40, 40, 40, 130).getRGB());
+
+               if (this.skin != null) {
+                  GlStateManager.enableBlend();
+                  GlStateManager.enableAlpha();
+                  GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                  minecraft.getTextureManager().bindTexture(this.skin);
+                  RenderUtils.drawScaledTexturedRect(x + 1.5F, y + 1.7F, 8.0F, 8.0F, 8.0F, 8.0F, 35.2F, 35.2F, 64.0F, 64.0F);
+                  if (this.entityPlayer.isWearing(EnumPlayerModelParts.HAT)) {
+                     RenderUtils.drawScaledTexturedRect(x + 1.5F, y + 1.7F, 40.0F, 8.0F, 8.0F, 8.0F, 35.2F, 35.2F, 64.0F, 64.0F);
+                  }
+                  GlStateManager.disableBlend();
+                  GlStateManager.enableAlpha();
+               }
+
+               int hudColor = ModuleManager.themeColor.getColor();
+               int darkerHudColor = new Color(hudColor).darker().getRGB();
+               float barStartX = x + 40.0F;
+               float barY1 = y + 18.0F;
+               float barY2 = y + 28.8F;
+
+               RenderUtils.drawRect(barStartX, barY1, barStartX + 100.0F * space, barY2, new Color(0, 0, 0, 50).getRGB());
+               RenderUtils.drawRect(barStartX, barY1, barStartX + percent * space, barY2, hudColor);
+               RenderUtils.drawRect(barStartX + percent * space, barY1, barStartX + (float)((double)percent + this.diffP) * space, barY2, darkerHudColor);
+
+               String text = String.format(Locale.ENGLISH, "%.1f%%", percent);
+               float textX = barStartX + 50.0F * space - (float)minecraft.fontRendererObj.getInt3(text) / 2.0F;
+               float textY = y + 19.5F;
+
+               minecraft.fontRendererObj.drawStringWithShadow(text, textX, textY, -1);
+               minecraft.fontRendererObj.drawStringWithShadow(name, x + 40.0F, y + 5.5F, -1);
             }
          }
 
@@ -273,8 +362,12 @@ public class TargetHudElement extends HudElement {
          return 35.5F;
       } else if (currentElement == 1) {
          return 28.0F;
+      } else if (currentElement == 2) {
+         return 34.0F;
+      } else if (currentElement == 3) {
+         return 39.0F;
       } else {
-         return currentElement == 2 ? 34.0F : 0.0F;
+         return 0.0F;
       }
    }
 
@@ -284,6 +377,7 @@ public class TargetHudElement extends HudElement {
 
    @Override
    public float getY() {
-      return this.y + this.scaledResolution.getScaledHeight() / 2.0F + this.getHeight();
+      ScaledResolution sr = this.scaledResolution != null ? this.scaledResolution : new ScaledResolution(minecraft);
+      return this.y + sr.getScaledHeight() / 2.0F + this.getHeight();
    }
 }

@@ -7,7 +7,7 @@ import wtf.novoline.setting.MultiComboSetting;
 import wtf.novoline.setting.NumberSetting;
 
 public class TargetHUD extends Module {
-   public final ComboSetting targetHUD = settingManager.register(new ComboSetting(this, "Mode", 0, "Type 1", "Type 2", "Type 3"));
+   public final ComboSetting targetHUD = settingManager.register(new ComboSetting(this, "Mode", 0, "Type 1", "Type 2", "Type 3", "Classic"));
    public final MultiComboSetting addons = settingManager.register(new MultiComboSetting(this, "Addons").add("Blur", true).add("Shadow", true));
    public final NumberSetting blurRadius = settingManager.register(new NumberSetting(this, "Blur radius", 18, 1, 40) {
       @Override
@@ -23,7 +23,7 @@ public class TargetHUD extends Module {
    });
 
    public TargetHUD() {
-      super(Category.CLIENT, "TargetHUD", "");
+      super(Category.VISUAL, "TargetHUD", "");
       this.setEnabled(true);
    }
 }
