@@ -174,7 +174,7 @@ public class HUD extends Module {
    }
 
    public HUD() {
-      super(Category.HUD, "HUD", "Various useful elements");
+      super(Category.CLIENT, "HUD", "Various useful elements");
    }
 
    private void drawArmorStatus(RenderScreenEvent renderScreenEvent2) {

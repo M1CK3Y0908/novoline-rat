@@ -32,7 +32,7 @@ public class ArrayListElement extends HudElement {
    }
 
    private boolean isFilteredOut(boolean flag, boolean flag2, Module module2) {
-      return flag2 && module2.getKeyBind() == 0 || flag && module2.getCategory() == Category.VISUAL || module2.getCategory() == Category.HUD;
+      return flag2 && module2.getKeyBind() == 0 || flag && module2.getCategory() == Category.VISUAL || module2.getCategory() == Category.CLIENT;
    }
 
    @Override

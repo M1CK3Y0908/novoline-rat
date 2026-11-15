@@ -19,7 +19,7 @@ public class Notifications extends Module {
    public final MultiComboSetting rules = settingManager.register(new MultiComboSetting(this, "Rules").add("On feature toggle", true));
 
    public Notifications() {
-      super(Category.HUD, "Notifications", "");
+      super(Category.CLIENT, "Notifications", "");
       this.setEnabled(true);
    }
 }

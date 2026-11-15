@@ -12,7 +12,7 @@ public class Watermark extends Module {
    public final CheckboxSetting showPlayTime = settingManager.register(new CheckboxSetting(this, "Show play time", true));
 
    public Watermark() {
-      super(Category.HUD, "Watermark", "");
+      super(Category.CLIENT, "Watermark", "");
       this.setEnabled(true);
    }
 }

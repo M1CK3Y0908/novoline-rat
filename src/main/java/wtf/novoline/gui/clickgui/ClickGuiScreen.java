@@ -456,7 +456,7 @@ public class ClickGuiScreen extends GuiScreen {
       VISUAL(Category.VISUAL, new ResourceLocation("novoline", "images/clickgui/neverlose/visual.png")),
       WORLD(Category.WORLD, new ResourceLocation("novoline", "images/clickgui/neverlose/world.png")),
       MISC(Category.MISC, new ResourceLocation("novoline", "images/clickgui/neverlose/misc.png")),
-      HUD(Category.HUD, new ResourceLocation("novoline", "images/clickgui/neverlose/hud.png")),
+      CLIENT(Category.CLIENT, new ResourceLocation("novoline", "images/clickgui/neverlose/hud.png")),
       SCRIPTS(Category.SCRIPTS, new ResourceLocation("novoline", "images/clickgui/neverlose/scripts.png"));
 
       private final Category category;

@@ -122,7 +122,7 @@ public class ArrayList extends Module {
    });
 
    public ArrayList() {
-      super(Category.HUD, "ArrayList", "");
+      super(Category.CLIENT, "ArrayList", "");
       this.setEnabled(true);
    }
 }

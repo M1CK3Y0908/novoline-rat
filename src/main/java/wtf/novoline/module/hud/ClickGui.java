@@ -136,7 +136,7 @@ public class ClickGui extends Module {
    }
 
    public ClickGui() {
-      super(Category.HUD, "ClickGui", "");
+      super(Category.CLIENT, "ClickGui", "");
       this.setKeyBind(54);
 
       try {

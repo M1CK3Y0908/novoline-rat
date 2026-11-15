@@ -10,10 +10,8 @@ public enum Category {
    VISUAL("Visual", new ResourceLocation("novoline", "images/clickgui/visual.png")),
    WORLD("World", new ResourceLocation("novoline", "images/clickgui/world.png")),
    MISC("Misc", new ResourceLocation("novoline", "images/clickgui/misc.png")),
-   HUD("Client", new ResourceLocation("novoline", "images/clickgui/hud.png")),
+   CLIENT("Client", new ResourceLocation("novoline", "images/clickgui/hud.png")),
    SCRIPTS("Scripts", new ResourceLocation("novoline", "images/clickgui/scripts.png"));
-
-   public static final Category CLIENT = HUD;
 
    private final String displayName;
    private final ResourceLocation icon;
@@ -28,7 +26,7 @@ public enum Category {
 
    public static Category byName(String text) {
       return Arrays.stream(values())
-         .filter(category -> category.getDisplayName().equalsIgnoreCase(text) || category.name().equalsIgnoreCase(text) || (category == HUD && text.equalsIgnoreCase("display")))
+         .filter(category -> category.getDisplayName().equalsIgnoreCase(text) || category.name().equalsIgnoreCase(text))
          .findFirst()
          .orElse(null);
    }

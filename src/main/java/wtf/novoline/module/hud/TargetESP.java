@@ -106,7 +106,7 @@ public class TargetESP extends Module {
    };
 
    public TargetESP() {
-      super(Category.HUD, "TargetESP", "");
+      super(Category.CLIENT, "TargetESP", "");
       this.setEnabled(true);
    }
 }

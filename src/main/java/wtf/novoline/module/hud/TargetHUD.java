@@ -23,7 +23,7 @@ public class TargetHUD extends Module {
    });
 
    public TargetHUD() {
-      super(Category.HUD, "TargetHUD", "");
+      super(Category.CLIENT, "TargetHUD", "");
       this.setEnabled(true);
    }
 }
