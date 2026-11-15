@@ -71,23 +71,23 @@ public class Killaura extends Module {
 
    /* Settings */
    private final ComboSetting mode = settingManager.register(new ComboSetting(this, "Mode", 0, "Switch", "Single", "Multi"));
-   private final ComboSetting sort = settingManager.register(new ComboSetting(this, "Sort by", 0, "Distance", "Health", "Hurt_time", "Yaw"));
-   private final ComboSetting rotationMode = settingManager.register(new ComboSetting(this, "Rotation", 0, "Silent", "Lock_view", "None"));
+   private final ComboSetting sort = settingManager.register(new ComboSetting(this, "Sort By", 0, "Distance", "Health", "Hurt Time", "Yaw"));
+   private final ComboSetting rotationMode = settingManager.register(new ComboSetting(this, "Rotation", 0, "Silent", "Lock View", "None"));
    private final ComboSetting autoBlockMode = settingManager.register(
-      new ComboSetting(this, "Auto block mode", 4, "Off", "Vanilla", "Damage", "Fake", "Interact_A", "Interact_B", "Interact_C", "Interact_D", "Swap", "Dual")
+      new ComboSetting(this, "Auto Block Mode", 4, "Off", "Vanilla", "Damage", "Fake", "Interact A", "Interact B", "Interact C", "Interact D", "Swap", "Dual")
    );
    private final NumberSetting aps = settingManager.register(new NumberSetting(this, "APS", 12.0F, 1.0F, 20.0F));
-   private final NumberSetting autoBlockAps = settingManager.register(new NumberSetting(this, "Auto block APS", 10.0F, 1.0F, 20.0F));
-   private final NumberSetting autoBlockLag = settingManager.register(new NumberSetting(this, "Auto block lag", 0, 0, 100));
-   private final NumberSetting range = settingManager.register(new NumberSetting(this, "Attack range", 3.1F, 1.0F, 6.0F));
-   private final NumberSetting swingRange = settingManager.register(new NumberSetting(this, "Swing range", 3.3F, 1.0F, 8.0F));
-   private final NumberSetting blockRange = settingManager.register(new NumberSetting(this, "Block range", 3.5F, 1.0F, 8.0F));
-   private final NumberSetting wallRange = settingManager.register(new NumberSetting(this, "Wall range", 3.0F, 1.0F, 6.0F));
+   private final NumberSetting autoBlockAps = settingManager.register(new NumberSetting(this, "Auto Block APS", 10.0F, 1.0F, 20.0F));
+   private final NumberSetting autoBlockLag = settingManager.register(new NumberSetting(this, "Auto Block Lag", 0, 0, 100));
+   private final NumberSetting range = settingManager.register(new NumberSetting(this, "Attack Range", 3.1F, 1.0F, 6.0F));
+   private final NumberSetting swingRange = settingManager.register(new NumberSetting(this, "Swing Range", 3.3F, 1.0F, 8.0F));
+   private final NumberSetting blockRange = settingManager.register(new NumberSetting(this, "Block Range", 3.5F, 1.0F, 8.0F));
+   private final NumberSetting wallRange = settingManager.register(new NumberSetting(this, "Wall Range", 3.0F, 1.0F, 6.0F));
    private final NumberSetting fov = settingManager.register(new NumberSetting(this, "FOV", 360, 30, 360));
    private final NumberSetting smoothness = settingManager.register(new NumberSetting(this, "Smoothing", 0.0F, 0.0F, 10.0F));
-   private final NumberSetting switchDelay = settingManager.register(new NumberSetting(this, "Switch delay", 300, 0, 1000));
-   private final NumberSetting targetsLimit = settingManager.register(new NumberSetting(this, "Targets limit", 1, 1, 10));
-   private final NumberSetting attackOnDamage = settingManager.register(new NumberSetting(this, "Attack on damage", 0, 0, 5));
+   private final NumberSetting switchDelay = settingManager.register(new NumberSetting(this, "Switch Delay", 300, 0, 1000));
+   private final NumberSetting targetsLimit = settingManager.register(new NumberSetting(this, "Targets Limit", 1, 1, 10));
+   private final NumberSetting attackOnDamage = settingManager.register(new NumberSetting(this, "Attack On Damage", 0, 0, 5));
    private final MultiComboSetting targets = settingManager.register(
       new MultiComboSetting(this, "Targets").add("Players", true).add("Mobs", false).add("Animals", false).add("Invisibles", false).add("Fireballs", false)
    );
@@ -95,23 +95,23 @@ public class Killaura extends Module {
       new MultiComboSetting(this, "Filters").add("Teams", true).add("Armor", false)
    );
    private final MultiComboSetting stopRules = settingManager.register(
-      new MultiComboSetting(this, "Stop rules")
-         .add("In inventory", true)
-         .add("While blocking", false)
-         .add("While mining", false)
-         .add("Sprint midair", false)
+      new MultiComboSetting(this, "Stop Rules")
+         .add("In Inventory", true)
+         .add("While Blocking", false)
+         .add("While Mining", false)
+         .add("Sprint Midair", false)
    );
-   private final CheckboxSetting hitThroughBlocks = settingManager.register(new CheckboxSetting(this, "Hit through blocks", false));
-   private final CheckboxSetting ignoreTeammates = settingManager.register(new CheckboxSetting(this, "Ignore teammates", true));
-   private final CheckboxSetting prioritizeEnemies = settingManager.register(new CheckboxSetting(this, "Prioritize enemies", false));
-   private final CheckboxSetting requireMouseDown = settingManager.register(new CheckboxSetting(this, "Require mouse down", false));
-   private final CheckboxSetting silentSwing = settingManager.register(new CheckboxSetting(this, "Silent swing", false));
-   private final CheckboxSetting weaponOnly = settingManager.register(new CheckboxSetting(this, "Weapon only", false));
-   private final CheckboxSetting autoWeapon = settingManager.register(new CheckboxSetting(this, "Auto weapon", false));
-   private final CheckboxSetting autoStrafe = settingManager.register(new CheckboxSetting(this, "Auto strafe", false));
+   private final CheckboxSetting hitThroughBlocks = settingManager.register(new CheckboxSetting(this, "Hit Through Blocks", false));
+   private final CheckboxSetting ignoreTeammates = settingManager.register(new CheckboxSetting(this, "Ignore Teammates", true));
+   private final CheckboxSetting prioritizeEnemies = settingManager.register(new CheckboxSetting(this, "Prioritize Enemies", false));
+   private final CheckboxSetting requireMouseDown = settingManager.register(new CheckboxSetting(this, "Require Mouse Down", false));
+   private final CheckboxSetting silentSwing = settingManager.register(new CheckboxSetting(this, "Silent Swing", false));
+   private final CheckboxSetting weaponOnly = settingManager.register(new CheckboxSetting(this, "Weapon Only", false));
+   private final CheckboxSetting autoWeapon = settingManager.register(new CheckboxSetting(this, "Auto Weapon", false));
+   private final CheckboxSetting autoStrafe = settingManager.register(new CheckboxSetting(this, "Auto Strafe", false));
    private final CheckboxSetting drawFov = settingManager.register(new CheckboxSetting(this, "Draw FOV", false));
    private final MultiComboSetting disableRules = settingManager.register(
-      new MultiComboSetting(this, "Disable rules").add("World change", true).add("Death", true).add("Game end", true)
+      new MultiComboSetting(this, "Disable Rules").add("World Change", true).add("Death", true).add("Game End", true)
    );
 
    /* State */
@@ -150,12 +150,13 @@ public class Killaura extends Module {
    private long damageBlockAt;
 
    public Killaura() {
-      super(Category.COMBAT, "Killaura", "Automatically attacks entities with RavenXD mechanics");
+      super(Category.COMBAT, "Kill Aura", "Automatically attacks entities with RavenXD mechanics");
    }
 
    public AutoBlockMode getAutoBlockMode() {
       try {
-         return AutoBlockMode.valueOf(this.autoBlockMode.getCurrentElementAsString());
+         String name = this.autoBlockMode.getCurrentElementAsString().replace(" ", "_");
+         return AutoBlockMode.valueOf(name);
       } catch (Exception e) {
          return AutoBlockMode.Off;
       }
@@ -241,7 +242,7 @@ public class Killaura extends Module {
 
       if (!minecraft.thePlayer.isEntityAlive() && this.disableRules.isSelected(1)) {
          this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "Killaura", Language.translate("feature.killaura.disable_rules.notification.death"), 2500L);
+         this.showNotification(NotificationType.INFO, "Kill Aura", Language.translate("feature.killaura.disable_rules.notification.death"), 2500L);
          return;
       }
 
@@ -260,7 +261,7 @@ public class Killaura extends Module {
       updateAps();
 
       boolean canAttack = exists(this.target);
-      if (isStopRuleSelected("In inventory") && minecraft.currentScreen != null) {
+      if (isStopRuleSelected("In Inventory") && minecraft.currentScreen != null) {
          canAttack = false;
       }
 
@@ -312,7 +313,7 @@ public class Killaura extends Module {
          this.attackTimer.reset();
          setDelay(false);
          if (this.target != null) {
-            if (!(isStopRuleSelected("Sprint midair") && !minecraft.thePlayer.onGround && minecraft.thePlayer.isSprinting())) {
+            if (!(isStopRuleSelected("Sprint Midair") && !minecraft.thePlayer.onGround && minecraft.thePlayer.isSprinting())) {
                this.attackQueued = true;
             }
          }
@@ -374,7 +375,7 @@ public class Killaura extends Module {
          boolean swing = true;
          boolean silent = this.silentSwing.isEnabled();
 
-         if (isStopRuleSelected("While blocking") && PlayerUtils.holdingSword() && minecraft.thePlayer.isBlocking()) {
+         if (isStopRuleSelected("While Blocking") && PlayerUtils.holdingSword() && minecraft.thePlayer.isBlocking()) {
             swing = false;
             attack = false;
          }
@@ -674,7 +675,7 @@ public class Killaura extends Module {
    public final Listener<GameEndEvent> onGameEnd = gameEndEvent -> {
       if (this.disableRules.isSelected(2)) {
          this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "Killaura", Language.translate("feature.killaura.disable_rules.notification.game_end"), 2500L);
+         this.showNotification(NotificationType.INFO, "Kill Aura", Language.translate("feature.killaura.disable_rules.notification.game_end"), 2500L);
       }
    };
 
@@ -682,12 +683,12 @@ public class Killaura extends Module {
    public final Listener<LoadWorldEvent> onLoadWorld = loadWorldEvent -> {
       if (this.disableRules.isSelected(0)) {
          this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "Killaura", Language.translate("feature.killaura.disable_rules.notification.world_change"), 2500L);
+         this.showNotification(NotificationType.INFO, "Kill Aura", Language.translate("feature.killaura.disable_rules.notification.world_change"), 2500L);
       }
    };
 
    private void findTarget() {
-      if (isStopRuleSelected("In inventory") && minecraft.currentScreen != null) {
+      if (isStopRuleSelected("In Inventory") && minecraft.currentScreen != null) {
          setTarget(null);
          return;
       }
@@ -699,7 +700,7 @@ public class Killaura extends Module {
          setTarget(null);
          return;
       }
-      if (isStopRuleSelected("While mining") && Mouse.isCreated() && Mouse.isButtonDown(0) && minecraft.objectMouseOver != null && minecraft.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+      if (isStopRuleSelected("While Mining") && Mouse.isCreated() && Mouse.isButtonDown(0) && minecraft.objectMouseOver != null && minecraft.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
          setTarget(null);
          return;
       }
