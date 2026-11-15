@@ -33,10 +33,10 @@ public class ItemESP extends Module {
          return ItemESP.this.itemName.isEnabled();
       }
    });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 24) {
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
       @Override
       public boolean shouldShow() {
-         return ItemESP.this.itemName.isEnabled() && ItemESP.this.font.getCurrentElement() != 5;
+         return ItemESP.this.itemName.isEnabled() && !"Minecraft".equals(ItemESP.this.font.getCurrentElementAsString());
       }
    });
 

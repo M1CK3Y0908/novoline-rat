@@ -45,16 +45,16 @@ public class Radar extends Module {
          return Radar.this.circle.isEnabled();
       }
    });
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Minecraft", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel") {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Minecraft", "Montserrat", "Museo Sans", "Roboto", "Pixel") {
       @Override
       public boolean shouldShow() {
          return Radar.this.direction.isEnabled();
       }
    });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 10, 8, 20) {
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 8, 20) {
       @Override
       public boolean shouldShow() {
-         return Radar.this.direction.isEnabled() && Radar.this.font.getCurrentElement() != 0;
+         return Radar.this.direction.isEnabled() && !"Minecraft".equals(Radar.this.font.getCurrentElementAsString());
       }
    });
 

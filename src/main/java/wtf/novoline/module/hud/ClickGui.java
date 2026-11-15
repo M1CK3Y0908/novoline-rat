@@ -48,7 +48,7 @@ public class ClickGui extends Module {
       public boolean shouldShow() {
          return !ClickGui.this.performanceMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
-   }).add("Blur", true).add("Desaturation", true).add("Obscuration", true).add("Anime", true));
+   }).add("Blur", true).add("Desaturation", false).add("Obscuration", true).add("Anime", true));
    public NumberSetting imageScale = new NumberSetting(this, "Image Scale", 1.2F, 1.0F, 2.0F) {
       @Override
       public boolean shouldShow() {

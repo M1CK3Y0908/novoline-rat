@@ -21,7 +21,7 @@ public class ThemeColor extends Module {
       }
    );
    public final ColorSetting firstColor = settingManager.register(
-      new ColorSetting(this, "First Color", -13204766) {
+      new ColorSetting(this, "First Color", 0xFF35314D) {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();

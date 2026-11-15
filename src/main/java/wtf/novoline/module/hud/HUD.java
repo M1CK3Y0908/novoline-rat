@@ -50,7 +50,7 @@ import wtf.novoline.utils.time.Stopwatch;
 
 public class HUD extends Module {
    public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 22));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 22));
 
    public FontAdapter getFont() {
       return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
@@ -144,7 +144,7 @@ public class HUD extends Module {
          if (this.hud.isSelected(i2)) {
             int height = (int) this.getFont().getHeight();
             int i3 = renderScreenEvent2.scaledResolution.getScaledHeight() - height - i;
-            this.getFont().drawStringWithNiceShadowNoColor((String)arrayList.get(i2), 2.0F, (float) i3, -1);
+            this.getFont().drawStringWithShadow((String)arrayList.get(i2), 2.0F, (float) i3, -1);
             i += height + 3;
          }
       }
@@ -258,7 +258,7 @@ public class HUD extends Module {
          i = 2 + (int) this.getFont().getHeight();
          String text = "UID: " + EnumChatFormatting.GRAY + Novoline.userId;
          this.getFont()
-            .drawStringWithNiceShadowNoColor(
+            .drawStringWithShadow(
                text, scaledResolution2.getScaledWidth() - 2 - (int) this.getFont().getStringWidth(text), scaledResolution2.getScaledHeight() - i, -1
             );
          i += 7;
@@ -295,7 +295,7 @@ public class HUD extends Module {
                stringBuilder.append(" ").append(Potion.getDurationString(potionEffect));
                String text2 = stringBuilder.toString();
                this.getFont()
-                  .drawStringWithNiceShadowNoColor(
+                  .drawStringWithShadow(
                      stringBuilder.toString(), scaledResolution2.getScaledWidth() - 2 - (int) this.getFont().getStringWidth(text2), scaledResolution2.getScaledHeight() - i, -1
                   );
                i += (int) this.getFont().getHeight() + 2;
@@ -328,6 +328,6 @@ public class HUD extends Module {
 
    private void drawCenteredText(String text, float f2, float f3) {
       float f4 = f2 + (16 - this.getFont().getStringWidth(text)) / 2.0F;
-      this.getFont().drawStringWithNiceShadowNoColor(text, f4, f3 - 4.0F, -1);
+      this.getFont().drawStringWithShadow(text, f4, f3 - 4.0F, -1);
    }
 }

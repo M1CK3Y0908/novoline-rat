@@ -26,11 +26,11 @@ import wtf.novoline.utils.render.RenderUtils;
 
 public class DamageParticles extends Module {
    private final ComboSetting damageParticles = settingManager.register(new ComboSetting(this, "Works on", 0, "All", "Target"));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Minecraft", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 8, 24) {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Minecraft", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 8, 24) {
       @Override
       public boolean shouldShow() {
-         return DamageParticles.this.font.getCurrentElement() != 0;
+         return !"Minecraft".equals(DamageParticles.this.font.getCurrentElementAsString());
       }
    });
 

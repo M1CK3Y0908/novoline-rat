@@ -149,9 +149,9 @@ public class ArrayListElement extends HudElement {
                      RenderUtils.drawRect(f5 + f7, this.getY() + arrayListOffsetY, f5 + f7 + currentValue3, this.getY() + arrayListOffsetY + f2, color3);
                   }
 
-                  cFontRenderer.drawString(name, f5 + currentValue / 2.0F, this.getY() + arrayListOffsetY + (currentValue2 + cFontRenderer.getHeight() / 2.0F) / 2.0F, color);
+                  cFontRenderer.drawStringWithShadow(name, f5 + currentValue / 2.0F, this.getY() + arrayListOffsetY + (currentValue2 + cFontRenderer.getHeight() / 2.0F) / 2.0F, color);
                   if (visibleSuffix2) {
-                     cFontRenderer.drawString(suffix, f5 + currentValue / 2.0F + f4, this.getY() + arrayListOffsetY + (currentValue2 + cFontRenderer.getHeight() / 2.0F) / 2.0F, color2);
+                     cFontRenderer.drawStringWithShadow(suffix, f5 + currentValue / 2.0F + f4, this.getY() + arrayListOffsetY + (currentValue2 + cFontRenderer.getHeight() / 2.0F) / 2.0F, color2);
                   }
                }
 

@@ -40,10 +40,10 @@ public class HypixelStats extends Module {
    public final CheckboxSetting hypixelStats = settingManager.register(new CheckboxSetting(this, "Check Staff bans", true));
    public final CheckboxSetting showPlayTime = settingManager.register(new CheckboxSetting(this, "Show play time", true));
    public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 24) {
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
       @Override
       public boolean shouldShow() {
-         return HypixelStats.this.font.getCurrentElement() != 5;
+         return !"Minecraft".equals(HypixelStats.this.font.getCurrentElementAsString());
       }
    });
 

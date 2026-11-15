@@ -31,11 +31,11 @@ import wtf.novoline.setting.MultiComboSetting;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class NameTags extends Module {
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Minecraft", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 24) {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Minecraft", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
       @Override
       public boolean shouldShow() {
-         return NameTags.this.font.getCurrentElement() != 0;
+         return !"Minecraft".equals(NameTags.this.font.getCurrentElementAsString());
       }
    });
 

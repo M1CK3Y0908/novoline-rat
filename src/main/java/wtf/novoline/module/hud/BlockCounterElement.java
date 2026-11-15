@@ -42,7 +42,7 @@ public class BlockCounterElement extends HudElement {
          }
 
          fontAdapter
-            .drawString(
+            .drawStringWithShadow(
                text,
                f2 - fontAdapter.getStringWidth(text) / 2.0F,
                f3 + 10.0F - fontAdapter.getHeight() / 2.0F + 1.0F,

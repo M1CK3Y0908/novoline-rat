@@ -36,21 +36,21 @@ import wtf.novoline.utils.render.RenderUtils;
 
 public class PlayerESP extends Module {
    public final ComboSetting playerESP = settingManager.register(new ComboSetting(this, "Mode", 3, "Vanilla", "Shader", "3D Box", "2D Box"));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Pixel", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Minecraft") {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Pixel", "Montserrat", "Museo Sans", "Roboto", "Minecraft") {
       @Override
       public boolean shouldShow() {
          return PlayerESP.this.playerESP.getCurrentElement() == 3;
       }
    });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 8, 6, 20) {
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 6, 20) {
       @Override
       public boolean shouldShow() {
-         return PlayerESP.this.playerESP.getCurrentElement() == 3 && PlayerESP.this.font.getCurrentElement() != 5;
+         return PlayerESP.this.playerESP.getCurrentElement() == 3 && !"Minecraft".equals(PlayerESP.this.font.getCurrentElementAsString());
       }
    });
 
    public FontAdapter getFont() {
-      if (this.font.getCurrentElement() == 0 && Math.round(this.fontSize.getCurrentValue()) == 8) {
+      if ("Pixel".equals(this.font.getCurrentElementAsString()) && Math.round(this.fontSize.getCurrentValue()) == 8) {
          return Fonts.pixelSize8;
       }
       return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());

@@ -11,11 +11,11 @@ import wtf.novoline.utils.render.FontAdapter;
 
 public class Watermark extends Module {
    public final ComboSetting watermark = settingManager.register(new ComboSetting(this, "Type", 0, "OneTap", "NeverLose"));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Default", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 24));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Default", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24));
 
    public FontAdapter getFont(boolean bold) {
-      if (this.font.getCurrentElement() == 0) {
+      if ("Default".equals(this.font.getCurrentElementAsString())) {
          return null;
       }
       return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), bold);

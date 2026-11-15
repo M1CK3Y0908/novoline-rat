@@ -40,8 +40,8 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
       RenderUtils.drawTextureWithAlpha(f + 4.0F, f2 + f3 / 2.0F - 8.0F, 16.0F, 16.0F, 1.0F, resourceLocation);
       FontAdapter titleFont = this.getTitleFont();
       FontAdapter subFont = this.getSubTextFont();
-      titleFont.drawString(notification2.getTitle(), f + 28.0F, f2 + f3 / 2.0F - titleFont.getHeight() / 2.0F - 3.0F, -1);
-      subFont.drawString(notification2.getSubText(), f + 28.0F, f2 + f3 / 2.0F - subFont.getHeight() / 2.0F + 6.0F, -2039584);
+      titleFont.drawStringWithShadow(notification2.getTitle(), f + 28.0F, f2 + f3 / 2.0F - titleFont.getHeight() / 2.0F - 3.0F, -1);
+      subFont.drawStringWithShadow(notification2.getSubText(), f + 28.0F, f2 + f3 / 2.0F - subFont.getHeight() / 2.0F + 6.0F, -2039584);
    }
 
    public void updatePositions(ScaledResolution scaledResolution) {

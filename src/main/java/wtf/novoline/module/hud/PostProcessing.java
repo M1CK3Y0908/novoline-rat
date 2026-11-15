@@ -40,7 +40,7 @@ public class PostProcessing extends Module {
          public boolean shouldShow() {
             return PostProcessing.this.bloom.isEnabled();
          }
-      }).add("ArrayList", true).add("ClickGui", false).add("Watermark", true).add("TargetHUD", true).add("Notifications", false)
+      }).add("ArrayList", false).add("ClickGui", false).add("Watermark", false).add("TargetHUD", false).add("Notifications", false)
    );
    public final NumberSetting shadowRadius = settingManager.register(new NumberSetting(this, "Bloom Iterations", 3, 1, 8) {
       @Override

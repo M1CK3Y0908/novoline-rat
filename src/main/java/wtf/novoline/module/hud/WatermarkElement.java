@@ -75,7 +75,7 @@ public class WatermarkElement extends HudElement {
                c2,
                false
             );
-            cFontRenderer.drawString(
+            cFontRenderer.drawStringWithShadow(
                this.watermarkText,
                this.getX() + this.getWidth() / 2.0F - cFontRenderer.getStringWidth(this.watermarkText) / 2.0F,
                this.getY() + this.getHeight() / 2.0F - cFontRenderer.getHeight() / 2.0F + 1.0F,
@@ -113,9 +113,8 @@ public class WatermarkElement extends HudElement {
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
             filledPolygonRenderer.putRoundedRect(this.getX(), this.getY(), this.width, 14.0F, 1.0F, -15395563);
             filledPolygonRenderer.draw();
-            cFontRenderer2.drawString(text3, this.getX() + 3.0F, this.getY() + 5.0F, -16611376);
-            cFontRenderer2.drawString(text3, this.getX() + 3.0F + 0.5F, this.getY() + 5.0F + 0.5F, -1);
-            cFontRenderer3.drawString(this.watermarkText, this.getX() + 3.0F + cFontRenderer2.getStringWidth(text3) + 3.0F, this.getY() + 5.0F + 0.5F, -1);
+            cFontRenderer2.drawStringWithShadow(text3, this.getX() + 3.0F, this.getY() + 5.0F, -1);
+            cFontRenderer3.drawStringWithShadow(this.watermarkText, this.getX() + 3.0F + cFontRenderer2.getStringWidth(text3) + 3.0F, this.getY() + 5.0F + 0.5F, -1);
          }
       }
    }
