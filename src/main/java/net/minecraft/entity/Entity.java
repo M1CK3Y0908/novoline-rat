@@ -48,12 +48,49 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import wtf.novoline.Novoline;
+import wtf.novoline.culling.Cullable;
 import wtf.novoline.event.MoveEntityEvent;
 import wtf.novoline.event.MoveEntityEvent2;
 import wtf.novoline.event.MoveFlyingEvent;
 import wtf.novoline.module.ModuleManager;
 
-public abstract class Entity implements ICommandSender {
+public abstract class Entity implements ICommandSender, Cullable {
+   public boolean culled;
+   public long forcedVisibleUntil;
+   public boolean outOfCamera;
+
+   @Override
+   public void setCullTimeout() {
+      this.forcedVisibleUntil = System.currentTimeMillis() + 1000L;
+   }
+
+   @Override
+   public boolean isForcedVisible() {
+      return this.forcedVisibleUntil > System.currentTimeMillis();
+   }
+
+   @Override
+   public void setCulled(boolean culled) {
+      this.culled = culled;
+      if (!culled) {
+         this.setCullTimeout();
+      }
+   }
+
+   @Override
+   public boolean isCulled() {
+      return this.culled;
+   }
+
+   @Override
+   public void setOutOfCamera(boolean outOfCamera) {
+      this.outOfCamera = outOfCamera;
+   }
+
+   @Override
+   public boolean isOutOfCamera() {
+      return this.outOfCamera;
+   }
    public double prevPosZ;
    private double entityRiderYawDelta;
    public int serverPosZ;
@@ -726,7 +763,7 @@ public abstract class Entity implements ICommandSender {
 
          boolean wet = this.isWet();
          if (this.worldObj.isFlammableWithin(this.getEntityBoundingBox().contract(0.001, 0.001, 0.001))) {
-            this.setTimeout();
+            this.setCullTimeout();
             if (!wet) {
                this.fire++;
                if (this.fire == 0) {

@@ -71,6 +71,7 @@ import wtf.novoline.module.visual.ChinaHat;
 import wtf.novoline.module.visual.Crosshair;
 import wtf.novoline.module.visual.CustomModel;
 import wtf.novoline.module.visual.DamageParticles;
+import wtf.novoline.module.visual.EntityCulling;
 import wtf.novoline.module.visual.FreeLook;
 import wtf.novoline.module.visual.ItemESP;
 import wtf.novoline.module.visual.ItemPhysics;
@@ -189,6 +190,7 @@ public class ModuleManager {
    public static final MobESP mobESP = new MobESP();
    public static final ItemESP itemESP = new ItemESP();
    public static final WorldColor worldColor = new WorldColor();
+   public static final EntityCulling entityCulling = new EntityCulling();
    public static final ChestStealer chestStealer = new ChestStealer();
    public static final Scaffold scaffold = new Scaffold();
    public static final Breaker breaker = new Breaker();

@@ -1,5 +1,7 @@
 package net.minecraft.tileentity;
 
+import wtf.novoline.culling.Cullable;
+
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -14,7 +16,43 @@ import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class TileEntity {
+public abstract class TileEntity implements Cullable {
+   public boolean culled;
+   public long forcedVisibleUntil;
+   public boolean outOfCamera;
+
+   @Override
+   public void setCullTimeout() {
+      this.forcedVisibleUntil = System.currentTimeMillis() + 1000L;
+   }
+
+   @Override
+   public boolean isForcedVisible() {
+      return this.forcedVisibleUntil > System.currentTimeMillis();
+   }
+
+   @Override
+   public void setCulled(boolean culled) {
+      this.culled = culled;
+      if (!culled) {
+         this.setCullTimeout();
+      }
+   }
+
+   @Override
+   public boolean isCulled() {
+      return this.culled;
+   }
+
+   @Override
+   public void setOutOfCamera(boolean outOfCamera) {
+      this.outOfCamera = outOfCamera;
+   }
+
+   @Override
+   public boolean isOutOfCamera() {
+      return this.outOfCamera;
+   }
    private static final Logger logger = LogManager.getLogger();
    private static Map<String, Class<? extends TileEntity>> nameToClassMap = Maps.newHashMap();
    protected BlockPos pos = BlockPos.ORIGIN;

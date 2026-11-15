@@ -6,6 +6,7 @@ import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.model.ModelChicken;
@@ -105,6 +106,7 @@ import net.optifine.entity.model.CustomEntityModels;
 import net.optifine.player.PlayerItemsLayer;
 import net.optifine.reflect.Reflector;
 import net.optifine.shaders.Shaders;
+import wtf.novoline.culling.Cullable;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.module.visual.FreeLook;
 
@@ -214,6 +216,16 @@ public class RenderManager {
       try {
          render2 = this.getEntityRenderObject(entity2);
          if (render2 != null && this.renderEngine != null) {
+            if (ModuleManager.entityCulling != null && ModuleManager.entityCulling.isEnabled() && ModuleManager.entityCulling.cullEntities.isEnabled()) {
+               if (entity2 instanceof Cullable && ((Cullable) entity2).isCulled() && !((Cullable) entity2).isForcedVisible()) {
+                  if (entity2 != this.livingPlayer && (Minecraft.getMinecraft() == null || entity2 != Minecraft.getMinecraft().thePlayer)) {
+                     if (ModuleManager.entityCulling.renderNametags.isEnabled() && render2.canRenderName(entity2)) {
+                        render2.renderName(entity2, d, d2, d3);
+                     }
+                     return false;
+                  }
+               }
+            }
             try {
                if (render2 instanceof RendererLivingEntity) {
                   ((RendererLivingEntity)render2).setRenderOutlines(this.renderOutlines);

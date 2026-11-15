@@ -1,5 +1,8 @@
 package net.minecraft.client.renderer.tileentity;
 
+import wtf.novoline.culling.Cullable;
+import wtf.novoline.module.ModuleManager;
+
 import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
@@ -78,6 +81,11 @@ public class TileEntityRendererDispatcher {
    }
 
    public void renderTileEntityAt(TileEntity tileEntityIn, double x, double y, double z, float partialTicks, int destroyStage) {
+      if (ModuleManager.entityCulling != null && ModuleManager.entityCulling.isEnabled() && ModuleManager.entityCulling.cullTileEntities.isEnabled()) {
+         if (tileEntityIn instanceof Cullable && ((Cullable) tileEntityIn).isCulled() && !((Cullable) tileEntityIn).isForcedVisible()) {
+            return;
+         }
+      }
       TileEntitySpecialRenderer specialRenderer = this.getSpecialRenderer(tileEntityIn);
       if (specialRenderer != null) {
          try {
