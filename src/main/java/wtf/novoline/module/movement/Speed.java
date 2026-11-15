@@ -2,6 +2,8 @@ package wtf.novoline.module.movement;
 
 import io.github.nevalackin.homoBus.Listener;
 import io.github.nevalackin.homoBus.annotations.EventLink;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
@@ -15,6 +17,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovementInput;
 import wtf.novoline.enums.HypixelGameType;
 import wtf.novoline.enums.ServerType;
+import wtf.novoline.event.JumpEvent;
 import wtf.novoline.event.PacketReceiveEvent;
 import wtf.novoline.event.PlayerMoveEvent;
 import wtf.novoline.event.PreUpdateEvent;
@@ -35,7 +38,7 @@ import wtf.novoline.utils.player.PlayerUtils;
 public class Speed extends Module {
    private boolean explosionBoostPending;
    private final ComboSetting speed = settingManager.register(
-      new ComboSetting(this, "Mode", 0, "Hypixel", "Hypixel2", "Motion", "Matrix", "Matrix2", "NCP", "ZoneCraft")
+      new ComboSetting(this, "Mode", 0, "Watchdog", "Hypixel", "Hypixel2", "Motion", "Matrix", "Matrix2", "NCP", "ZoneCraft")
    );
    private double lastTickDistance;
    private final MultiComboSetting moveAddons = settingManager.register(
@@ -52,10 +55,12 @@ public class Speed extends Module {
    private float lastMoveYaw;
    private double currentSpeed;
    private boolean wasOnGroundHypixel;
+   private boolean watchdogShouldBoost;
+   private double watchdogSpeed;
    private final CheckboxSetting movementSlowdown = settingManager.register(new CheckboxSetting(this, "Movement slowdown", false) {
       @Override
       public boolean shouldShow() {
-         return Speed.this.moveAddons.isSelected(5) && Speed.this.speed.getCurrentElement() == 0;
+         return Speed.this.moveAddons.isSelected(5) && Speed.this.speed.getCurrentElementAsString().equals("Hypixel");
       }
    });
    private final NumberSetting slowdown = settingManager.register(new NumberSetting(this, "Slowdown", 0.5F, 0.1F, 1.0F) {
@@ -67,7 +72,7 @@ public class Speed extends Module {
    private final NumberSetting speed2 = settingManager.register(new NumberSetting(this, "Speed", 0.3F, 0.0F, 1.0F) {
       @Override
       public boolean shouldShow() {
-         return Speed.this.speed.getCurrentElement() == 2;
+         return Speed.this.speed.getCurrentElementAsString().equals("Motion");
       }
    });
    private final NumberSetting timerBoost = settingManager.register(new NumberSetting(this, "Timer boost", 1.0F, 1.0F, 2.0F) {
@@ -84,6 +89,12 @@ public class Speed extends Module {
       }
    });
    @EventLink
+   public final Listener<JumpEvent> onJump = jumpEvent -> {
+      if (minecraft.thePlayer != null && PlayerUtils.isMoving() && this.speed.getCurrentElementAsString().equals("Watchdog")) {
+         jumpEvent.cancel();
+      }
+   };
+   @EventLink
    public final Listener<UpdateEvent> onUpdate = updateEvent -> {
       KeyBinding.setKeyBindState(minecraft.gameSettings.keyBindJump.getKeyCode(), false);
       this.lastTickDistance = PlayerUtils.getLastTickDistance();
@@ -97,20 +108,32 @@ public class Speed extends Module {
    @EventLink
    public final Listener<PreUpdateEvent> onPreUpdate = preUpdateEvent -> {
       this.setSuffix(this.speed.getCurrentElementAsString());
-      int currentElement = this.speed.getCurrentElement();
-      if (currentElement != 1) {
+      String mode = this.speed.getCurrentElementAsString();
+      if (!mode.equals("Hypixel2") && !mode.equals("Watchdog")) {
          minecraft.timer.timerSpeed = this.getTimerSpeed();
       }
 
       if (this.moveAddons.isSelected(5) && this.airTicks > 0.01 && PlayerUtils.isMoving()) {
-         if (currentElement != 0) {
+         if (!mode.equals("Hypixel")) {
             preUpdateEvent.rotationYaw = PlayerUtils.getMoveDirectionDegrees();
          } else {
             preUpdateEvent.rotationYaw = this.lastMoveYaw;
          }
       }
 
-      if (currentElement == 0 && HypixelState.isServerType(ServerType.HYPIXEL)) {
+      if (mode.equals("Watchdog")) {
+         if (this.lastTickDistance > 0.0) {
+            if (!ModuleManager.scaffold.isEnabled()) {
+               double roundedY = this.round(preUpdateEvent.posY, 3);
+               if (roundedY % 1.0 % 0.125 == 0.0) {
+                  preUpdateEvent.posY = roundedY;
+                  preUpdateEvent.onGround = true;
+               }
+            } else if (minecraft.thePlayer.onGround) {
+               preUpdateEvent.posY += 0.015625;
+            }
+         }
+      } else if (mode.equals("Hypixel") && HypixelState.isServerType(ServerType.HYPIXEL)) {
          minecraft.timer.timerSpeed = this.getTimerSpeed();
          if (PlayerUtils.isMoving()) {
             minecraft.thePlayer.setSprinting(true);
@@ -120,7 +143,7 @@ public class Speed extends Module {
                this.currentSpeed = this.launchSpeed * 2.0;
             }
          }
-      } else if (currentElement == 2) {
+      } else if (mode.equals("Motion")) {
          if (PlayerUtils.isMoving()) {
             minecraft.thePlayer.setSprinting(true);
             if (minecraft.thePlayer.onGround) {
@@ -129,7 +152,7 @@ public class Speed extends Module {
 
             PlayerUtils.setSpeed(this.speed2.getCurrentValue());
          }
-      } else if (currentElement == 3) {
+      } else if (mode.equals("Matrix")) {
          if (PlayerUtils.isMoving()) {
             minecraft.thePlayer.setSprinting(true);
             if (minecraft.thePlayer.onGround) {
@@ -146,7 +169,7 @@ public class Speed extends Module {
                }
             }
          }
-      } else if (currentElement == 4 && PlayerUtils.isMoving()) {
+      } else if (mode.equals("Matrix2") && PlayerUtils.isMoving()) {
          minecraft.thePlayer.setSprinting(true);
          if (minecraft.thePlayer.onGround) {
             if (!minecraft.gameSettings.keyBindJump.isKeyDown()) {
@@ -173,8 +196,28 @@ public class Speed extends Module {
    private double minSpeedHypixel;
    @EventLink
    public final Listener<PlayerMoveEvent> onPlayerMove = playerMoveEvent -> {
-      int currentElement = this.speed.getCurrentElement();
-      if (currentElement == 0 && HypixelState.isServerType(ServerType.HYPIXEL)) {
+      String mode = this.speed.getCurrentElementAsString();
+      if (mode.equals("Watchdog")) {
+         if (PlayerUtils.isMoving()) {
+            if (minecraft.thePlayer.onGround) {
+               this.setWatchdogTimer(1.0F);
+               playerMoveEvent.y = minecraft.thePlayer.motionY = PlayerUtils.addJumpBoost(ModuleManager.scaffold.isEnabled() ? 0.41999998688698 : 0.39999998688698);
+               this.watchdogSpeed = this.minSpeedHypixel2 * 2.1449999809265137;
+            } else if (this.watchdogShouldBoost) {
+               boolean isSwOrLobby = HypixelState.isGameType(HypixelGameType.SKY_WARS) || HypixelState.isGameType(HypixelGameType.LOBBY);
+               this.setWatchdogTimer(isSwOrLobby ? 1.0F : 0.9F);
+               this.watchdogSpeed = this.lastTickDistance - 0.819999 * (this.lastTickDistance - this.minSpeedHypixel2);
+            } else {
+               boolean isSwOrLobby = HypixelState.isGameType(HypixelGameType.SKY_WARS) || HypixelState.isGameType(HypixelGameType.LOBBY);
+               this.setWatchdogTimer(isSwOrLobby ? 1.2F : 1.1F);
+               this.watchdogSpeed = this.lastTickDistance - this.lastTickDistance / 159.9;
+            }
+
+            this.watchdogSpeed = this.addExplosionBoost(this.watchdogSpeed);
+            this.applyTargetStrafeSpeed(playerMoveEvent, Math.max(this.watchdogSpeed, this.minSpeedHypixel2));
+            this.watchdogShouldBoost = minecraft.thePlayer.onGround;
+         }
+      } else if (mode.equals("Hypixel") && HypixelState.isServerType(ServerType.HYPIXEL)) {
          if (!(minecraft.thePlayer.fallDistance <= 5.0F) || minecraft.thePlayer.isSpectator() || PlayerUtils.isStandingOnLiquid()) {
             return;
          }
@@ -197,7 +240,7 @@ public class Speed extends Module {
          } else {
             this.applyMoveSpeed(playerMoveEvent, 0.0);
          }
-      } else if (currentElement == 1 && PlayerUtils.isMoving() && HypixelState.isServerType(ServerType.HYPIXEL)) {
+      } else if (mode.equals("Hypixel2") && PlayerUtils.isMoving() && HypixelState.isServerType(ServerType.HYPIXEL)) {
          float timerSpeed2 = this.getTimerSpeed();
          if (minecraft.thePlayer.onGround) {
             minecraft.timer.timerSpeed = 1.0F;
@@ -219,7 +262,7 @@ public class Speed extends Module {
          this.currentSpeed = Math.max(this.currentSpeed, this.minSpeedHypixel2);
          this.applyTargetStrafeSpeed(playerMoveEvent, this.currentSpeed);
          this.wasOnGroundHypixel2 = minecraft.thePlayer.onGround;
-      } else if (currentElement == 5) {
+      } else if (mode.equals("NCP")) {
          if (PlayerUtils.isMoving()) {
             if (minecraft.thePlayer.onGround) {
                this.airTicks = 0;
@@ -245,7 +288,7 @@ public class Speed extends Module {
             this.applyTargetStrafeSpeed(playerMoveEvent, this.currentSpeed);
             this.airTicks++;
          }
-      } else if (currentElement == 6 && minecraft.thePlayer.onGround && PlayerUtils.isMoving()) {
+      } else if (mode.equals("ZoneCraft") && minecraft.thePlayer.onGround && PlayerUtils.isMoving()) {
          this.sendPacketUnregistered(
             new C08PacketPlayerBlockPlacement(minecraft.thePlayer.getPosition().down(), 0, new ItemStack(Blocks.stone, 1), 0.54345F, 0.523234F, 0.5435345F)
          );
@@ -255,7 +298,7 @@ public class Speed extends Module {
    private int airTicks;
    @EventLink
    public final Listener<PacketReceiveEvent> onPacketReceive = packetReceiveEvent -> {
-      if (this.speed.getCurrentElement() == 6 && packetReceiveEvent.packet instanceof S08PacketPlayerPosLook s08PacketPlayerPosLook && minecraft.thePlayer.ticksExisted > 30) {
+      if (this.speed.getCurrentElementAsString().equals("ZoneCraft") && packetReceiveEvent.packet instanceof S08PacketPlayerPosLook s08PacketPlayerPosLook && minecraft.thePlayer.ticksExisted > 30) {
          this.sendPacketUnregistered(new C04PacketPlayerPosition(s08PacketPlayerPosLook.getX(), s08PacketPlayerPosLook.getY(), s08PacketPlayerPosLook.getZ(), false));
          packetReceiveEvent.cancel();
       } else {
@@ -274,10 +317,27 @@ public class Speed extends Module {
    };
    private double launchSpeed;
 
+   private double round(double value, int places) {
+      if (places < 0) {
+         throw new IllegalArgumentException();
+      }
+      return new BigDecimal(value).setScale(places, RoundingMode.HALF_UP).doubleValue();
+   }
+
+   private void setWatchdogTimer(float speed) {
+      if (minecraft.thePlayer == null) return;
+      EntityLivingBase entityLivingBase = ModuleManager.killaura.entityLivingBase;
+      if (this.moveAddons.isSelected(1) && entityLivingBase != null) {
+         minecraft.timer.timerSpeed = this.timerBoostAttack.getCurrentValue();
+      } else if (this.moveAddons.isSelected(0)) {
+         minecraft.timer.timerSpeed = minecraft.thePlayer.fallDistance > 2.0F ? 1.0F : speed;
+      } else {
+         minecraft.timer.timerSpeed = 1.0F;
+      }
+   }
+
    private double addExplosionBoost(double d) {
-      if (this.moveAddons.isSelected(3) && this.explosionBoostPending && !minecraft.thePlayer.isPotionActive(Potion.poison) && !minecraft.thePlayer.isBurning()
-         )
-       {
+      if (this.moveAddons.isSelected(3) && this.explosionBoostPending && !minecraft.thePlayer.isPotionActive(Potion.poison) && !minecraft.thePlayer.isBurning()) {
          d += this.explosionSpeed;
          this.explosionBoostPending = false;
       }
@@ -296,7 +356,13 @@ public class Speed extends Module {
 
    @Override
    protected void onToggled() {
-      this.launchSpeed = this.lastTickDistance = 0.0;
+      this.launchSpeed = this.lastTickDistance = this.watchdogSpeed = 0.0;
+      this.watchdogShouldBoost = false;
+      minecraft.timer.timerSpeed = 1.0F;
+   }
+
+   @Override
+   protected void onDisable() {
       minecraft.timer.timerSpeed = 1.0F;
    }
 
@@ -345,6 +411,10 @@ public class Speed extends Module {
    @Override
    protected void onEnable() {
       this.lastMoveYaw = PlayerUtils.getMoveDirectionDegrees();
+      if (minecraft.thePlayer != null) {
+         this.watchdogSpeed = PlayerUtils.getDefaultMoveSpeed();
+         this.watchdogShouldBoost = false;
+      }
    }
 
    public Speed() {
