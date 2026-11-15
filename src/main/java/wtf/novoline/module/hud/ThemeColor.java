@@ -56,7 +56,7 @@ public class ThemeColor extends Module {
       }
    );
    public final NumberSetting gradientLength = settingManager.register(
-      new NumberSetting(this, "Gradient Length", 300, 50, 1000, "px") {
+      new NumberSetting(this, "Gradient Length", 50, 0, 200, "px") {
          @Override
          public boolean shouldShow() {
             return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
@@ -198,18 +198,18 @@ public class ThemeColor extends Module {
       } else {
          double rad = Math.toRadians(this.angle.getCurrentValue());
          double projected = x * Math.cos(rad) + y * Math.sin(rad);
-         double length = Math.max(10.0, (double)this.gradientLength.getCurrentValue());
+         double length = (double)this.gradientLength.getCurrentValue();
          long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
          double timeProgress = (double)(System.currentTimeMillis() % (speedMs * 3600000L)) / (double)speedMs;
 
          return switch (m) {
             case "Double Color" -> {
-               double phi = projected / (2.0 * length) + timeProgress;
+               double phi = (length <= 0.0 ? 0.0 : projected / (2.0 * length)) + timeProgress;
                float factor = (float)((1.0 - Math.cos(phi * 2.0 * Math.PI)) / 2.0);
                yield RenderUtils.lerpColor(this.firstColor.getColor(), this.secondColor.getColor(), factor);
             }
             case "Triple Color" -> {
-               double phi = projected / (3.0 * length) + timeProgress;
+               double phi = (length <= 0.0 ? 0.0 : projected / (3.0 * length)) + timeProgress;
                double p = phi % 1.0;
                if (p < 0.0) p += 1.0;
                int c1 = this.firstColor.getColor();
@@ -230,7 +230,7 @@ public class ThemeColor extends Module {
                }
             }
             case "Rainbow" -> {
-               double phi = projected / length + timeProgress;
+               double phi = (length <= 0.0 ? 0.0 : projected / length) + timeProgress;
                double p = phi % 1.0;
                if (p < 0.0) p += 1.0;
                float sat = this.saturation.getCurrentValue() / 100.0F;
@@ -238,7 +238,7 @@ public class ThemeColor extends Module {
                yield Color.HSBtoRGB((float)p, sat, bri);
             }
             case "Astolfo" -> {
-               double phi = projected / (2.0 * length) + timeProgress;
+               double phi = (length <= 0.0 ? 0.0 : projected / (2.0 * length)) + timeProgress;
                float factor = (float)((1.0 - Math.cos(phi * 2.0 * Math.PI)) / 2.0);
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
