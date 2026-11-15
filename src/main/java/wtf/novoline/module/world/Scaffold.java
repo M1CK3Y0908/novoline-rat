@@ -333,6 +333,11 @@ public class Scaffold extends Module {
       }
    }
 
+   public boolean isUsingFastScaffold() {
+      if (!this.isEnabled()) return false;
+      return getFastScaffoldMode() != FastScaffoldMode.Disabled;
+   }
+
    public boolean canSprint() {
       if (!this.isEnabled() || !this.active) return true;
       if (this.tower.isEnabled() && MoveUtils.jumpKeyDown()) return false;
@@ -752,6 +757,9 @@ public class Scaffold extends Module {
    private void fastScaffoldTick() {
       this.rightHeld = Mouse.isCreated() && Mouse.isButtonDown(1) && minecraft.currentScreen == null;
       FastScaffoldMode fastScaffold = getFastScaffoldMode();
+      if (fastScaffold != FastScaffoldMode.Disabled && !fastScaffold.canSprint(this) && minecraft.thePlayer.isSprinting()) {
+         minecraft.thePlayer.setSprinting(false);
+      }
       boolean moving = MoveUtils.isMoving();
       boolean groundMoving = minecraft.thePlayer.onGround && moving;
       boolean can = fastScaffold.canFastScaffold(this);

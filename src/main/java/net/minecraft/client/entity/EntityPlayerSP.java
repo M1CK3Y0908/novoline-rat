@@ -399,28 +399,36 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       this.pushOutOfBlocks(this.posX + this.width * 0.35, this.getEntityBoundingBox().minY + 0.5, this.posZ - this.width * 0.35);
       this.pushOutOfBlocks(this.posX + this.width * 0.35, this.getEntityBoundingBox().minY + 0.5, this.posZ + this.width * 0.35);
       boolean flag2 = this.getFoodStats().getFoodLevel() > 6.0F || this.capabilities.allowFlying;
-      if (this.onGround
-         && !sneak2
-         && !flag
-         && this.movementInput.moveForward >= f
-         && !this.isSprinting()
-         && flag2
-         && !this.isUsingItem()
-         && !this.isPotionActive(Potion.blindness)) {
-         if (this.sprintToggleTimer <= 0 && !this.mc.gameSettings.keyBindSprint.isKeyDown()) {
-            this.sprintToggleTimer = 7;
-         } else {
+      boolean usingFastScaffold = ModuleManager.scaffold != null && ModuleManager.scaffold.isUsingFastScaffold();
+      if (!usingFastScaffold) {
+         if (this.onGround
+            && !sneak2
+            && !flag
+            && this.movementInput.moveForward >= f
+            && !this.isSprinting()
+            && flag2
+            && !this.isUsingItem()
+            && !this.isPotionActive(Potion.blindness)) {
+            if (this.sprintToggleTimer <= 0 && !this.mc.gameSettings.keyBindSprint.isKeyDown()) {
+               this.sprintToggleTimer = 7;
+            } else {
+               this.setSprinting(true);
+            }
+         }
+
+         if (!this.isSprinting()
+            && this.movementInput.moveForward >= f
+            && flag2
+            && !this.isUsingItem()
+            && !this.isPotionActive(Potion.blindness)
+            && this.mc.gameSettings.keyBindSprint.isKeyDown()) {
             this.setSprinting(true);
          }
-      }
-
-      if (!this.isSprinting()
-         && this.movementInput.moveForward >= f
-         && flag2
-         && !this.isUsingItem()
-         && !this.isPotionActive(Potion.blindness)
-         && this.mc.gameSettings.keyBindSprint.isKeyDown()) {
-         this.setSprinting(true);
+      } else {
+         this.sprintToggleTimer = 0;
+         if (!ModuleManager.scaffold.canSprint() && this.isSprinting()) {
+            this.setSprinting(false);
+         }
       }
 
       if (this.isSprinting()
