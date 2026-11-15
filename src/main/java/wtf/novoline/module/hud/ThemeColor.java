@@ -49,6 +49,14 @@ public class ThemeColor extends Module {
          }
       }
    );
+   public final NumberSetting gradientLength = settingManager.register(
+      new NumberSetting(this, "Gradient Length", 600.0F, 50.0F, 2000.0F) {
+         @Override
+         public boolean shouldShow() {
+            return ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
+         }
+      }
+   );
    public final NumberSetting angle = settingManager.register(
       new NumberSetting(this, "Angle", 0.0F, 0.0F, 360.0F) {
          @Override
@@ -174,7 +182,8 @@ public class ThemeColor extends Module {
          double projected = x * Math.cos(rad) + y * Math.sin(rad);
          long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
          double timeProgress = (System.currentTimeMillis() % speedMs) / (double)speedMs;
-         double progress = (projected / 600.0 + timeProgress) % 1.0;
+         double length = Math.max(10.0, (double)this.gradientLength.getCurrentValue());
+         double progress = (projected / length + timeProgress) % 1.0;
          if (progress < 0.0) {
             progress += 1.0;
          }
