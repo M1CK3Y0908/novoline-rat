@@ -241,9 +241,6 @@ public class MenuClickGuiScreen extends GuiScreen {
       if (this.visibility <= 0.0F) {
          return;
       }
-      if (bloom && !glow) {
-         return;
-      }
 
       double d = sr.getScaledWidth_double();
       double d2 = sr.getScaledHeight_double();
@@ -258,10 +255,6 @@ public class MenuClickGuiScreen extends GuiScreen {
 
       int themeColor = this.clickGuiTheme != null ? this.clickGuiTheme.getSecondaryColor(true) : ModuleManager.themeColor.getColor();
 
-      if (!bloom && this.clickGui != null && this.clickGui.backgroundSettings.getElements().get(0).isSelected()) {
-         RenderUtils.drawRect(0.0F, 0.0F, (float)d, (float)d2, -16777216);
-      }
-
       for (MenuCategoryPanel panel : this.buttons) {
          float px = panel.getX() - 2.0F;
          float py = panel.getY();
@@ -270,8 +263,10 @@ public class MenuClickGuiScreen extends GuiScreen {
 
          if (!bloom) {
             RenderUtils.drawRect(px, py, px + pw, py + ph, -16777216);
-         } else {
+         } else if (glow) {
             RenderUtils.drawRect(px, py, px + pw, py + ph, themeColor);
+         } else {
+            RenderUtils.drawRect(px, py, px + pw, py + ph, -16777216);
          }
       }
 

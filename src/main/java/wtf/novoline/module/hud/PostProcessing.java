@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
+import org.lwjgl.opengl.GL13;
 import wtf.novoline.Novoline;
 import wtf.novoline.event.ShaderEvent;
 import wtf.novoline.module.Category;
@@ -39,7 +40,7 @@ public class PostProcessing extends Module {
          public boolean shouldShow() {
             return PostProcessing.this.bloom.isEnabled();
          }
-      }).add("ArrayList", true).add("ClickGui", true).add("Watermark", true).add("TargetHUD", true).add("Notifications", true)
+      }).add("ArrayList", true).add("ClickGui", false).add("Watermark", true).add("TargetHUD", true).add("Notifications", false)
    );
    public final NumberSetting shadowRadius = settingManager.register(new NumberSetting(this, "Bloom Iterations", 3, 1, 8) {
       @Override
@@ -92,7 +93,7 @@ public class PostProcessing extends Module {
       Minecraft mc = Minecraft.getMinecraft();
       float scaleFactor = sr.getScaleFactor();
 
-      if (!bloom && mc.currentScreen instanceof GuiChat) {
+      if (mc.currentScreen instanceof GuiChat) {
          RenderUtils.drawRect(2.0F, sr.getScaledHeight() - 14.0F, sr.getScaledWidth() - 4.0F, sr.getScaledHeight() - 2.0F, -16777216);
       }
 
@@ -130,6 +131,7 @@ public class PostProcessing extends Module {
             stencilFramebuffer.deleteFramebuffer();
          }
          stencilFramebuffer = new Framebuffer(mc.displayWidth, mc.displayHeight, false);
+         stencilFramebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
       }
 
       ScaledResolution sr = new ScaledResolution(mc);
@@ -156,5 +158,12 @@ public class PostProcessing extends Module {
 
          KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int) this.shadowRadius.getCurrentValue(), (int) this.shadowOffset.getCurrentValue());
       }
+
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
+      GlStateManager.bindTexture(0);
+      GlStateManager.enableTexture2D();
+      GlStateManager.enableAlpha();
+      GlStateManager.disableBlend();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 }

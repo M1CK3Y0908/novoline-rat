@@ -143,6 +143,14 @@ public class WatermarkElement extends HudElement {
             fpr.putRoundedRect(x, y, w, 14.0F, 1.0F, cTheme);
             fpr.draw();
          }
+      } else {
+         if (currentElement == 0) {
+            RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
+         } else if (currentElement == 1) {
+            FilledPolygonRenderer fpr = new FilledPolygonRenderer();
+            fpr.putRoundedRect(x, y, w, 14.0F, 1.0F, -16777216);
+            fpr.draw();
+         }
       }
    }
 

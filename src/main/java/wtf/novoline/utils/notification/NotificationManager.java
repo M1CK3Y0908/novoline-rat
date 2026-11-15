@@ -62,9 +62,12 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
                NotificationType type = notification2.getType();
                int accentColor = type.getAccentColor();
                FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
-               filledPolygonRenderer.putCustomRoundedRect(f5, f6, 24.0F, f3, 3.0F, 3.0F, 0.0F, 0.0F, accentColor);
+               filledPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, accentColor);
                filledPolygonRenderer.draw();
-               this.drawNotificationContent(notification2, f5, f6, f3, type.getResourceLocation());
+            } else {
+               FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
+               filledPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, -16777216);
+               filledPolygonRenderer.draw();
             }
          }
       }

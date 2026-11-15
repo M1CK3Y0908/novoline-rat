@@ -41,7 +41,9 @@ public class KawaseBlur {
          if (fb != null) {
             fb.deleteFramebuffer();
          }
-         return new Framebuffer(mc.displayWidth, mc.displayHeight, depth);
+         Framebuffer newFb = new Framebuffer(mc.displayWidth, mc.displayHeight, depth);
+         newFb.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+         return newFb;
       }
       return fb;
    }
@@ -59,12 +61,14 @@ public class KawaseBlur {
 
       Minecraft mc = Minecraft.getMinecraft();
       framebufferList.add(framebuffer = createFrameBuffer(null, false));
+      framebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
 
       for (int i = 1; i <= iterations; i++) {
          int w = Math.max(1, (int)(mc.displayWidth / Math.pow(2.0, i)));
          int h = Math.max(1, (int)(mc.displayHeight / Math.pow(2.0, i)));
          Framebuffer currentBuffer = new Framebuffer(w, h, false);
          currentBuffer.setFramebufferFilter(GL11.GL_LINEAR);
+         currentBuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
          GlStateManager.bindTexture(currentBuffer.framebufferTexture);
          GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL14.GL_MIRRORED_REPEAT);
          GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL14.GL_MIRRORED_REPEAT);
@@ -97,35 +101,56 @@ public class KawaseBlur {
       Framebuffer lastBuffer = framebufferList.get(0);
       lastBuffer.framebufferClear();
       lastBuffer.bindFramebuffer(false);
+      GlStateManager.enableTexture2D();
+      GlStateManager.disableLighting();
+      GlStateManager.disableDepth();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       kawaseUp.init();
       kawaseUp.setUniformf("offset", (float)offset, (float)offset);
       kawaseUp.setUniformi("inTexture", 0);
       kawaseUp.setUniformi("check", 1);
-      kawaseUp.setUniformi("textureToCheck", 16);
+      kawaseUp.setUniformi("textureToCheck", 1);
       kawaseUp.setUniformf("halfpixel", 1.0F / (float)lastBuffer.framebufferWidth, 1.0F / (float)lastBuffer.framebufferHeight);
       kawaseUp.setUniformf("iResolution", (float)lastBuffer.framebufferWidth, (float)lastBuffer.framebufferHeight);
-      GL13.glActiveTexture(GL13.GL_TEXTURE16);
-      GlStateManager.bindTexture(stencilFrameBufferTexture);
-      GL13.glActiveTexture(GL13.GL_TEXTURE0);
-      GlStateManager.bindTexture(framebufferList.get(1).framebufferTexture);
+
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE1);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, stencilFrameBufferTexture);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(1).framebufferTexture);
       ShaderUtil.drawQuads();
       kawaseUp.unload();
 
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE1);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+
       mc.getFramebuffer().bindFramebuffer(true);
-      GlStateManager.bindTexture(framebufferList.get(0).framebufferTexture);
+      GlStateManager.enableTexture2D();
+      GlStateManager.disableLighting();
+      GlStateManager.disableDepth();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(0).framebufferTexture);
       GlStateManager.enableAlpha();
       GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
       GlStateManager.enableBlend();
       GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       ShaderUtil.drawQuads();
-      GlStateManager.bindTexture(0);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
    private static void renderFBO(Framebuffer fb, int framebufferTexture, ShaderUtil shader, float offset) {
       fb.framebufferClear();
       fb.bindFramebuffer(false);
+      GlStateManager.enableTexture2D();
+      GlStateManager.disableLighting();
+      GlStateManager.disableDepth();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       shader.init();
-      GlStateManager.bindTexture(framebufferTexture);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferTexture);
       shader.setUniformf("offset", offset, offset);
       shader.setUniformi("inTexture", 0);
       shader.setUniformi("check", 0);
@@ -133,5 +158,6 @@ public class KawaseBlur {
       shader.setUniformf("iResolution", (float)fb.framebufferWidth, (float)fb.framebufferHeight);
       ShaderUtil.drawQuads();
       shader.unload();
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
    }
 }

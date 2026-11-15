@@ -717,6 +717,7 @@ public class RenderUtils {
       instance.draw();
       GlStateManager.enableTexture2D();
       GlStateManager.disableBlend();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
    public static void drawBorderedRect(float f, float f2, float f3, float f4, float f5, int i, int i2) {

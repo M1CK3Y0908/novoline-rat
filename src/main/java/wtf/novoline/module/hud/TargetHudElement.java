@@ -348,9 +348,6 @@ public class TargetHudElement extends HudElement {
       if (instance.animation == null || instance.animation.getValue() <= 0.0) {
          return;
       }
-      if (bloom && !glow) {
-         return;
-      }
 
       GlStateManager.pushMatrix();
       GlStateManager.translate(instance.getX() + instance.getWidth() / 2.0F, instance.getY() + instance.getHeight() / 2.0F, 0.0F);
@@ -365,9 +362,11 @@ public class TargetHudElement extends HudElement {
 
       if (!bloom) {
          RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
-      } else {
+      } else if (glow) {
          int col = ModuleManager.themeColor.getColor(x, y);
          RenderUtils.drawRect(x, y, x + w, y + h, col);
+      } else {
+         RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
       }
 
       GlStateManager.popMatrix();

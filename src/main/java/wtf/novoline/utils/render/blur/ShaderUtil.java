@@ -2,6 +2,7 @@ package wtf.novoline.utils.render.blur;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -30,7 +31,7 @@ public class ShaderUtil {
 
           vec4 sum = texture2D(inTexture, uv + vec2(-halfpixel.x * 2.0, 0.0) * offset);
           sum.rgb *= sum.a;
-          vec4 smpl1 =  texture2D(inTexture, uv + vec2(-halfpixel.x, halfpixel.y) * offset);
+          vec4 smpl1 = texture2D(inTexture, uv + vec2(-halfpixel.x, halfpixel.y) * offset);
           smpl1.rgb *= smpl1.a;
           sum += smpl1 * 2.0;
           vec4 smp2 = texture2D(inTexture, uv + vec2(0.0, halfpixel.y * 2.0) * offset);
@@ -52,7 +53,9 @@ public class ShaderUtil {
           smp7.rgb *= smp7.a;
           sum += smp7 * 2.0;
           vec4 result = sum / 12.0;
-          gl_FragColor = vec4(result.rgb / result.a, mix(result.a, result.a * (1.0 - texture2D(textureToCheck, gl_TexCoord[0].st).a), check));
+          vec3 rgb = result.a > 0.0001 ? result.rgb / result.a : vec3(0.0);
+          float alpha = mix(result.a, result.a * (1.0 - texture2D(textureToCheck, uv).a), float(check));
+          gl_FragColor = vec4(rgb, alpha);
       }
       """;
 
@@ -64,9 +67,8 @@ public class ShaderUtil {
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
-          vec4 sum = texture2D(inTexture, gl_TexCoord[0].st);
+          vec4 sum = texture2D(inTexture, uv) * 4.0;
           sum.rgb *= sum.a;
-          sum *= 4.0;
           vec4 smp1 = texture2D(inTexture, uv - halfpixel.xy * offset);
           smp1.rgb *= smp1.a;
           sum += smp1;
@@ -80,7 +82,8 @@ public class ShaderUtil {
           smp4.rgb *= smp4.a;
           sum += smp4;
           vec4 result = sum / 8.0;
-          gl_FragColor = vec4(result.rgb / result.a, result.a);
+          vec3 rgb = result.a > 0.0001 ? result.rgb / result.a : vec3(0.0);
+          gl_FragColor = vec4(rgb, result.a);
       }
       """;
 
@@ -102,7 +105,7 @@ public class ShaderUtil {
           sum += texture2D(inTexture, uv + vec2(0.0, -halfpixel.y * 2.0) * offset);
           sum += texture2D(inTexture, uv + vec2(-halfpixel.x, -halfpixel.y) * offset) * 2.0;
 
-          gl_FragColor = vec4(sum.rgb / 12.0, mix(1.0, texture2D(textureToCheck, gl_TexCoord[0].st).a, check));
+          gl_FragColor = vec4(sum.rgb / 12.0, mix(1.0, texture2D(textureToCheck, uv).a, float(check)));
       }
       """;
 
@@ -114,7 +117,7 @@ public class ShaderUtil {
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
-          vec4 sum = texture2D(inTexture, gl_TexCoord[0].st) * 4.0;
+          vec4 sum = texture2D(inTexture, uv) * 4.0;
           sum += texture2D(inTexture, uv - halfpixel.xy * offset);
           sum += texture2D(inTexture, uv + halfpixel.xy * offset);
           sum += texture2D(inTexture, uv + vec2(halfpixel.x, -halfpixel.y) * offset);
@@ -191,6 +194,8 @@ public class ShaderUtil {
       ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
       float width = (float) sr.getScaledWidth_double();
       float height = (float) sr.getScaledHeight_double();
+      GlStateManager.enableTexture2D();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       glBegin(GL_QUADS);
       glTexCoord2f(0.0F, 1.0F);
       glVertex2f(0.0F, 0.0F);
@@ -204,6 +209,8 @@ public class ShaderUtil {
    }
 
    public static void drawQuads(float x, float y, float width, float height) {
+      GlStateManager.enableTexture2D();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       glBegin(GL_QUADS);
       glTexCoord2f(0.0F, 0.0F);
       glVertex2f(x, y);

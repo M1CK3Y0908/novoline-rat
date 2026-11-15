@@ -172,9 +172,6 @@ public class ArrayListElement extends HudElement {
       if (Minecraft.getMinecraft().gameSettings.showDebugInfo || ModuleManager.arrayList == null || !ModuleManager.arrayList.isEnabled()) {
          return;
       }
-      if (bloom && !glow) {
-         return;
-      }
       ArrayList arrayList2 = ModuleManager.arrayList;
       if (!bloom && !arrayList2.background.isEnabled()) {
          return;
@@ -207,9 +204,11 @@ public class ArrayListElement extends HudElement {
                float f5 = flag2 ? baseX + arrayListOffsetX - f3 + currentValue3 : baseX + (instance != null ? instance.getWidth() : 0.0F) - arrayListOffsetX - currentValue3;
                if (!bloom) {
                   RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, -16777216);
-               } else {
+               } else if (glow) {
                   int color = ModuleManager.themeColor.getColor(f5, baseY + arrayListOffsetY);
                   RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, color);
+               } else {
+                  RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, -16777216);
                }
             }
          }
