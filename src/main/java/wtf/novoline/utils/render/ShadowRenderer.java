@@ -11,11 +11,26 @@ import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBShaderObjects;
+import org.lwjgl.opengl.GL11;
 
 public class ShadowRenderer {
    private final List<Runnable> pendingDraws = new ArrayList<>();
    private final ShaderProgram shaderProgram = new ShaderProgram(new ResourceLocation("novoline", "shaders/shadow.fsh"));
    private final FramebufferManager framebufferManager;
+
+   private Framebuffer targetFbo;
+   private Framebuffer hBlurFbo;
+   private Framebuffer vBlurFbo;
+   private int lastTargetW = -1;
+   private int lastTargetH = -1;
+   private int lastDownW = -1;
+   private int lastDownH = -1;
+
+   private float boundsMinX = Float.POSITIVE_INFINITY;
+   private float boundsMinY = Float.POSITIVE_INFINITY;
+   private float boundsMaxX = Float.NEGATIVE_INFINITY;
+   private float boundsMaxY = Float.NEGATIVE_INFINITY;
+   private boolean hasCustomBounds = false;
 
    private int uTextureLoc = -1;
    private int uDirLoc = -1;
@@ -33,12 +48,47 @@ public class ShadowRenderer {
    private float lastSigma = -1.0F;
    private int cachedSampleCount = 0;
 
+   public ShadowRenderer(FramebufferManager framebufferManager2) {
+      this.framebufferManager = framebufferManager2;
+   }
+
+   public void submit(float minX, float minY, float maxX, float maxY, Runnable runnable) {
+      this.boundsMinX = Math.min(this.boundsMinX, Math.min(minX, maxX));
+      this.boundsMinY = Math.min(this.boundsMinY, Math.min(minY, maxY));
+      this.boundsMaxX = Math.max(this.boundsMaxX, Math.max(minX, maxX));
+      this.boundsMaxY = Math.max(this.boundsMaxY, Math.max(minY, maxY));
+      this.hasCustomBounds = true;
+      this.pendingDraws.add(runnable);
+   }
+
    public void submit(Runnable runnable) {
       this.pendingDraws.add(runnable);
    }
 
-   public ShadowRenderer(FramebufferManager framebufferManager2) {
-      this.framebufferManager = framebufferManager2;
+   private void checkFramebuffers(int fullW, int fullH, int downW, int downH) {
+      if (this.targetFbo == null || this.lastTargetW != fullW || this.lastTargetH != fullH) {
+         if (this.targetFbo != null) {
+            this.targetFbo.deleteFramebuffer();
+         }
+         this.targetFbo = new Framebuffer(fullW, fullH, false);
+         this.targetFbo.setFramebufferFilter(9729);
+         this.lastTargetW = fullW;
+         this.lastTargetH = fullH;
+      }
+      if (this.hBlurFbo == null || this.vBlurFbo == null || this.lastDownW != downW || this.lastDownH != downH) {
+         if (this.hBlurFbo != null) {
+            this.hBlurFbo.deleteFramebuffer();
+         }
+         if (this.vBlurFbo != null) {
+            this.vBlurFbo.deleteFramebuffer();
+         }
+         this.hBlurFbo = new Framebuffer(downW, downH, false);
+         this.hBlurFbo.setFramebufferFilter(9729);
+         this.vBlurFbo = new Framebuffer(downW, downH, false);
+         this.vBlurFbo.setFramebufferFilter(9729);
+         this.lastDownW = downW;
+         this.lastDownH = downH;
+      }
    }
 
    private void updateKernel(float radiusF, float sigmaF) {
@@ -118,9 +168,8 @@ public class ShadowRenderer {
          this.uniformsInitialized = true;
       }
 
-      Minecraft mc = Minecraft.getMinecraft();
-      float dirX = flag ? (1.0F / (float) mc.displayWidth) : 0.0F;
-      float dirY = flag ? 0.0F : (1.0F / (float) mc.displayHeight);
+      float dirX = flag ? (1.0F / (float) this.hBlurFbo.framebufferWidth) : 0.0F;
+      float dirY = flag ? 0.0F : (1.0F / (float) this.vBlurFbo.framebufferHeight);
 
       ARBShaderObjects.glUniform1iARB(this.uTextureLoc, 0);
       ARBShaderObjects.glUniform2fARB(this.uDirLoc, dirX, dirY);
@@ -138,43 +187,111 @@ public class ShadowRenderer {
    }
 
    public void render(Framebuffer framebuffer, ScaledResolution scaledResolution, int i, float f, float f2, float f3, boolean flag) {
-      if (!this.pendingDraws.isEmpty()) {
-         float[] fArray = RenderUtils.unpackColorNormalized(i);
-         int i2 = RenderUtils.withAlpha(i, 0);
-         GlStateManager.alphaFunc(516, 0.001F);
-         GlStateManager.enableBlend();
-         RenderUtils.applyBlendFunc();
-         BlurFramebuffer blurFramebuffer = this.framebufferManager.acquire("screen-shadow-target", i2);
-         blurFramebuffer.bindFramebuffer();
-
-         for (Runnable runnable : this.pendingDraws) {
-            runnable.run();
-         }
-
-         this.pendingDraws.clear();
-         BlurFramebuffer blurFramebuffer2 = this.framebufferManager.acquire("screen-shadow-h-blur", i2);
-         blurFramebuffer2.bindFramebuffer();
-         blurFramebuffer.bindTexture();
-         this.blurPass(scaledResolution, true, fArray, f, f2, f3);
-         BlurFramebuffer blurFramebuffer3 = this.framebufferManager.acquire("screen-shadow-v-blur", i2);
-         blurFramebuffer3.bindFramebuffer();
-         blurFramebuffer2.bindTexture();
-         this.blurPass(scaledResolution, false, fArray, f, f2, f3);
-         framebuffer.bindFramebuffer(true);
-         RenderUtils.resetColor();
-         GlStateManager.enableBlend();
-         RenderUtils.applyBlendFunc();
-         blurFramebuffer3.bindTexture();
-         RenderUtils.drawFullscreenQuad(scaledResolution);
-         if (flag) {
-            blurFramebuffer.bindTexture();
-            RenderUtils.drawFullscreenQuad(scaledResolution);
-         }
-
-         GlStateManager.alphaFunc(516, 0.1F);
-         blurFramebuffer.release();
-         blurFramebuffer2.release();
-         blurFramebuffer3.release();
+      if (this.pendingDraws.isEmpty()) {
+         return;
       }
+
+      Minecraft mc = Minecraft.getMinecraft();
+      int fullW = mc.displayWidth;
+      int fullH = mc.displayHeight;
+      int downW = Math.max(1, fullW / 2);
+      int downH = Math.max(1, fullH / 2);
+      this.checkFramebuffers(fullW, fullH, downW, downH);
+
+      boolean useScissor = this.hasCustomBounds && (this.boundsMaxX > this.boundsMinX && this.boundsMaxY > this.boundsMinY);
+      int scX = 0, scY = 0, scW = 0, scH = 0;
+      int dScX = 0, dScY = 0, dScW = 0, dScH = 0;
+
+      if (useScissor) {
+         int sf = scaledResolution.getScaleFactor();
+         float pad = f + 10.0F;
+         float sMinX = (this.boundsMinX - pad) * sf;
+         float sMaxX = (this.boundsMaxX + pad) * sf;
+         float sMinY = (this.boundsMinY - pad) * sf;
+         float sMaxY = (this.boundsMaxY + pad) * sf;
+
+         scX = (int) Math.max(0, Math.floor(sMinX));
+         scY = (int) Math.max(0, Math.floor(fullH - sMaxY));
+         scW = (int) Math.min(fullW - scX, Math.ceil(sMaxX - sMinX));
+         scH = (int) Math.min(fullH - scY, Math.ceil(sMaxY - sMinY));
+
+         dScX = Math.max(0, scX / 2);
+         dScY = Math.max(0, scY / 2);
+         dScW = Math.min(downW - dScX, (int) Math.ceil(scW / 2.0));
+         dScH = Math.min(downH - dScY, (int) Math.ceil(scH / 2.0));
+
+         if (scW <= 0 || scH <= 0 || dScW <= 0 || dScH <= 0) {
+            useScissor = false;
+         }
+      }
+
+      // Step 1: Draw shapes into targetFbo
+      this.targetFbo.bindFramebuffer(true);
+      if (useScissor) {
+         GL11.glEnable(GL11.GL_SCISSOR_TEST);
+         GL11.glScissor(scX, scY, scW, scH);
+      }
+      this.targetFbo.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+      this.targetFbo.framebufferClear();
+
+      GlStateManager.alphaFunc(516, 0.001F);
+      GlStateManager.enableBlend();
+      RenderUtils.applyBlendFunc();
+
+      for (Runnable runnable : this.pendingDraws) {
+         runnable.run();
+      }
+      this.pendingDraws.clear();
+
+      // Step 2: Horizontal blur into hBlurFbo (half-res)
+      float downRadius = Math.max(1.0F, f * 0.5F);
+      float downSigma = Math.max(0.1F, f2 * 0.5F);
+      float[] fArray = RenderUtils.unpackColorNormalized(i);
+
+      this.hBlurFbo.bindFramebuffer(true);
+      if (useScissor) {
+         GL11.glScissor(dScX, dScY, dScW, dScH);
+      }
+      this.hBlurFbo.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+      this.hBlurFbo.framebufferClear();
+      this.targetFbo.bindFramebufferTexture();
+      this.blurPass(scaledResolution, true, fArray, downRadius, downSigma, f3);
+
+      // Step 3: Vertical blur into vBlurFbo (half-res)
+      this.vBlurFbo.bindFramebuffer(true);
+      if (useScissor) {
+         GL11.glScissor(dScX, dScY, dScW, dScH);
+      }
+      this.vBlurFbo.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+      this.vBlurFbo.framebufferClear();
+      this.hBlurFbo.bindFramebufferTexture();
+      this.blurPass(scaledResolution, false, fArray, downRadius, downSigma, f3);
+
+      // Step 4: Draw shadow to destination framebuffer
+      framebuffer.bindFramebuffer(true);
+      if (useScissor) {
+         GL11.glScissor(scX, scY, scW, scH);
+      }
+      RenderUtils.resetColor();
+      GlStateManager.enableBlend();
+      RenderUtils.applyBlendFunc();
+      this.vBlurFbo.bindFramebufferTexture();
+      RenderUtils.drawFullscreenQuad(scaledResolution);
+
+      if (flag) {
+         this.targetFbo.bindFramebufferTexture();
+         RenderUtils.drawFullscreenQuad(scaledResolution);
+      }
+
+      if (useScissor) {
+         GL11.glDisable(GL11.GL_SCISSOR_TEST);
+      }
+
+      this.hasCustomBounds = false;
+      this.boundsMinX = Float.POSITIVE_INFINITY;
+      this.boundsMinY = Float.POSITIVE_INFINITY;
+      this.boundsMaxX = Float.NEGATIVE_INFINITY;
+      this.boundsMaxY = Float.NEGATIVE_INFINITY;
+      GlStateManager.alphaFunc(516, 0.1F);
    }
 }

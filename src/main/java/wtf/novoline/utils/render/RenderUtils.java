@@ -231,16 +231,14 @@ public class RenderUtils {
       double d5 = scaledResolution.getScaledWidth_double();
       double d6 = scaledResolution.getScaledHeight_double();
       double d7 = d6 - d2 - d4;
-      GL11.glBegin(7);
-      GL11.glTexCoord2d(d / d5, (d7 + d4) / d6);
-      GL11.glVertex2d(d, d2);
-      GL11.glTexCoord2d(d / d5, d7 / d6);
-      GL11.glVertex2d(d, d2 + d4);
-      GL11.glTexCoord2d((d + d3) / d5, d7 / d6);
-      GL11.glVertex2d(d + d3, d2 + d4);
-      GL11.glTexCoord2d((d + d3) / d5, (d7 + d4) / d6);
-      GL11.glVertex2d(d + d3, d2);
-      GL11.glEnd();
+      Tessellator tessellator = Tessellator.getInstance();
+      WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+      worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+      worldRenderer.pos(d, d2, 0.0).tex(d / d5, (d7 + d4) / d6).endVertex();
+      worldRenderer.pos(d, d2 + d4, 0.0).tex(d / d5, d7 / d6).endVertex();
+      worldRenderer.pos(d + d3, d2 + d4, 0.0).tex((d + d3) / d5, d7 / d6).endVertex();
+      worldRenderer.pos(d + d3, d2, 0.0).tex((d + d3) / d5, (d7 + d4) / d6).endVertex();
+      tessellator.draw();
    }
 
    public static int timedHsbColor(double d, float f, float f2, long l) {

@@ -127,7 +127,11 @@ public class TargetHudElement extends HudElement {
                      scaledResolution2,
                      (int)ModuleManager.targetHUD.blurRadius.getCurrentValue(),
                      ModuleManager.targetHUD.blurSigma.getCurrentValue(),
-                     1
+                     1,
+                     this.getX(),
+                     this.getY(),
+                     this.getX() + this.getWidth(),
+                     this.getY() + this.getHeight()
                   );
                minecraft.getFramebuffer().bindFramebuffer(true);
                this.blurRenderer.bindResultTexture();

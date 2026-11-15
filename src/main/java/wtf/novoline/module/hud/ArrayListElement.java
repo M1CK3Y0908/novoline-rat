@@ -128,10 +128,19 @@ public class ArrayListElement extends HudElement {
                   }
 
                   float f6 = f3;
+                  float entryMinX = f5;
+                  float entryMinY = this.getY() + arrayListOffsetY;
+                  float entryMaxX = f5 + f6;
+                  float entryMaxY = this.getY() + arrayListOffsetY + f2;
+
                   if (arrayList2.background.isEnabled()) {
                      if (enabled) {
                         this.backgroundShadow
                            .submit(
+                              entryMinX,
+                              entryMinY,
+                              entryMaxX,
+                              entryMaxY,
                               () -> RenderUtils.drawRect(
                                  f5, this.getY() + arrayListOffsetY, f5 + f6, this.getY() + arrayListOffsetY + f2, arrayList2.backgroundColor.getColor()
                               )
@@ -149,6 +158,10 @@ public class ArrayListElement extends HudElement {
                   if (arrayList2.textGlow.isEnabled()) {
                      this.textGlowShadow
                         .submit(
+                           entryMinX,
+                           entryMinY,
+                           entryMaxX,
+                           entryMaxY,
                            () -> RenderUtils.drawRect(
                               f5,
                               this.y + arrayListOffsetY,
