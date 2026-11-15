@@ -682,81 +682,58 @@ public class RenderUtils {
       GlStateManager.enableBlend();
       applyBlendFunc();
       GlStateManager.alphaFunc(516, 0.001F);
-      GL11.glBegin(7);
+
+      Tessellator tessellator = Tessellator.getInstance();
+      WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+      worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+
       if (flag) {
-         GL11.glTexCoord2d(0.5, 1.0);
-         GL11.glVertex2d(f, f2);
-         GL11.glTexCoord2d(1.0, 1.0);
-         GL11.glVertex2d(f3, f2);
-         GL11.glTexCoord2d(1.0, 0.0);
-         GL11.glVertex2d(f3, f2 - f5);
-         GL11.glTexCoord2d(0.5, 0.0);
-         GL11.glVertex2d(f, f2 - f5);
+         worldRenderer.pos(f, f2, 0.0).tex(0.5, 1.0).endVertex();
+         worldRenderer.pos(f3, f2, 0.0).tex(1.0, 1.0).endVertex();
+         worldRenderer.pos(f3, f2 - f5, 0.0).tex(1.0, 0.0).endVertex();
+         worldRenderer.pos(f, f2 - f5, 0.0).tex(0.5, 0.0).endVertex();
       }
 
-      GL11.glTexCoord2d(1.0, 1.0);
-      GL11.glVertex2d(f3, f4);
-      GL11.glTexCoord2d(0.5, 1.0);
-      GL11.glVertex2d(f, f4);
-      GL11.glTexCoord2d(0.5, 0.0);
-      GL11.glVertex2d(f, f4 + f5);
-      GL11.glTexCoord2d(1.0, 0.0);
-      GL11.glVertex2d(f3, f4 + f5);
-      GL11.glTexCoord2d(0.5, 1.0);
-      GL11.glVertex2d(f3, f2);
-      GL11.glTexCoord2d(1.0, 1.0);
-      GL11.glVertex2d(f3, f4);
-      GL11.glTexCoord2d(1.0, 0.0);
-      GL11.glVertex2d(f3 + f5, f4);
-      GL11.glTexCoord2d(0.5, 0.0);
-      GL11.glVertex2d(f3 + f5, f2);
-      GL11.glTexCoord2d(1.0, 1.0);
-      GL11.glVertex2d(f, f4);
-      GL11.glTexCoord2d(0.5, 1.0);
-      GL11.glVertex2d(f, f2);
-      GL11.glTexCoord2d(0.5, 0.0);
-      GL11.glVertex2d(f - f5, f2);
-      GL11.glTexCoord2d(1.0, 0.0);
-      GL11.glVertex2d(f - f5, f4);
+      worldRenderer.pos(f3, f4, 0.0).tex(1.0, 1.0).endVertex();
+      worldRenderer.pos(f, f4, 0.0).tex(0.5, 1.0).endVertex();
+      worldRenderer.pos(f, f4 + f5, 0.0).tex(0.5, 0.0).endVertex();
+      worldRenderer.pos(f3, f4 + f5, 0.0).tex(1.0, 0.0).endVertex();
+
+      worldRenderer.pos(f3, f2, 0.0).tex(0.5, 1.0).endVertex();
+      worldRenderer.pos(f3, f4, 0.0).tex(1.0, 1.0).endVertex();
+      worldRenderer.pos(f3 + f5, f4, 0.0).tex(1.0, 0.0).endVertex();
+      worldRenderer.pos(f3 + f5, f2, 0.0).tex(0.5, 0.0).endVertex();
+
+      worldRenderer.pos(f, f4, 0.0).tex(1.0, 1.0).endVertex();
+      worldRenderer.pos(f, f2, 0.0).tex(0.5, 1.0).endVertex();
+      worldRenderer.pos(f - f5, f2, 0.0).tex(0.5, 0.0).endVertex();
+      worldRenderer.pos(f - f5, f4, 0.0).tex(1.0, 0.0).endVertex();
+
       if (flag) {
-         GL11.glTexCoord2d(0.5, 1.0);
-         GL11.glVertex2d(f, f2);
-         GL11.glTexCoord2d(0.5, 0.0);
-         GL11.glVertex2d(f, f2 - f5);
-         GL11.glTexCoord2d(0.0, 0.0);
-         GL11.glVertex2d(f - f5, f2 - f5);
-         GL11.glTexCoord2d(0.0, 1.0);
-         GL11.glVertex2d(f - f5, f2);
+         worldRenderer.pos(f, f2, 0.0).tex(0.5, 1.0).endVertex();
+         worldRenderer.pos(f, f2 - f5, 0.0).tex(0.5, 0.0).endVertex();
+         worldRenderer.pos(f - f5, f2 - f5, 0.0).tex(0.0, 0.0).endVertex();
+         worldRenderer.pos(f - f5, f2, 0.0).tex(0.0, 1.0).endVertex();
       }
 
-      GL11.glTexCoord2d(0.5, 1.0);
-      GL11.glVertex2d(f3, f4);
-      GL11.glTexCoord2d(0.5, 0.0);
-      GL11.glVertex2d(f3, f4 + f5);
-      GL11.glTexCoord2d(0.0, 0.0);
-      GL11.glVertex2d(f3 + f5, f4 + f5);
-      GL11.glTexCoord2d(0.0, 1.0);
-      GL11.glVertex2d(f3 + f5, f4);
+      worldRenderer.pos(f3, f4, 0.0).tex(0.5, 1.0).endVertex();
+      worldRenderer.pos(f3, f4 + f5, 0.0).tex(0.5, 0.0).endVertex();
+      worldRenderer.pos(f3 + f5, f4 + f5, 0.0).tex(0.0, 0.0).endVertex();
+      worldRenderer.pos(f3 + f5, f4, 0.0).tex(0.0, 1.0).endVertex();
+
       if (flag) {
-         GL11.glTexCoord2d(0.5, 0.0);
-         GL11.glVertex2d(f3, f2 - f5);
-         GL11.glTexCoord2d(0.5, 1.0);
-         GL11.glVertex2d(f3, f2);
-         GL11.glTexCoord2d(0.0, 1.0);
-         GL11.glVertex2d(f3 + f5, f2);
-         GL11.glTexCoord2d(0.0, 0.0);
-         GL11.glVertex2d(f3 + f5, f2 - f5);
+         worldRenderer.pos(f3, f2 - f5, 0.0).tex(0.5, 0.0).endVertex();
+         worldRenderer.pos(f3, f2, 0.0).tex(0.5, 1.0).endVertex();
+         worldRenderer.pos(f3 + f5, f2, 0.0).tex(0.0, 1.0).endVertex();
+         worldRenderer.pos(f3 + f5, f2 - f5, 0.0).tex(0.0, 0.0).endVertex();
       }
 
-      GL11.glTexCoord2d(0.5, 0.0);
-      GL11.glVertex2d(f, f4 + f5);
-      GL11.glTexCoord2d(0.5, 1.0);
-      GL11.glVertex2d(f, f4);
-      GL11.glTexCoord2d(0.0, 1.0);
-      GL11.glVertex2d(f - f5, f4);
-      GL11.glTexCoord2d(0.0, 0.0);
-      GL11.glVertex2d(f - f5, f4 + f5);
-      GL11.glEnd();
+      worldRenderer.pos(f, f4 + f5, 0.0).tex(0.5, 0.0).endVertex();
+      worldRenderer.pos(f, f4, 0.0).tex(0.5, 1.0).endVertex();
+      worldRenderer.pos(f - f5, f4, 0.0).tex(0.0, 1.0).endVertex();
+      worldRenderer.pos(f - f5, f4 + f5, 0.0).tex(0.0, 0.0).endVertex();
+
+      tessellator.draw();
       applyBlendFunc();
       GlStateManager.alphaFunc(516, 0.1F);
       GlStateManager.disableBlend();
