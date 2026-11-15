@@ -13,6 +13,7 @@ public final class NumberSettingTypeAdapter extends AbstractTypeAdapter<NumberSe
       scriptValue.putSupplier("getDefaultState", numberSetting::getDefaultState);
       scriptValue.putConsumer("setCurrentValue", numberSetting::setCurrentValue);
       scriptValue.putConsumer("setCurrentValueIgnoreNormalize", numberSetting::setCurrentValueIgnoreNormalize);
+      scriptValue.putSupplier("getUnit", numberSetting::getUnit);
       scriptValue.putEnum("type", numberSetting.getType());
       return scriptValue;
    }

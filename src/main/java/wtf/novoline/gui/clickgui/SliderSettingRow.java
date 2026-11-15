@@ -60,53 +60,58 @@ public class SliderSettingRow extends SettingRow {
          GlStateManager.alphaFunc(516, 0.1F);
       }
 
-      float f6 = this.width / 2.0F
-         + (this.width - 27.0F - this.width / 2.0F)
-         + (numberSetting.getCurrentValue() - numberSetting.getMaxValue()) * ((this.width - 27.0F - this.width / 2.0F) / (numberSetting.getMaxValue() - numberSetting.getMinValue()));
+      String text2 = this.editingText
+         ? this.inputText
+         : numberSetting.getFormattedValue();
+      float stringWidth2 = Fonts.museoSans500Size11.getStringWidth(text2);
+      float boxWidth = Math.max(16.0F, stringWidth2 + 4.0F);
+      float boxRight = f4 + this.width - 5.0F;
+      float boxLeft = boxRight - boxWidth;
+      float sliderRight = boxLeft - 6.0F;
+      float sliderLeft = f4 + this.width / 2.0F;
+      float sliderTrackWidth = Math.max(1.0F, sliderRight - sliderLeft);
+
+      float f6 = sliderLeft
+         + (numberSetting.getCurrentValue() - numberSetting.getMinValue()) / (numberSetting.getMaxValue() - numberSetting.getMinValue()) * sliderTrackWidth;
       if (this.dragging) {
          float f7 = numberSetting.getMinValue()
-            + (f - f4 - this.width / 2.0F) / (this.width - 27.0F - this.width / 2.0F) * (numberSetting.getMaxValue() - numberSetting.getMinValue());
+            + (f - sliderLeft) / sliderTrackWidth * (numberSetting.getMaxValue() - numberSetting.getMinValue());
          numberSetting.setCurrentValue(f7);
-         f6 = MathHelper.clamp_float(f, f4 + this.width / 2.0F, f4 + this.width - 27.0F) - f4;
+         f6 = MathHelper.clamp_float(f, sliderLeft, sliderRight);
       }
 
-      this.knobOffset = SmoothingUtils.approach(this.knobOffset, f6 - this.width / 2.0F, 10.0F);
+      this.knobOffset = SmoothingUtils.approach(this.knobOffset, f6 - sliderLeft, 10.0F);
       RenderUtils.drawLine(
-         f4 + this.width / 2.0F,
+         sliderLeft,
          f5 + ModulePanel.getRowHeight() / 2.0F,
-         f4 + this.width - 27.0F,
+         sliderRight,
          f5 + ModulePanel.getRowHeight() / 2.0F,
          1.5F,
          -16750672,
          false
       );
-      RenderUtils.drawCircle(f4 + this.width / 2.0F + this.knobOffset, f5 + ModulePanel.getRowHeight() / 2.0F, 3.0F, 1.0F, -16611376);
+      RenderUtils.drawCircle(sliderLeft + this.knobOffset, f5 + ModulePanel.getRowHeight() / 2.0F, 3.0F, 1.0F, -16611376);
       RenderUtils.drawShadow(
-         f4 + this.width - 21.0F - 0.5F,
+         boxLeft - 0.5F,
          f5 + ModulePanel.getRowHeight() / 2.0F - 3.0F - 0.5F,
-         f4 + this.width - 5.0F + 0.5F,
+         boxRight + 0.5F,
          f5 + ModulePanel.getRowHeight() / 2.0F + 3.0F + 0.5F,
          0.5F,
          -14931383
       );
       RenderUtils.drawRect(
-         f4 + this.width - 21.0F,
+         boxLeft,
          f5 + ModulePanel.getRowHeight() / 2.0F - 3.0F,
-         f4 + this.width - 5.0F,
+         boxRight,
          f5 + ModulePanel.getRowHeight() / 2.0F + 3.0F,
          -16314860
       );
-      RenderUtils.enableScissor((int)(f4 + this.width - 20.0F), (int)(f5 + ModulePanel.getRowHeight() / 2.0F - 3.0F - 0.5F), 14, 7);
-      IntType type = numberSetting.getType();
-      String text2 = this.editingText
-         ? this.inputText
-         : (type == IntType.DECIMAL ? decimalFormat.format(numberSetting.getCurrentValue()) : String.valueOf((int)numberSetting.getCurrentValue()));
-      float stringWidth2 = Fonts.museoSans500Size11.getStringWidth(text2);
+      RenderUtils.enableScissor((int)(boxLeft + 1.0F), (int)(f5 + ModulePanel.getRowHeight() / 2.0F - 3.0F - 0.5F), (int)(boxWidth - 2.0F), 7);
       int i = this.editingText ? -1 : -6509895;
-      if (stringWidth2 > 14.0F) {
-         Fonts.museoSans500Size11.drawString(text2, f4 + this.width - 20.0F, f5 + ModulePanel.getRowHeight() / 2.0F - 0.5F, i);
+      if (stringWidth2 > boxWidth - 2.0F) {
+         Fonts.museoSans500Size11.drawString(text2, boxLeft + 1.0F, f5 + ModulePanel.getRowHeight() / 2.0F - 0.5F, i);
       } else {
-         Fonts.museoSans500Size11.drawString(text2, f4 + this.width - 13.0F - stringWidth2 / 2.0F, f5 + ModulePanel.getRowHeight() / 2.0F - 0.5F, i);
+         Fonts.museoSans500Size11.drawString(text2, boxLeft + boxWidth / 2.0F - stringWidth2 / 2.0F, f5 + ModulePanel.getRowHeight() / 2.0F - 0.5F, i);
       }
 
       RenderUtils.disableScissor();
@@ -122,19 +127,26 @@ public class SliderSettingRow extends SettingRow {
       float f4 = clickGuiScreen.getY() - clickGuiScreen.getScrollOffset() + this.y;
       this.applyInputText();
       this.editingText = false;
-      if (f >= f3 + this.width / 2.0F
-         && f <= f3 + this.width - 27.0F
+      NumberSetting numberSetting = (NumberSetting)this.moduleSetting;
+      String text2 = numberSetting.getFormattedValue();
+      float boxWidth = Math.max(16.0F, Fonts.museoSans500Size11.getStringWidth(text2) + 4.0F);
+      float boxRight = f3 + this.width - 5.0F;
+      float boxLeft = boxRight - boxWidth;
+      float sliderRight = boxLeft - 6.0F;
+      float sliderLeft = f3 + this.width / 2.0F;
+
+      if (f >= sliderLeft
+         && f <= sliderRight
          && f2 >= f4 + ModulePanel.getRowHeight() / 2.0F - 4.0F
          && f2 <= f4 + ModulePanel.getRowHeight() / 2.0F + 4.0F) {
          if (i == 0) {
             this.dragging = true;
          }
-      } else if (f >= f3 + this.width - 21.0F
-         && f <= f3 + this.width - 5.0F
+      } else if (f >= boxLeft
+         && f <= boxRight
          && f2 >= f4 + ModulePanel.getRowHeight() / 2.0F - 3.0F
          && f2 <= f4 + ModulePanel.getRowHeight() / 2.0F + 3.0F
          && i == 0) {
-         NumberSetting numberSetting = (NumberSetting)this.moduleSetting;
          this.editingText = true;
          this.inputText = decimalFormat.format(numberSetting.getCurrentValue());
       }
@@ -167,7 +179,11 @@ public class SliderSettingRow extends SettingRow {
          NumberSetting numberSetting = (NumberSetting)this.moduleSetting;
 
          try {
-            numberSetting.setCurrentValueIgnoreNormalize(Float.parseFloat(decimalFormat.format(Float.parseFloat(this.inputText))));
+            String cleaned = this.inputText.trim();
+            if (numberSetting.getUnit() != null && !numberSetting.getUnit().isEmpty() && cleaned.endsWith(numberSetting.getUnit())) {
+               cleaned = cleaned.substring(0, cleaned.length() - numberSetting.getUnit().length()).trim();
+            }
+            numberSetting.setCurrentValueIgnoreNormalize(Float.parseFloat(cleaned));
             clickGuiScreen.getCategoryPanel().refreshLayout();
          } catch (Exception exception) {
          }

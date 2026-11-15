@@ -44,14 +44,14 @@ public class ArrayList extends Module {
          return ArrayList.this.colorMode.getCurrentElementAsString().equals("Fade");
       }
    });
-   public final NumberSetting saturation = settingManager.register(new NumberSetting(this, "Saturation", 0.4F, 0.0F, 1.0F) {
+   public final NumberSetting saturation = settingManager.register(new NumberSetting(this, "Saturation", 40, 0, 100, "%") {
       @Override
       public boolean shouldShow() {
          String m = ArrayList.this.colorMode.getCurrentElementAsString();
          return m.equals("Rainbow") || m.equals("Astolfo");
       }
    });
-   public final NumberSetting brightness = settingManager.register(new NumberSetting(this, "Brightness", 1.0F, 0.0F, 1.0F) {
+   public final NumberSetting brightness = settingManager.register(new NumberSetting(this, "Brightness", 100, 0, 100, "%") {
       @Override
       public boolean shouldShow() {
          String m = ArrayList.this.colorMode.getCurrentElementAsString();

@@ -96,8 +96,8 @@ public class ArrayListElement extends HudElement {
          int i = (int)arrayList2.step.getCurrentValue();
          float currentValue4 = arrayList2.fadeMin.getCurrentValue();
          float currentValue5 = arrayList2.fadeMax.getCurrentValue();
-         float currentValue6 = arrayList2.saturation.getCurrentValue();
-         float currentValue7 = arrayList2.brightness.getCurrentValue();
+         float currentValue6 = arrayList2.saturation.getCurrentValue() / 100.0F;
+         float currentValue7 = arrayList2.brightness.getCurrentValue() / 100.0F;
          int i2 = 0;
          if (flag3) {
             for (Module module2 : ModuleManager.modulesByWidth) {

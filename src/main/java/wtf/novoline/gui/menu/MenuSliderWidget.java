@@ -69,12 +69,7 @@ public class MenuSliderWidget extends MenuSettingWidget {
             this.y + this.getHeight() / 2.0F - 1.0F,
             this.menuClickGuiScreen.getClickGuiTheme().getTextColor()
          );
-         String text;
-         if (type.equals(IntType.DECIMAL)) {
-            text = Math.round(this.displayedValue * 100.0F) / 5 * 5 / 100.0F + "";
-         } else {
-            text = (int)this.displayedValue + "";
-         }
+         String text = ((NumberSetting)this.moduleSetting).getFormattedValue(this.displayedValue);
 
          floatSupplier.drawStringLeftMiddle(
             text,

@@ -1,5 +1,8 @@
 package wtf.novoline.setting;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import net.minecraft.util.MathHelper;
 import wtf.novoline.module.Module;
 import wtf.novoline.setting.ModuleSetting.CheckboxType;
@@ -10,8 +13,15 @@ public class NumberSetting extends ModuleSetting {
    private final NumberSetting.IntType intType;
    private final float minValue;
    private final float maxValue;
+   private String unit = "";
+
+   private static final DecimalFormat decimalFormat = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
 
    public void setCurrentValueIgnoreNormalize(float f) {
+      if ("%".equals(this.unit) && f > 0.0F && f < 1.0F && this.maxValue > 10.0F) {
+         f *= 100.0F;
+      }
+
       if (this.intType.equals(NumberSetting.IntType.DECIMAL)) {
          this.currentValue = MathHelper.clamp_float(f, this.minValue, this.maxValue);
       } else {
@@ -44,12 +54,17 @@ public class NumberSetting extends ModuleSetting {
    }
 
    public NumberSetting(Module module2, String text, int i, int i2, int i3) {
+      this(module2, text, i, i2, i3, "");
+   }
+
+   public NumberSetting(Module module2, String text, int i, int i2, int i3, String unit) {
       super(module2, text, "slider", CheckboxType.SLIDER);
       this.currentValue = i;
       this.defaultValue = i;
       this.intType = NumberSetting.IntType.INT;
       this.minValue = i2;
       this.maxValue = i3;
+      this.unit = unit != null ? unit : "";
    }
 
    public float getDefaultState() {
@@ -61,12 +76,49 @@ public class NumberSetting extends ModuleSetting {
    }
 
    public NumberSetting(Module module2, String text, float f, float f2, float f3) {
+      this(module2, text, f, f2, f3, "");
+   }
+
+   public NumberSetting(Module module2, String text, float f, float f2, float f3, String unit) {
       super(module2, text, "slider", CheckboxType.SLIDER);
       this.currentValue = f;
       this.defaultValue = f;
       this.intType = NumberSetting.IntType.DECIMAL;
       this.minValue = f2;
       this.maxValue = f3;
+      this.unit = unit != null ? unit : "";
+   }
+
+   public String getUnit() {
+      return this.unit;
+   }
+
+   public NumberSetting setUnit(String unit) {
+      this.unit = unit != null ? unit : "";
+      return this;
+   }
+
+   public String getFormattedValue() {
+      return this.getFormattedValue(this.currentValue);
+   }
+
+   public String getFormattedValue(float val) {
+      String numStr = this.intType == IntType.DECIMAL ? decimalFormat.format(val) : String.valueOf(Math.round(val));
+      if (numStr.equals("-0")) {
+         numStr = "0";
+      }
+      if (this.unit != null && !this.unit.isEmpty()) {
+         try {
+            if (Double.parseDouble(numStr) != 0.0) {
+               return numStr + this.unit;
+            }
+         } catch (NumberFormatException ignored) {
+            if (Math.abs(val) > 0.0001F) {
+               return numStr + this.unit;
+            }
+         }
+      }
+      return numStr;
    }
 
    public enum IntType {

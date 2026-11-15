@@ -74,7 +74,7 @@ public class ThemeColor extends Module {
       }
    );
    public final NumberSetting saturation = settingManager.register(
-      new NumberSetting(this, "Saturation", 0.8F, 0.0F, 1.0F) {
+      new NumberSetting(this, "Saturation", 80, 0, 100, "%") {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
@@ -83,7 +83,7 @@ public class ThemeColor extends Module {
       }
    );
    public final NumberSetting brightness = settingManager.register(
-      new NumberSetting(this, "Brightness", 1.0F, 0.0F, 1.0F) {
+      new NumberSetting(this, "Brightness", 100, 0, 100, "%") {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
@@ -165,13 +165,13 @@ public class ThemeColor extends Module {
                }
             }
             case "Rainbow" -> {
-               float sat = this.saturation.getCurrentValue();
-               float bri = this.brightness.getCurrentValue();
+               float sat = this.saturation.getCurrentValue() / 100.0F;
+               float bri = this.brightness.getCurrentValue() / 100.0F;
                yield Color.HSBtoRGB((float)timeProgress, sat, bri);
             }
             case "Astolfo" -> {
-               float sat = this.saturation.getCurrentValue();
-               float bri = this.brightness.getCurrentValue();
+               float sat = this.saturation.getCurrentValue() / 100.0F;
+               float bri = this.brightness.getCurrentValue() / 100.0F;
                float hue = 0.5F + 0.35F * factor;
                yield Color.HSBtoRGB(hue, sat, bri);
             }
@@ -214,13 +214,13 @@ public class ThemeColor extends Module {
                }
             }
             case "Rainbow" -> {
-               float sat = this.saturation.getCurrentValue();
-               float bri = this.brightness.getCurrentValue();
+               float sat = this.saturation.getCurrentValue() / 100.0F;
+               float bri = this.brightness.getCurrentValue() / 100.0F;
                yield Color.HSBtoRGB((float)progress, sat, bri);
             }
             case "Astolfo" -> {
-               float sat = this.saturation.getCurrentValue();
-               float bri = this.brightness.getCurrentValue();
+               float sat = this.saturation.getCurrentValue() / 100.0F;
+               float bri = this.brightness.getCurrentValue() / 100.0F;
                float hue = 0.5F + 0.35F * factor;
                yield Color.HSBtoRGB(hue, sat, bri);
             }
