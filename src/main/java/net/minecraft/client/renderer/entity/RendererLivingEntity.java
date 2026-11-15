@@ -559,7 +559,7 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
             } else if (currentElement == 1) {
                GL11.glPushMatrix();
                GlStateManager.disableTexture2D();
-               float[] fArray = RenderUtils.unpackColorNormalized(chams2.color.getColor());
+               float[] fArray = RenderUtils.unpackColorNormalized(chams2.getColor());
                if (chams2.wireframe.isEnabled()) {
                   GL11.glPolygonMode(1032, 6913);
                }

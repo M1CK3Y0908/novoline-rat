@@ -55,52 +55,10 @@ public class ClickGui extends Module {
          return ClickGui.this.backgroundSettings.isSelected(3) && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    };
-   public CheckboxSetting changeAccentColor = new CheckboxSetting(this, "Change accent color", false) {
-      @Override
-      public boolean shouldShow() {
-         return ClickGui.this.backgroundSettings.isSelected(3) && ClickGui.this.clickGui.getCurrentElement() == 0;
-      }
-   };
-   public final ComboSetting colorMode = settingManager.register(new ComboSetting(this, "Color Mode", 0, "Theme", "Custom") {
-      @Override
-      public boolean shouldShow() {
-         return ClickGui.this.clickGui.getCurrentElement() == 0;
-      }
-   });
    public final CheckboxSetting performanceMode = settingManager.register(new CheckboxSetting(this, "Performance Mode", false) {
       @Override
       public boolean shouldShow() {
          return ClickGui.this.clickGui.getCurrentElement() == 0;
-      }
-   });
-   public final CheckboxSetting astolfoMode = settingManager.register(new CheckboxSetting(this, "Astolfo Mode", false) {
-      @Override
-      public boolean shouldShow() {
-         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && ClickGui.this.clickGui.getCurrentElement() == 0;
-      }
-   });
-   public final NumberSetting astolfoCycleTime = settingManager.register(new NumberSetting(this, "Astolfo Cycle Time", 10000, 1, 20000) {
-      @Override
-      public boolean shouldShow() {
-         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
-      }
-   });
-   public final ColorSetting primary = settingManager.register(new ColorSetting(this, "Primary", -8286984) {
-      @Override
-      public boolean shouldShow() {
-         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
-      }
-   });
-   public final ColorSetting extra = settingManager.register(new ColorSetting(this, "Extra", -10262799) {
-      @Override
-      public boolean shouldShow() {
-         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
-      }
-   });
-   public final ColorSetting desaturation = settingManager.register(new ColorSetting(this, "Desaturation", -13554047) {
-      @Override
-      public boolean shouldShow() {
-         return ClickGui.this.colorMode.getCurrentElementAsString().equals("Custom") && !ClickGui.this.astolfoMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    });
    private final Stopwatch toggleTimer = new Stopwatch();
@@ -131,12 +89,7 @@ public class ClickGui extends Module {
          this.entry = this.backgroundManager.byAlias(this.image.getCurrentElementAsString());
       }
 
-      if (this.changeAccentColor.isEnabled()) {
-         Record colors = this.entry.getMetadata().getColors();
-         this.primary.setColor(colors.getColor().getRGB());
-         this.extra.setColor(colors.getColor2().getRGB());
-         this.desaturation.setColor(colors.getColor3().getRGB());
-      }
+
 
       minecraft.displayGuiScreen(guiScreen);
    }
@@ -163,7 +116,6 @@ public class ClickGui extends Module {
          settingManager.register(this.image);
          settingManager.register(this.imageScale);
          settingManager.register(this.randomImage);
-         settingManager.register(this.changeAccentColor);
       } catch (Throwable throwable) {
          Novoline.taggedLogger.error(throwable, "Couldn't load anime images");
          throw new RuntimeException(throwable);

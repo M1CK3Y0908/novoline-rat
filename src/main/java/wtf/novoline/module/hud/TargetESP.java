@@ -11,7 +11,6 @@ import wtf.novoline.event.RenderWorldEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.module.ModuleManager;
-import wtf.novoline.setting.ColorSetting;
 import wtf.novoline.setting.ComboSetting;
 import wtf.novoline.setting.NumberSetting;
 import wtf.novoline.utils.math.InterpolationUtils;
@@ -19,19 +18,7 @@ import wtf.novoline.utils.render.RenderUtils;
 
 public class TargetESP extends Module {
    private final ComboSetting targetESP = settingManager.register(new ComboSetting(this, "Mode", 0, "Circle"));
-   public final ComboSetting colorMode = settingManager.register(new ComboSetting(this, "Color Mode", 0, "Theme", "Custom"));
-   private final NumberSetting cycleTime = settingManager.register(new NumberSetting(this, "Cycle Time", 1.0F, 1.0F, 5.0F) {
-      @Override
-      public boolean shouldShow() {
-         return TargetESP.this.targetESP.getCurrentElement() == 0;
-      }
-   });
-   private final ColorSetting color = settingManager.register(new ColorSetting(this, "Color", -1426063361) {
-      @Override
-      public boolean shouldShow() {
-         return TargetESP.this.colorMode.getCurrentElementAsString().equals("Custom");
-      }
-   });
+   private final NumberSetting cycleTime = settingManager.register(new NumberSetting(this, "Cycle Time", 1.0F, 1.0F, 5.0F));
    @EventLink
    private final Listener<RenderWorldEvent> onRenderWorld = renderWorldEvent -> {
       if (ModuleManager.killaura.isEnabled() && ModuleManager.killaura.entityLivingBase != null) {
@@ -69,16 +56,10 @@ public class TargetESP extends Module {
          double d6 = entityLivingBase2.lastTickPosZ + (entityLivingBase2.posZ - entityLivingBase2.lastTickPosZ) * renderWorldEvent.partialTicks - renderManager.viewerPosZ;
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          double d7 = entityLivingBase2.getEntityBoundingBox().maxX - entityLivingBase2.getEntityBoundingBox().minX;
-         boolean isTheme = this.colorMode.getCurrentElementAsString().equals("Theme");
-         int color2 = isTheme ? ModuleManager.themeColor.getColor() : this.color.getColor();
-         int i = RenderUtils.withAlpha(color2, 0);
          GL11.glBegin(3);
-         RenderUtils.setColor(color2);
 
          for (int i2 = 0; i2 <= 360; i2++) {
-            if (isTheme) {
-               RenderUtils.setColor(ModuleManager.themeColor.getColor(i2 * 2.0, 0.0));
-            }
+            RenderUtils.setColor(ModuleManager.themeColor.getColor(i2 * 2.0, 0.0));
             GL11.glVertex3d(d3 + Math.sin(i2 * Math.PI / 180.0) * d7, d4, d6 + Math.cos(i2 * Math.PI / 180.0) * d7);
          }
 
@@ -89,7 +70,7 @@ public class TargetESP extends Module {
             double d8 = i3 * 6;
             double d9 = d3 + Math.sin(Math.toRadians(d8)) * d7;
             double d10 = d6 + Math.cos(Math.toRadians(d8)) * d7;
-            int colTop = isTheme ? ModuleManager.themeColor.getColor(i3 * 10.0, 0.0) : color2;
+            int colTop = ModuleManager.themeColor.getColor(i3 * 10.0, 0.0);
             int colBot = RenderUtils.withAlpha(colTop, 0);
             if (i3 > 0) {
                RenderUtils.setColor(colTop);

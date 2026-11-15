@@ -24,9 +24,6 @@ import wtf.novoline.utils.render.RenderUtils;
 public class Radar extends Module {
    private final ComboSetting radar = settingManager.register(new ComboSetting(this, "Rotation type", 0, "Auto", "Manual"));
    private final ComboSetting arrowType = settingManager.register(new ComboSetting(this, "Arrow type", 1, "2D", "3D"));
-   private final ComboSetting arrowColorType = settingManager.register(new ComboSetting(this, "Arrow color type", 2, "Custom", "Rainbow", "Astolfo"));
-   private final ComboSetting directionColorType = settingManager.register(new ComboSetting(this, "Direction color type", 0, "Custom", "Rainbow", "Astolfo"));
-   private final ComboSetting circleColorType = settingManager.register(new ComboSetting(this, "Circle color type", 0, "Custom", "Rainbow", "Astolfo"));
    private final MultiComboSetting ignoreRules = settingManager.register(
       new MultiComboSetting(this, "Ignore rules").add("Self", true).add("Invisible", false).add("Bots", true).add("Team", false)
    );
@@ -46,24 +43,6 @@ public class Radar extends Module {
          return Radar.this.circle.isEnabled();
       }
    });
-   private final ColorSetting arrowColor = settingManager.register(new ColorSetting(this, "Arrow color", -14506000) {
-      @Override
-      public boolean shouldShow() {
-         return Radar.this.arrowColorType.getCurrentElement() == 0;
-      }
-   });
-   private final ColorSetting directionColor = settingManager.register(new ColorSetting(this, "Direction color", -1) {
-      @Override
-      public boolean shouldShow() {
-         return Radar.this.directionColorType.getCurrentElement() == 0;
-      }
-   });
-   private final ColorSetting circleColor = settingManager.register(new ColorSetting(this, "Circle color", -1) {
-      @Override
-      public boolean shouldShow() {
-         return Radar.this.circleColorType.getCurrentElement() == 0;
-      }
-   });
    private final ColorSetting friendColor = settingManager.register(new ColorSetting(this, "Friend color", -12657535));
    private final ColorSetting targetColor = settingManager.register(new ColorSetting(this, "Target color", -2341314));
    @EventLink
@@ -80,15 +59,7 @@ public class Radar extends Module {
 
       double d4 = this.radius.getCurrentValue() + 15.0F;
       double d5 = d4 * (0.3 + 0.7 * d3);
-      int i = -1;
-      int currentElement2 = this.arrowColorType.getCurrentElement();
-      if (currentElement2 == 0) {
-         i = this.arrowColor.getColor();
-      } else if (currentElement2 == 1) {
-         i = RenderUtils.indexedHsbColor(1, 1, 0.6F, 1.0F, 2000L);
-      } else if (currentElement2 == 2) {
-         i = RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, 2000L);
-      }
+      int i = ModuleManager.themeColor.getColor();
 
       for (EntityPlayer entityPlayer : minecraft.theWorld.playerEntities) {
          if ((!this.ignoreRules.isSelected(0) || entityPlayer != minecraft.thePlayer)
@@ -162,15 +133,7 @@ public class Radar extends Module {
       if (this.circle.isEnabled() || this.direction.isEnabled()) {
          d4 = this.radius.getCurrentValue();
          d5 = d4 * (0.2 + 0.8 * d3);
-         int i4 = -1;
-         int currentElement4 = this.circleColorType.getCurrentElement();
-         if (currentElement4 == 0) {
-            i4 = this.circleColor.getColor();
-         } else if (currentElement4 == 1) {
-            i4 = RenderUtils.indexedHsbColor(1, 1, 0.6F, 1.0F, 2000L);
-         } else if (currentElement4 == 2) {
-            i4 = RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, 2000L);
-         }
+         int i4 = ModuleManager.themeColor.getColor();
 
          for (int i5 = 0; i5 <= 3; i5++) {
             EnumFacing enumFacing2 = this.byHorizontalIndex(i5);
@@ -208,15 +171,7 @@ public class Radar extends Module {
             }
 
             if (this.direction.isEnabled()) {
-               int i8 = -1;
-               int currentElement5 = this.directionColorType.getCurrentElement();
-               if (currentElement5 == 0) {
-                  i8 = this.directionColor.getColor();
-               } else if (currentElement5 == 1) {
-                  i8 = RenderUtils.indexedHsbColor(1, 1, 0.6F, 1.0F, 2000L);
-               } else if (currentElement5 == 2) {
-                  i8 = RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, 2000L);
-               }
+               int i8 = ModuleManager.themeColor.getColor();
 
                String text = String.valueOf(enumFacing2.getName().charAt(0)).toUpperCase(Locale.ROOT);
                GlStateManager.pushMatrix();

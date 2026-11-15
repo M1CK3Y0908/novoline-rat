@@ -16,7 +16,7 @@ import wtf.novoline.event.RenderWorldEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.setting.CheckboxSetting;
-import wtf.novoline.setting.ColorSetting;
+import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.ComboSetting;
 import wtf.novoline.utils.math.InterpolationUtils;
 import wtf.novoline.utils.render.BlurFramebuffer;
@@ -40,12 +40,9 @@ public class Chams extends Module {
       }
    });
    private boolean renderedTargets;
-   public ColorSetting color = settingManager.register(new ColorSetting(this, "Color", -12986881) {
-      @Override
-      public boolean shouldShow() {
-         return Chams.this.chams.getCurrentElement() == 1;
-      }
-   });
+   public int getColor() {
+      return ModuleManager.themeColor.getColor();
+   }
    private BlurFramebuffer blurFramebuffer;
    private BlurFramebuffer maskFramebuffer;
    private final FramebufferManager framebufferManager = new FramebufferManager();

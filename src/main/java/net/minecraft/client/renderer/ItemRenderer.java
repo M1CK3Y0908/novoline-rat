@@ -283,7 +283,7 @@ public class ItemRenderer {
       if (chams2.isEnabled() && chams2.arm.isEnabled() && chams2.chams.getCurrentElement() == 1) {
          GL11.glPushMatrix();
          GlStateManager.disableTexture2D();
-         float[] fArray = RenderUtils.unpackColorNormalized(chams2.color.getColor());
+         float[] fArray = RenderUtils.unpackColorNormalized(chams2.getColor());
          if (chams2.wireframe.isEnabled()) {
             GL11.glPolygonMode(1032, 6913);
          }
@@ -298,7 +298,7 @@ public class ItemRenderer {
 
       renderPlayer.renderRightArm(this.mc.thePlayer);
       if (chams2.isEnabled() && chams2.arm.isEnabled() && chams2.chams.getCurrentElement() == 1) {
-         float[] fArray2 = RenderUtils.unpackColorNormalized(chams2.color.getColor());
+         float[] fArray2 = RenderUtils.unpackColorNormalized(chams2.getColor());
          if (fArray2[3] < 0.1F) {
             GlStateManager.alphaFunc(516, 0.1F);
          }

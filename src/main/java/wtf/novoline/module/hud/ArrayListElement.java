@@ -78,7 +78,6 @@ public class ArrayListElement extends HudElement {
             this.backgroundShadow.render(Minecraft.getMinecraft().getFramebuffer(), scaledResolution2, arrayList2.backgroundColor.getColor(), 15.0F, 5.0F, 1.1F, true);
          }
 
-         int currentElement = arrayList2.colorMode.getCurrentElement();
          List elements = arrayList2.arrayList.getElements();
          boolean selected = ((Option)elements.get(0)).isSelected();
          boolean selected2 = ((Option)elements.get(1)).isSelected();
@@ -92,12 +91,6 @@ public class ArrayListElement extends HudElement {
          this.height = 0.0F;
          this.maxEntryWidth = 0.0F;
          this.width = 0.0F;
-         long l = (long)(arrayList2.cycleTime.getCurrentValue() * 1000.0F);
-         int i = (int)arrayList2.step.getCurrentValue();
-         float currentValue4 = arrayList2.fadeMin.getCurrentValue();
-         float currentValue5 = arrayList2.fadeMax.getCurrentValue();
-         float currentValue6 = arrayList2.saturation.getCurrentValue() / 100.0F;
-         float currentValue7 = arrayList2.brightness.getCurrentValue() / 100.0F;
          int i2 = 0;
          if (flag3) {
             for (Module module2 : ModuleManager.modulesByWidth) {
@@ -124,21 +117,9 @@ public class ArrayListElement extends HudElement {
                float arrayListOffsetY = module3.getArrayListOffsetY();
                float arrayListOffsetX = module3.getArrayListOffsetX();
                float f5 = flag2 ? this.getX() + arrayListOffsetX - f3 + currentValue3 : this.getX() + this.getWidth() - arrayListOffsetX - currentValue3;
-               int color = arrayList2.main.getColor();
+               int color = ModuleManager.themeColor.getColor(f5, this.getY() + arrayListOffsetY);
                int color2 = arrayList2.status.getColor();
-               int color3 = arrayList2.rightLineColor.getColor();
-               String mode = arrayList2.colorMode.getCurrentElementAsString();
-               if (mode.equals("Theme")) {
-                  color = color3 = ModuleManager.themeColor.getColor(f5, this.getY() + arrayListOffsetY);
-               } else if (mode.equals("Fade")) {
-                  color = color3 = RenderUtils.pulseBrightness(color, currentValue4, currentValue5, i2, i, l);
-               } else if (mode.equals("Rainbow")) {
-                  color = color3 = RenderUtils.indexedHsbColor(i2, i, currentValue6, currentValue7, l);
-               } else if (mode.equals("Astolfo")) {
-                  color = color3 = RenderUtils.indexedHsbColorMirrored(i2, i, currentValue6, currentValue7, l);
-               } else if (mode.equals("Gradient")) {
-                  color = color3 = RenderUtils.pulseBetweenColors(arrayList2.gradientFirst.getColor(), arrayList2.gradientSecond.getColor(), i2, i, l);
-               }
+               int color3 = color;
                final int finalColor = color;
 
                if (arrayListOffsetX > -2.0F) {
@@ -173,7 +154,7 @@ public class ArrayListElement extends HudElement {
                               this.y + arrayListOffsetY,
                               f5 + f6,
                               this.y + arrayListOffsetY + f2,
-                              RenderUtils.withAlphaFraction(mode.equals("Theme") ? finalColor : arrayList2.main.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F)
+                              RenderUtils.withAlphaFraction(finalColor, arrayList2.textGlowAlpha.getCurrentValue() / 255.0F)
                            )
                         );
                   }
@@ -200,7 +181,7 @@ public class ArrayListElement extends HudElement {
                .render(
                   Minecraft.getMinecraft().getFramebuffer(),
                   scaledResolution2,
-                  RenderUtils.withAlphaFraction(arrayList2.colorMode.getCurrentElementAsString().equals("Theme") ? ModuleManager.themeColor.getColor() : arrayList2.main.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F),
+                  RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(), arrayList2.textGlowAlpha.getCurrentValue() / 255.0F),
                   arrayList2.textGlowRadius.getCurrentValue(),
                   arrayList2.textGlowSigma.getCurrentValue(),
                   1.0F,

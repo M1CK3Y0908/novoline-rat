@@ -12,7 +12,7 @@ import wtf.novoline.event.RenderWorldEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.setting.CheckboxSetting;
-import wtf.novoline.setting.ColorSetting;
+import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.ComboSetting;
 import wtf.novoline.utils.render.RenderUtils;
 
@@ -25,7 +25,6 @@ public class ItemESP extends Module {
       }
    });
    private final CheckboxSetting itemName = settingManager.register(new CheckboxSetting(this, "Item name", false));
-   private final ColorSetting color = settingManager.register(new ColorSetting(this, "Color", -12986881));
    @EventLink
    public final Listener<RenderWorldEvent> onRenderWorld = renderWorldEvent -> {
       if (this.itemESP.getCurrentElement() == 1) {
@@ -34,7 +33,7 @@ public class ItemESP extends Module {
                double d = (entity2.posX - entity2.prevPosX) * (renderWorldEvent.partialTicks - 1.0F);
                double d2 = (entity2.posY - entity2.prevPosY) * (renderWorldEvent.partialTicks - 1.0F);
                double d3 = (entity2.posZ - entity2.prevPosZ) * (renderWorldEvent.partialTicks - 1.0F);
-               RenderUtils.drawBoxOutlineAtRenderPos(entity2.getEntityBoundingBox().offset(d, d2, d3), this.color.getColor(), renderWorldEvent.partialTicks);
+               RenderUtils.drawBoxOutlineAtRenderPos(entity2.getEntityBoundingBox().offset(d, d2, d3), ModuleManager.themeColor.getColor(), renderWorldEvent.partialTicks);
             }
          }
       }
@@ -66,7 +65,7 @@ public class ItemESP extends Module {
                float[] fArray2 = RenderUtils.worldToScreen(vector3f2.x, vector3f2.y, vector3f2.z);
                if (fArray2 != null) {
                   float f5 = Math.abs(fArray[1] - fArray2[1]);
-                  int color2 = this.color.getColor();
+                  int color2 = ModuleManager.themeColor.getColor();
                   if (currentElement == 0) {
                      if (this.setting2dMode.getCurrentElement() == 0) {
                         RenderUtils.drawBorderedRect(
@@ -84,7 +83,7 @@ public class ItemESP extends Module {
                      } else if (this.setting2dMode.getCurrentElement() == 1) {
                         RenderUtils.drawArc(fArray[0], fArray[1], f5 * 0.7F + 0.5F, 1.0F, -1442840576, 360);
                         RenderUtils.drawArc(fArray[0], fArray[1], f5 * 0.7F - 0.5F, 1.0F, -1442840576, 360);
-                        RenderUtils.drawArc(fArray[0], fArray[1], f5 * 0.7F, 1.0F, this.color.getColor(), 360);
+                        RenderUtils.drawArc(fArray[0], fArray[1], f5 * 0.7F, 1.0F, ModuleManager.themeColor.getColor(), 360);
                      }
                   }
 

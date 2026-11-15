@@ -29,9 +29,7 @@ public class MenuLayout {
    }
 
    public int getDesaturationColor() {
-      return ModuleManager.clickGui.astolfoMode.isEnabled()
-         ? RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, (long)ModuleManager.clickGui.astolfoCycleTime.getCurrentValue())
-         : ModuleManager.clickGui.desaturation.getColor();
+      return ModuleManager.themeColor.getColor();
    }
 
    public int getPanelBlurRadius() {

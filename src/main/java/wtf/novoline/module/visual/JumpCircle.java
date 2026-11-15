@@ -14,23 +14,14 @@ import wtf.novoline.event.RenderWorldEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.module.ModuleManager;
-import wtf.novoline.setting.ColorSetting;
-import wtf.novoline.setting.ComboSetting;
 import wtf.novoline.setting.NumberSetting;
 import wtf.novoline.utils.math.SmoothingUtils;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class JumpCircle extends Module {
    private final List<JumpCircle.Holder> circles = new CopyOnWriteArrayList<>();
-   public final ComboSetting colorMode = settingManager.register(new ComboSetting(this, "Color Mode", 0, "Theme", "Custom"));
    private final NumberSetting speed = settingManager.register(new NumberSetting(this, "Speed", 0.5F, 0.0F, 5.0F));
    private final NumberSetting radius = settingManager.register(new NumberSetting(this, "Radius", 3.0F, 0.0F, 20.0F));
-   private final ColorSetting color = settingManager.register(new ColorSetting(this, "Color", -10262799) {
-      @Override
-      public boolean shouldShow() {
-         return JumpCircle.this.colorMode.getCurrentElementAsString().equals("Custom");
-      }
-   });
    @EventLink
    public final Listener<JumpEvent> onJump = jumpEvent -> this.circles
       .add(new JumpCircle.Holder(minecraft.thePlayer.posX, minecraft.thePlayer.posY + 0.05, minecraft.thePlayer.posZ));
@@ -85,9 +76,7 @@ public class JumpCircle extends Module {
       public float alpha;
 
       public void render() {
-         int baseCol = JumpCircle.this.colorMode.getCurrentElementAsString().equals("Theme")
-            ? ModuleManager.themeColor.getColor(this.x, this.z)
-            : JumpCircle.this.color.getColor();
+         int baseCol = ModuleManager.themeColor.getColor(this.x, this.z);
          float[] fArray = RenderUtils.unpackColorNormalized(baseCol);
          GlStateManager.color(fArray[0], fArray[1], fArray[2], this.alpha / 255.0F);
          this.radius = SmoothingUtils.approach((float)this.radius, JumpCircle.this.radius.getCurrentValue(), JumpCircle.this.speed.getCurrentValue());

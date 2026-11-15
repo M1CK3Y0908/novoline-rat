@@ -10,12 +10,7 @@ public class ClickGuiTheme {
 
    public int getSecondaryColor(boolean flag) {
       if (flag) {
-         if (ModuleManager.clickGui.colorMode.getCurrentElementAsString().equals("Theme")) {
-            return ModuleManager.themeColor.getColor();
-         }
-         return ModuleManager.clickGui.astolfoMode.isEnabled()
-            ? RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, (long)ModuleManager.clickGui.astolfoCycleTime.getCurrentValue())
-            : ModuleManager.clickGui.extra.getColor();
+         return ModuleManager.themeColor.getColor();
       }
       return -1438102703;
    }
@@ -30,12 +25,7 @@ public class ClickGuiTheme {
 
    public int getPrimaryColor(boolean flag) {
       if (flag) {
-         if (ModuleManager.clickGui.colorMode.getCurrentElementAsString().equals("Theme")) {
-            return ModuleManager.themeColor.getColor();
-         }
-         return ModuleManager.clickGui.astolfoMode.isEnabled()
-            ? RenderUtils.indexedHsbColorMirrored(1, 1, 0.6F, 1.0F, (long)ModuleManager.clickGui.astolfoCycleTime.getCurrentValue())
-            : ModuleManager.clickGui.primary.getColor();
+         return ModuleManager.themeColor.getColor();
       }
       return -1434550140;
    }

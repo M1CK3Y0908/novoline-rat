@@ -348,7 +348,7 @@ public class GuiIngame extends Gui {
                      NameUtils.stripFormatting(text3),
                      i3,
                      i5,
-                     ModuleManager.watermark.colorMode.getCurrentElementAsString().equals("Theme") ? ModuleManager.themeColor.getColor(i3, i5) : RenderUtils.pulseBrightness(ModuleManager.watermark.main.getColor(), 0.7F, 1.0F, 1, 1, 3000L)
+                     ModuleManager.themeColor.getColor(i3, i5)
                   );
             } else {
                this.getFontRenderer().getInt(text3, i3, i5, -1);
