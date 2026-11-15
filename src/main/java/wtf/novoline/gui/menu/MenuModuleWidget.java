@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import wtf.novoline.Novoline;
@@ -96,9 +97,6 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
    }
 
    public float getBottomY() {
-      if (this.expanded && this.expandProgress >= 0.98F) {
-         return this.y + getHeaderHeight() + this.getSettingsHeight();
-      }
       return this.y + getHeaderHeight() + this.getSettingsHeight() * this.expandProgress;
    }
 
@@ -125,6 +123,7 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          if (Math.abs(this.expandProgress - target) <= 0.005F) {
             this.expandProgress = target;
          }
+         this.expandProgress = MathHelper.clamp_float(this.expandProgress, 0.0F, 1.0F);
       } else {
          this.expandProgress = this.expanded ? 1.0F : 0.0F;
       }
@@ -144,16 +143,6 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
 
    public float getY() {
       return this.y;
-   }
-
-   public boolean isSettingVisible(MenuSettingWidget menuSettingWidget, float visibleBottom) {
-      if (!menuSettingWidget.getModuleSetting().shouldShow()) {
-         return false;
-      }
-      if (this.expanded && this.expandProgress >= 0.98F) {
-         return true;
-      }
-      return menuSettingWidget.getY() + menuSettingWidget.getHeight() <= visibleBottom + 1.0F;
    }
 
    @Override
@@ -178,24 +167,32 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          GlStateManager.disableBlend();
       }
 
-      if (this.expandProgress > 0.01F) {
+      if (this.expandProgress > 0.001F) {
          this.layoutSettings();
-         float visibleBottom = this.y + getHeaderHeight() + this.getSettingsHeight(f, f2, f3) * this.expandProgress;
+         float settingsVisibleHeight = this.getSettingsHeight(f, f2, f3) * this.expandProgress;
+         boolean needScissor = this.expandProgress < 1.0F;
+
+         if (needScissor) {
+            RenderUtils.enableScissorDoubleScale(this.x, this.y + getHeaderHeight(), getWidth(), settingsVisibleHeight);
+         }
 
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (this.isSettingVisible(menuSettingWidget, visibleBottom)) {
+            if (menuSettingWidget.getModuleSetting().shouldShow()) {
                menuSettingWidget.render(f, f2, f3);
             }
          }
 
-         float settingsVisibleHeight = this.getSettingsHeight(f, f2, f3) * this.expandProgress;
+         if (needScissor) {
+            RenderUtils.disableScissor();
+         }
+
          if (!this.settingWidgets.isEmpty() && settingsVisibleHeight >= 4.0F) {
             RenderUtils.drawVerticalGradientRect(
                this.x, this.y + getHeaderHeight(), this.x + getWidth(), this.y + getHeaderHeight() + 4.0F, 1610612736, 3092790
             );
-            float gradientBottom = (this.expanded && this.expandProgress >= 0.98F) ? this.bottomY : visibleBottom;
+            float visibleBottom = this.y + getHeaderHeight() + settingsVisibleHeight;
             RenderUtils.drawVerticalGradientRect(
-               this.x, gradientBottom - 4.0F, this.x + getWidth(), gradientBottom, 3092790, 1610612736
+               this.x, visibleBottom - 4.0F, this.x + getWidth(), visibleBottom, 3092790, 1610612736
             );
          }
       }
@@ -230,9 +227,9 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
       }
 
       float visibleBottom = this.y + getHeaderHeight() + this.getSettingsHeight() * this.expandProgress;
-      if (this.expandProgress > 0.01F && f2 >= this.y + getHeaderHeight() && (this.expandProgress >= 0.98F || f2 <= visibleBottom)) {
+      if (this.expandProgress > 0.01F && f2 >= this.y + getHeaderHeight() && f2 <= visibleBottom) {
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (this.isSettingVisible(menuSettingWidget, visibleBottom)) {
+            if (menuSettingWidget.getModuleSetting().shouldShow()) {
                menuSettingWidget.handleMouseClick(f, f2, i);
             }
          }
@@ -255,9 +252,9 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          iRectRenderer.addRect(this.x, this.y, getWidth(), getHeaderHeight(), this.menuClickGuiScreen.getClickGuiTheme().getModuleBackgroundColor());
       }
 
-      if (this.expandProgress > 0.01F) {
+      if (this.expandProgress > 0.001F) {
          float totalSettingsHeight = this.getSettingsHeight();
-         float settingsVisibleHeight = (this.expanded && this.expandProgress >= 0.98F) ? totalSettingsHeight : totalSettingsHeight * this.expandProgress;
+         float settingsVisibleHeight = totalSettingsHeight * this.expandProgress;
          if (settingsVisibleHeight > 0.5F) {
             iRectRenderer.addRect(
                this.x,
@@ -289,17 +286,17 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          novoline.getNotificationManager()
             .show(
                new Notification(
-                  NotificationType.INFO,
-                  "Click GUI",
-                  "Feature " + this.module.getName() + " was " + (flag ? "unbound" : "bound to " + Keyboard.getKeyName(i)),
-                  3000L
-               )
-            );
-         return false;
-      } else {
-         return true;
-      }
-   }
+                   NotificationType.INFO,
+                   "Click GUI",
+                   "Feature " + this.module.getName() + " was " + (flag ? "unbound" : "bound to " + Keyboard.getKeyName(i)),
+                   3000L
+                )
+             );
+          return false;
+       } else {
+          return true;
+       }
+    }
 
    public float getX() {
       return this.x;
@@ -349,12 +346,23 @@ public class MenuModuleWidget implements MenuWidget, ExpandableWidget {
          floatSupplier.drawStringCentered(text, this.x + getWidth() / 2.0F, this.y + getHeaderHeight() / 2.0F + 1.0F, this.labelColor);
       }
 
-      if (this.expandProgress > 0.01F) {
-         float visibleBottom = this.y + getHeaderHeight() + this.getSettingsHeight() * this.expandProgress;
+      if (widgetType == WidgetType.REGULAR && this.expandProgress > 0.001F) {
+         boolean needScissor = this.expandProgress < 1.0F;
+         if (needScissor) {
+            floatSupplier.flush();
+            float settingsVisibleHeight = this.getSettingsHeight() * this.expandProgress;
+            RenderUtils.enableScissorDoubleScale(this.x, this.y + getHeaderHeight(), getWidth(), settingsVisibleHeight);
+         }
+
          for (MenuSettingWidget menuSettingWidget : this.settingWidgets) {
-            if (this.isSettingVisible(menuSettingWidget, visibleBottom)) {
+            if (menuSettingWidget.getModuleSetting().shouldShow()) {
                menuSettingWidget.renderText(floatSupplier, widgetType, f, flag);
             }
+         }
+
+         if (needScissor) {
+            floatSupplier.flush();
+            RenderUtils.disableScissor();
          }
       }
    }

@@ -1,6 +1,8 @@
 package wtf.novoline.utils.render.shape;
 
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import wtf.novoline.utils.render.CFontRenderer;
 import wtf.novoline.utils.render.shader.FloatSupplier;
 
@@ -11,6 +13,14 @@ public class ShaderRoundedRectRenderer extends RoundedRectRenderer implements Fl
    public void draw() {
       super.draw();
       GlStateManager.popMatrix();
+   }
+
+   @Override
+   public void flush() {
+      if (this.worldRenderer.getVertexCount() > 0) {
+         Tessellator.getInstance().draw();
+         this.worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+      }
    }
 
    public ShaderRoundedRectRenderer(CFontRenderer cFontRenderer2) {

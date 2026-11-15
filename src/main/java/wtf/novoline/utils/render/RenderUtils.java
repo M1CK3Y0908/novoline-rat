@@ -86,6 +86,15 @@ public class RenderUtils {
       GL11.glScissor(i * 2, minecraft.displayHeight - i2 * 2, i3 * 2, i4 * 2);
    }
 
+   public static void enableScissorDoubleScale(float f, float f2, float f3, float f4) {
+      GL11.glEnable(3089);
+      int i = Math.round(f * 2.0F);
+      int i2 = Math.round((f2 + f4) * 2.0F);
+      int i3 = Math.round(f3 * 2.0F);
+      int i4 = Math.round(f4 * 2.0F);
+      GL11.glScissor(i, minecraft.displayHeight - i2, Math.max(0, i3), Math.max(0, i4));
+   }
+
    public static void drawScaledTexturedRect(
       float f, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10
    ) {

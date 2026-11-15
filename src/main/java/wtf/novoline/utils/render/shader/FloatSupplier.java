@@ -3,6 +3,9 @@ package wtf.novoline.utils.render.shader;
 public interface FloatSupplier {
    long UNUSED_LONG_CONSTANT = 85272024331088L;
 
+   default void flush() {
+   }
+
    default float drawStringLeftMiddle(String text, float f, float f2, int i) {
       return this.drawStringAnchored(text, f, f2, i, 0.0F, 0.5F);
    }
