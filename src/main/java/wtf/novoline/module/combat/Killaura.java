@@ -80,10 +80,10 @@ public class Killaura extends Module {
    private final NumberSetting aps = settingManager.register(new NumberSetting(this, "APS", 12.0F, 1.0F, 20.0F));
    private final NumberSetting autoBlockAps = settingManager.register(new NumberSetting(this, "Auto Block APS", 10.0F, 1.0F, 20.0F));
    private final NumberSetting autoBlockLag = settingManager.register(new NumberSetting(this, "Auto Block Lag", 0, 0, 100));
-   private final NumberSetting range = settingManager.register(new NumberSetting(this, "Attack Range", 3.1F, 1.0F, 6.0F));
-   private final NumberSetting swingRange = settingManager.register(new NumberSetting(this, "Swing Range", 3.3F, 1.0F, 8.0F));
-   private final NumberSetting blockRange = settingManager.register(new NumberSetting(this, "Block Range", 3.5F, 1.0F, 8.0F));
-   private final NumberSetting wallRange = settingManager.register(new NumberSetting(this, "Wall Range", 3.0F, 1.0F, 6.0F));
+   private final NumberSetting range = settingManager.register(new NumberSetting(this, "Attack Range", 3.1F, 3.0F, 6.0F));
+   private final NumberSetting swingRange = settingManager.register(new NumberSetting(this, "Swing Range", 3.3F, 3.0F, 6.0F));
+   private final NumberSetting blockRange = settingManager.register(new NumberSetting(this, "Block Range", 3.5F, 3.0F, 6.0F));
+   private final NumberSetting wallRange = settingManager.register(new NumberSetting(this, "Wall Range", 3.0F, 3.0F, 6.0F));
    private final NumberSetting fov = settingManager.register(new NumberSetting(this, "FOV", 360, 30, 360));
    private final NumberSetting smoothness = settingManager.register(new NumberSetting(this, "Smoothing", 0.0F, 0.0F, 10.0F));
    private final NumberSetting switchDelay = settingManager.register(new NumberSetting(this, "Switch Delay", 300, 0, 1000));
