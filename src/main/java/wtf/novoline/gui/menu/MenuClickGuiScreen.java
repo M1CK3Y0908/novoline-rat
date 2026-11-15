@@ -124,28 +124,34 @@ public class MenuClickGuiScreen extends GuiScreen {
 
       this.animation.update();
       this.animation2.update();
+      this.visibility = MathHelper.clamp_float((float)this.animation.getValue(), 0.0F, 100.0F);
       ScaledResolution scaledResolution2 = new ScaledResolution(Minecraft.getMinecraft());
       if (this.visibility > 0.0F && clickGui2.backgroundSettings.isSelected(3)) {
          RenderUtils.resetColor();
          Entry entry2 = clickGui2.entry;
-         this.backgroundManager.loadTexture(entry2);
-         float width = entry2.getMetadata().getWidth();
-         float height = entry2.getMetadata().getHeight();
-         double d = 0.45 + clickGui2.imageScale.getCurrentValue();
-         double d2 = width / d / Display.getWidth();
-         double d3 = height / d / Display.getHeight();
-         int i = (int)(scaledResolution2.getScaledWidth() * d2);
-         int i2 = (int)(scaledResolution2.getScaledHeight() * d3);
-         Gui.drawModalRectWithCustomSizedTexture(
-            scaledResolution2.getScaledWidth() - i + (int)this.animation2.getValue(), scaledResolution2.getScaledHeight() - i2 + 5, 1.0F, 1.0F, i, i2, i, i2
-         );
+         if (entry2 != null && entry2.getMetadata() != null) {
+            this.backgroundManager.loadTexture(entry2);
+            float width = entry2.getMetadata().getWidth();
+            float height = entry2.getMetadata().getHeight();
+            double d = 0.45 + clickGui2.imageScale.getCurrentValue();
+            double d2 = width / d / Display.getWidth();
+            double d3 = height / d / Display.getHeight();
+            int i = (int)(scaledResolution2.getScaledWidth() * d2);
+            int i2 = (int)(scaledResolution2.getScaledHeight() * d3);
+            GlStateManager.enableBlend();
+            RenderUtils.applyBlendFunc();
+            GlStateManager.color(1.0F, 1.0F, 1.0F, this.visibility / 100.0F);
+            Gui.drawModalRectWithCustomSizedTexture(
+               scaledResolution2.getScaledWidth() - i + (int)this.animation2.getValue(), scaledResolution2.getScaledHeight() - i2 + 5, 1.0F, 1.0F, i, i2, i, i2
+            );
+            RenderUtils.resetColor();
+         }
       }
 
-      this.visibility = MathHelper.clamp_float((float)this.animation.getValue(), 0.0F, 100.0F);
       if (this.closing) {
-         if (this.visibility > 0.0F) {
+         if (this.visibility > 0.0F && (this.animation.isAnimating() || !this.resourcesReleased)) {
             this.renderLayers(framebuffer3, 0, 0, f);
-         } else if (this.visibility == 0.0F && !this.resourcesReleased) {
+         } else if (!this.animation.isAnimating() && !this.resourcesReleased) {
             this.releaseResources();
             this.resourcesReleased = true;
          }
@@ -203,10 +209,8 @@ public class MenuClickGuiScreen extends GuiScreen {
             }
          }
 
-         if (i == this.clickGui.getKeyBind()) {
-            this.clickGui.disable();
+         if (i == this.clickGui.getKeyBind() || i == 1) {
             this.mc.displayGuiScreen(null);
-            this.mc.setIngameFocus();
          } else {
             super.keyTyped(c, i);
          }
@@ -418,7 +422,7 @@ public class MenuClickGuiScreen extends GuiScreen {
          GlStateManager.enableTexture2D();
          this.framebuffer.bindFramebufferTexture();
          GlStateManager.pushMatrix();
-         double d3 = this.animation.getValue() / 100.0 * 0.2 + 0.8;
+         double d3 = MathHelper.clamp_double(this.animation.getValue() / 100.0, 0.0, 1.0) * 0.2 + 0.8;
          GlStateManager.translate(scaledResolution2.getScaledWidth_double() / 2.0, scaledResolution2.getScaledHeight_double() / 2.0, 0.0);
          GlStateManager.scale(d3, d3, 1.0);
          GlStateManager.translate(-scaledResolution2.getScaledWidth_double() / 2.0, -scaledResolution2.getScaledHeight_double() / 2.0, 0.0);
@@ -427,10 +431,12 @@ public class MenuClickGuiScreen extends GuiScreen {
          GlStateManager.alphaFunc(516, 0.1F);
          GlStateManager.disableBlend();
          RenderUtils.applyBlendFunc();
+         RenderUtils.resetColor();
       }
 
       Novoline.framebufferManager.assertAllReleased();
       GlStateManager.popMatrix();
+      RenderUtils.resetColor();
    }
 
    public void rebuildPanels() {
@@ -454,13 +460,20 @@ public class MenuClickGuiScreen extends GuiScreen {
 
    @Override
    public void startClosing() {
+      if (this.closing) {
+         return;
+      }
       this.closing = true;
-      this.clickGui.setEnabled(false);
+      if (this.clickGui.isEnabled()) {
+         this.clickGui.setEnabled(false);
+      }
       this.animation.unlock();
-      this.animation.start(this.animation.getValue(), 0.0, 500L, Easing.backInOut);
+      this.animation.start(this.animation.getValue(), 0.0, 300L, Easing.cubicInOut);
       Entry entry2 = this.clickGui.entry;
-      this.animation2.unlock();
-      this.animation2.start(this.animation2.getValue(), entry2.getMetadata().getWidth(), 400L, Easing.cubicInOut);
+      if (entry2 != null && entry2.getMetadata() != null) {
+         this.animation2.unlock();
+         this.animation2.start(this.animation2.getValue(), entry2.getMetadata().getWidth(), 300L, Easing.cubicInOut);
+      }
    }
 
    @Override
