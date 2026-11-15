@@ -48,7 +48,6 @@ public class Killaura extends Module {
 
    public enum AutoBlockMode {
       Off(false, false, false),
-      Manual(false, false, false),
       Vanilla(false, false, false),
       Damage(false, false, false),
       Fake(false, false, false),
@@ -75,7 +74,7 @@ public class Killaura extends Module {
    private final ComboSetting sort = settingManager.register(new ComboSetting(this, "Sort by", 0, "Distance", "Health", "Hurt_time", "Yaw"));
    private final ComboSetting rotationMode = settingManager.register(new ComboSetting(this, "Rotation", 0, "Silent", "Lock_view", "None"));
    private final ComboSetting autoBlockMode = settingManager.register(
-      new ComboSetting(this, "Auto block mode", 5, "Off", "Manual", "Vanilla", "Damage", "Fake", "Interact_A", "Interact_B", "Interact_C", "Interact_D", "Swap", "Dual")
+      new ComboSetting(this, "Auto block mode", 4, "Off", "Vanilla", "Damage", "Fake", "Interact_A", "Interact_B", "Interact_C", "Interact_D", "Swap", "Dual")
    );
    private final NumberSetting aps = settingManager.register(new NumberSetting(this, "APS", 12.0F, 1.0F, 20.0F));
    private final NumberSetting autoBlockAps = settingManager.register(new NumberSetting(this, "Auto block APS", 10.0F, 1.0F, 20.0F));
@@ -95,13 +94,15 @@ public class Killaura extends Module {
    private final MultiComboSetting filters = settingManager.register(
       new MultiComboSetting(this, "Filters").add("Teams", true).add("Armor", false)
    );
-   private final CheckboxSetting disableInInventory = settingManager.register(new CheckboxSetting(this, "Disable in inventory", true));
-   private final CheckboxSetting disableWhileBlocking = settingManager.register(new CheckboxSetting(this, "Disable while blocking", false));
-   private final CheckboxSetting disableWhileMining = settingManager.register(new CheckboxSetting(this, "Disable while mining", false));
-   private final CheckboxSetting disableSprintMidair = settingManager.register(new CheckboxSetting(this, "Disable sprint midair", false));
+   private final MultiComboSetting stopRules = settingManager.register(
+      new MultiComboSetting(this, "Stop rules")
+         .add("In inventory", true)
+         .add("While blocking", false)
+         .add("While mining", false)
+         .add("Sprint midair", false)
+   );
    private final CheckboxSetting hitThroughBlocks = settingManager.register(new CheckboxSetting(this, "Hit through blocks", false));
    private final CheckboxSetting ignoreTeammates = settingManager.register(new CheckboxSetting(this, "Ignore teammates", true));
-   private final CheckboxSetting manualBlock = settingManager.register(new CheckboxSetting(this, "Manual block", false));
    private final CheckboxSetting prioritizeEnemies = settingManager.register(new CheckboxSetting(this, "Prioritize enemies", false));
    private final CheckboxSetting requireMouseDown = settingManager.register(new CheckboxSetting(this, "Require mouse down", false));
    private final CheckboxSetting silentSwing = settingManager.register(new CheckboxSetting(this, "Silent swing", false));
@@ -170,6 +171,11 @@ public class Killaura extends Module {
       return opt != null && opt.isSelected();
    }
 
+   private boolean isStopRuleSelected(String name) {
+      MultiComboSetting.Option opt = this.stopRules.byName(name);
+      return opt != null && opt.isSelected();
+   }
+
    @Override
    protected void onEnable() {
       this.setSuffix(this.mode.getCurrentElementAsString());
@@ -199,7 +205,7 @@ public class Killaura extends Module {
 
    @Override
    protected void onDisable() {
-      if (getAutoBlockMode() != AutoBlockMode.Manual && !isRightDown() && minecraft.thePlayer != null && minecraft.thePlayer.isUsingItem()) {
+      if (!isRightDown() && minecraft.thePlayer != null && minecraft.thePlayer.isUsingItem()) {
          setBlocking(false, false);
       }
       if (this.blockState != -1) {
@@ -254,7 +260,7 @@ public class Killaura extends Module {
       updateAps();
 
       boolean canAttack = exists(this.target);
-      if (this.disableInInventory.isEnabled() && minecraft.currentScreen != null) {
+      if (isStopRuleSelected("In inventory") && minecraft.currentScreen != null) {
          canAttack = false;
       }
 
@@ -306,7 +312,7 @@ public class Killaura extends Module {
          this.attackTimer.reset();
          setDelay(false);
          if (this.target != null) {
-            if (!(this.disableSprintMidair.isEnabled() && !minecraft.thePlayer.onGround && minecraft.thePlayer.isSprinting())) {
+            if (!(isStopRuleSelected("Sprint midair") && !minecraft.thePlayer.onGround && minecraft.thePlayer.isSprinting())) {
                this.attackQueued = true;
             }
          }
@@ -368,7 +374,7 @@ public class Killaura extends Module {
          boolean swing = true;
          boolean silent = this.silentSwing.isEnabled();
 
-         if (this.disableWhileBlocking.isEnabled() && PlayerUtils.holdingSword() && minecraft.thePlayer.isBlocking()) {
+         if (isStopRuleSelected("While blocking") && PlayerUtils.holdingSword() && minecraft.thePlayer.isBlocking()) {
             swing = false;
             attack = false;
          }
@@ -681,7 +687,7 @@ public class Killaura extends Module {
    };
 
    private void findTarget() {
-      if (this.disableInInventory.isEnabled() && minecraft.currentScreen != null) {
+      if (isStopRuleSelected("In inventory") && minecraft.currentScreen != null) {
          setTarget(null);
          return;
       }
@@ -693,7 +699,7 @@ public class Killaura extends Module {
          setTarget(null);
          return;
       }
-      if (this.disableWhileMining.isEnabled() && Mouse.isCreated() && Mouse.isButtonDown(0) && minecraft.objectMouseOver != null && minecraft.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+      if (isStopRuleSelected("While mining") && Mouse.isCreated() && Mouse.isButtonDown(0) && minecraft.objectMouseOver != null && minecraft.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
          setTarget(null);
          return;
       }
@@ -949,7 +955,7 @@ public class Killaura extends Module {
    }
 
    public boolean blockAllowed() {
-      return !this.manualBlock.isEnabled() || isRightDown();
+      return getAutoBlockMode() != AutoBlockMode.Off;
    }
 
    private boolean isRightDown() {
