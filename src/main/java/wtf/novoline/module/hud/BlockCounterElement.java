@@ -10,6 +10,7 @@ import wtf.novoline.Novoline.Fonts;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.module.world.Scaffold;
 import wtf.novoline.utils.render.FilledPolygonRenderer;
+import wtf.novoline.utils.render.FontAdapter;
 
 public class BlockCounterElement extends HudElement {
    private final Scaffold scaffold;
@@ -26,7 +27,8 @@ public class BlockCounterElement extends HudElement {
             return item2 instanceof ItemBlock && ((ItemBlock)item2).getBlock().isFullCube();
          }).mapToInt(itemStack -> itemStack.stackSize).sum();
          String text = l + " blocks";
-         this.halfWidth = Fonts.rubikSemiboldSize16.getStringWidth(text) / 2.0F + 6.0F;
+         FontAdapter fontAdapter = this.scaffold.getCounterFont();
+         this.halfWidth = fontAdapter.getStringWidth(text) / 2.0F + 6.0F;
          FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
          filledPolygonRenderer.putRoundedRect(f2 - this.halfWidth, f3, this.halfWidth * 2.0F, 20.0F, 8.0F, Integer.MIN_VALUE);
          filledPolygonRenderer.draw();
@@ -39,11 +41,11 @@ public class BlockCounterElement extends HudElement {
             i = -566196;
          }
 
-         Fonts.rubikSemiboldSize16
+         fontAdapter
             .drawString(
                text,
-               f2 - Fonts.rubikSemiboldSize16.getStringWidth(text) / 2.0F,
-               f3 + 10.0F - Fonts.rubikSemiboldSize16.getHeight() / 2.0F + 1.0F,
+               f2 - fontAdapter.getStringWidth(text) / 2.0F,
+               f3 + 10.0F - fontAdapter.getHeight() / 2.0F + 1.0F,
                i
             );
       }

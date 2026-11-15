@@ -100,6 +100,10 @@ import wtf.novoline.utils.language.Language.RuRuType;
 import wtf.novoline.utils.notification.NotificationManager;
 import wtf.novoline.utils.proxy.ProxyList;
 import wtf.novoline.utils.render.CFontRenderer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Locale;
+import wtf.novoline.utils.render.FontAdapter;
+import wtf.novoline.utils.render.VanillaFontAdapter;
 import wtf.novoline.utils.render.FramebufferManager;
 import java.io.InputStream;
 import wtf.novoline.support.SneakyThrow;
@@ -531,6 +535,48 @@ public class Novoline {
       public static CFontRenderer museoSans500Size14;
       public static CFontRenderer pixelSize8;
       public static final ResourceLocation MONTSERRAT_REGULAR = new ResourceLocation("novoline", "fonts/montserrat-regular.ttf");
+      public static final ResourceLocation MONTSERRAT_SEMIBOLD = new ResourceLocation("novoline", "fonts/montserrat-semibold.ttf");
+      public static final String[] FONT_NAMES = new String[]{"Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"};
+      private static final Map<String, CFontRenderer> DYNAMIC_FONTS = new ConcurrentHashMap<>();
+
+      public static FontAdapter getFont(String fontName, float size, boolean bold) {
+         if (fontName == null || fontName.equalsIgnoreCase("Minecraft") || fontName.equalsIgnoreCase("Vanilla")) {
+            return VanillaFontAdapter.INSTANCE;
+         }
+
+         int intSize = Math.round(size);
+         String key = fontName.toLowerCase(Locale.ROOT) + ":" + intSize + ":" + bold;
+         CFontRenderer cached = DYNAMIC_FONTS.get(key);
+         if (cached != null) {
+            return cached;
+         }
+
+         ResourceLocation res;
+         String lower = fontName.toLowerCase(Locale.ROOT);
+         if (lower.contains("montserrat")) {
+            res = bold ? MONTSERRAT_SEMIBOLD : MONTSERRAT_REGULAR;
+         } else if (lower.contains("museo")) {
+            res = bold ? MUSEO_SANS_700 : MUSEO_SANS_500;
+         } else if (lower.contains("roboto")) {
+            res = ROBOTO_REGULAR;
+         } else if (lower.contains("pixel")) {
+            res = PIXEL;
+         } else {
+            res = bold ? RUBIK_SEMIBOLD : RUBIK_REGULAR;
+         }
+
+         try {
+            CFontRenderer created = createCFontRenderer(res, (float) intSize);
+            DYNAMIC_FONTS.put(key, created);
+            return created;
+         } catch (Throwable t) {
+            return rubikRegularSize16 != null ? rubikRegularSize16 : VanillaFontAdapter.INSTANCE;
+         }
+      }
+
+      public static FontAdapter getFont(String fontName, float size) {
+         return getFont(fontName, size, false);
+      }
       public static CFontRenderer museoSans900Size32;
       public static final ResourceLocation RUBIK_SEMIBOLD = new ResourceLocation("novoline", "fonts/rubik-semibold.ttf");
       public static CFontRenderer rubikSemiboldSize18;

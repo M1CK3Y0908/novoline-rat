@@ -113,11 +113,7 @@ public class TargetHudElement extends HudElement {
             }
 
             int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
-            if (currentElement == 3) {
-               this.nameWidth = (float)minecraft.fontRendererObj.getInt3(name);
-            } else {
-               this.nameWidth = Fonts.rubikSemiboldSize18.getStringWidth(name);
-            }
+            this.nameWidth = ModuleManager.targetHUD.getTitleFont().getStringWidth(name);
 
             if (ModuleManager.targetHUD.addons.isSelected(0)) {
                this.blurRenderer
@@ -169,11 +165,9 @@ public class TargetHudElement extends HudElement {
                   GlStateManager.enableAlpha();
                }
 
-               Fonts.rubikSemiboldSize18.drawString(name, this.getX() + 28.0F, this.getY() + 4.0F, -1);
-               Fonts.rubikRegularSize14
-                  .drawString(String.format(Locale.ENGLISH, "Health: %.1f", this.animatedHealth), this.getX() + 28.0F, this.getY() + 13.5F, -986896);
-               Fonts.rubikRegularSize14
-                  .drawString(
+               ModuleManager.targetHUD.getTitleFont().drawString(name, this.getX() + 28.0F, this.getY() + 4.0F, -1);
+               ModuleManager.targetHUD.getInfoFont().drawString(String.format(Locale.ENGLISH, "Health: %.1f", this.animatedHealth), this.getX() + 28.0F, this.getY() + 13.5F, -986896);
+               ModuleManager.targetHUD.getInfoFont().drawString(
                      String.format(Locale.ENGLISH, "Distance: %.1fm", this.entityPlayer.getDistanceToEntity(minecraft.thePlayer)),
                      this.getX() + 28.0F,
                      this.getY() + 21.0F,
@@ -221,9 +215,8 @@ public class TargetHudElement extends HudElement {
                   GlStateManager.enableAlpha();
                }
 
-               Fonts.rubikSemiboldSize18.drawString(name, this.getX() + 28.0F, this.getY() + 4.0F, -1);
-               Fonts.rubikRegularSize14
-                  .drawString(
+               ModuleManager.targetHUD.getTitleFont().drawString(name, this.getX() + 28.0F, this.getY() + 4.0F, -1);
+               ModuleManager.targetHUD.getInfoFont().drawString(
                      String.format(Locale.ENGLISH, "%d HP - %dm", (int)this.animatedHealth, (int)this.entityPlayer.getDistanceToEntity(minecraft.thePlayer)),
                      this.getX() + 28.0F,
                      this.getY() + 13.5F,
@@ -260,9 +253,8 @@ public class TargetHudElement extends HudElement {
                   GlStateManager.enableAlpha();
                }
 
-               Fonts.rubikSemiboldSize18.drawString(name, this.getX() + 34.0F, this.getY() + 7.0F, -1);
-               Fonts.rubikRegularSize14
-                  .drawString(
+               ModuleManager.targetHUD.getTitleFont().drawString(name, this.getX() + 34.0F, this.getY() + 7.0F, -1);
+               ModuleManager.targetHUD.getInfoFont().drawString(
                      String.format(Locale.ENGLISH, "%d HP - %dm", (int)this.animatedHealth, (int)this.entityPlayer.getDistanceToEntity(minecraft.thePlayer)),
                      this.getX() + 34.0F,
                      this.getY() + 16.5F,

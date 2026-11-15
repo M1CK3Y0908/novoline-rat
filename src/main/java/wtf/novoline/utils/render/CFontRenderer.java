@@ -12,7 +12,10 @@ import org.lwjgl.opengl.GL11;
 import wtf.novoline.utils.render.TrueTypeFont.Helper;
 import wtf.novoline.utils.render.shape.IRectRenderer;
 
-public class CFontRenderer extends TrueTypeFont {
+public class CFontRenderer extends TrueTypeFont implements FontAdapter {
+   public float drawStringWithShadow(String text, float f, float f2, int i) {
+      return this.drawStringWithShadow(text, (double) f, (double) f2, i);
+   }
    private final int[] intArray = new int[32];
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    private final String formatCodeChars = "0123456789abcdefklmnor";

@@ -102,6 +102,7 @@ import wtf.novoline.module.world.Scaffold;
 import wtf.novoline.module.world.SpeedMine;
 import wtf.novoline.module.world.XRay;
 import wtf.novoline.utils.render.CFontRenderer;
+import wtf.novoline.utils.render.FontAdapter;
 
 public class ModuleManager {
    public static List<Module> modules = new LinkedList<>();
@@ -204,11 +205,11 @@ public class ModuleManager {
 
    public void updateCachedFeatures() {
       boolean selected = arrayList.arrayList.isSelected(0);
-      CFontRenderer cFontRenderer = Fonts.rubikRegularSize16;
+      FontAdapter cFontRenderer = arrayList.getFont();
       modulesByWidth.sort(
          (module2, module3) -> Integer.compare(
-            cFontRenderer.getStringWidth(module3.getName() + (selected ? " " : module3.getSuffix())),
-            cFontRenderer.getStringWidth(module2.getName() + (selected ? " " : module2.getSuffix()))
+            (int) cFontRenderer.getStringWidth(module3.getName() + (selected ? " " : module3.getSuffix())),
+            (int) cFontRenderer.getStringWidth(module2.getName() + (selected ? " " : module2.getSuffix()))
          )
       );
       modulesByWidthReversed = Lists.reverse(modulesByWidth);

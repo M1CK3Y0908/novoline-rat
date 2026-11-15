@@ -13,13 +13,19 @@ import wtf.novoline.utils.math.SmoothingUtils;
 import wtf.novoline.utils.render.BloomRenderer;
 import wtf.novoline.utils.render.BlurRenderer;
 import wtf.novoline.utils.render.CFontRenderer;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.FilledPolygonRenderer;
 import wtf.novoline.utils.render.RenderUtils;
 import wtf.novoline.utils.render.RoundedPolygonRenderer;
 
 public class NotificationManager extends CopyOnWriteArrayList<Notification> {
-   private static final CFontRenderer cFontRenderer = Fonts.rubikRegularSize18;
-   private static final CFontRenderer cFontRenderer2 = Fonts.rubikRegularSize16;
+   private FontAdapter getTitleFont() {
+      return ModuleManager.notifications != null ? ModuleManager.notifications.getTitleFont() : Fonts.rubikRegularSize18;
+   }
+
+   private FontAdapter getSubTextFont() {
+      return ModuleManager.notifications != null ? ModuleManager.notifications.getSubTextFont() : Fonts.rubikRegularSize16;
+   }
    private final BlurRenderer blurRenderer = new BlurRenderer(Novoline.framebufferManager);
    private final BloomRenderer bloomRenderer = new BloomRenderer(Novoline.framebufferManager);
 
@@ -33,8 +39,10 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
 
    private void drawNotificationContent(Notification notification2, float f, float f2, float f3, ResourceLocation resourceLocation) {
       RenderUtils.drawTextureWithAlpha(f + 4.0F, f2 + f3 / 2.0F - 8.0F, 16.0F, 16.0F, 1.0F, resourceLocation);
-      cFontRenderer.drawString(notification2.getTitle(), f + 28.0F, f2 + f3 / 2.0F - cFontRenderer.getHeight() / 2.0F - 3.0F, -1);
-      cFontRenderer2.drawString(notification2.getSubText(), f + 28.0F, f2 + f3 / 2.0F - cFontRenderer2.getHeight() / 2.0F + 6.0F, -2039584);
+      FontAdapter titleFont = this.getTitleFont();
+      FontAdapter subFont = this.getSubTextFont();
+      titleFont.drawString(notification2.getTitle(), f + 28.0F, f2 + f3 / 2.0F - titleFont.getHeight() / 2.0F - 3.0F, -1);
+      subFont.drawString(notification2.getSubText(), f + 28.0F, f2 + f3 / 2.0F - subFont.getHeight() / 2.0F + 6.0F, -2039584);
    }
 
    public void renderAll(ScaledResolution scaledResolution) {
@@ -58,7 +66,7 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
 
          for (int i = 0; i < Math.min(this.size(), 15); i++) {
             Notification notification2 = this.get(i);
-            float f4 = Math.max(170.0F, cFontRenderer2.getStringWidth(notification2.getSubText()) + 36.0F);
+            float f4 = Math.max(170.0F, this.getSubTextFont().getStringWidth(notification2.getSubText()) + 36.0F);
             NotificationType type = notification2.getType();
             ResourceLocation resourceLocation = type.getResourceLocation();
             int backgroundColor = type.getBackgroundColor();

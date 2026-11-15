@@ -43,9 +43,19 @@ import wtf.novoline.module.Module;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.module.combat.Killaura;
 import wtf.novoline.setting.MultiComboSetting;
+import wtf.novoline.setting.ComboSetting;
+import wtf.novoline.setting.NumberSetting;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.time.Stopwatch;
 
 public class HUD extends Module {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 22));
+
+   public FontAdapter getFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+   }
+
    private final MultiComboSetting hud = settingManager.register(
       new MultiComboSetting(this, "Elements")
          .add("FPS", true)
@@ -132,9 +142,9 @@ public class HUD extends Module {
 
       for (int i2 = arrayList.size() - 1; i2 >= 0; i2--) {
          if (this.hud.isSelected(i2)) {
-            int height = Fonts.rubikRegularSize14.getHeight();
+            int height = (int) this.getFont().getHeight();
             int i3 = renderScreenEvent2.scaledResolution.getScaledHeight() - height - i;
-            Fonts.rubikRegularSize14.drawStringWithNiceShadowNoColor((String)arrayList.get(i2), 2.0F, i3, -1);
+            this.getFont().drawStringWithNiceShadowNoColor((String)arrayList.get(i2), 2.0F, (float) i3, -1);
             i += height + 3;
          }
       }
@@ -245,11 +255,11 @@ public class HUD extends Module {
       ScaledResolution scaledResolution2 = renderScreenEvent2.scaledResolution;
       int i = 2;
       if (this.hud.isSelected(5)) {
-         i = 2 + Fonts.rubikRegularSize14.getHeight();
+         i = 2 + (int) this.getFont().getHeight();
          String text = "UID: " + EnumChatFormatting.GRAY + Novoline.userId;
-         Fonts.rubikRegularSize14
+         this.getFont()
             .drawStringWithNiceShadowNoColor(
-               text, scaledResolution2.getScaledWidth() - 2 - Fonts.rubikRegularSize14.getStringWidth(text), scaledResolution2.getScaledHeight() - i, -1
+               text, scaledResolution2.getScaledWidth() - 2 - (int) this.getFont().getStringWidth(text), scaledResolution2.getScaledHeight() - i, -1
             );
          i += 7;
       }
@@ -284,11 +294,11 @@ public class HUD extends Module {
 
                stringBuilder.append(" ").append(Potion.getDurationString(potionEffect));
                String text2 = stringBuilder.toString();
-               Fonts.rubikRegularSize14
+               this.getFont()
                   .drawStringWithNiceShadowNoColor(
-                     stringBuilder.toString(), scaledResolution2.getScaledWidth() - 2 - Fonts.rubikRegularSize14.getStringWidth(text2), scaledResolution2.getScaledHeight() - i, -1
+                     stringBuilder.toString(), scaledResolution2.getScaledWidth() - 2 - (int) this.getFont().getStringWidth(text2), scaledResolution2.getScaledHeight() - i, -1
                   );
-               i += Fonts.rubikRegularSize14.getHeight() + 2;
+               i += (int) this.getFont().getHeight() + 2;
             }
          }
       }
@@ -316,8 +326,8 @@ public class HUD extends Module {
       return MathHelper.clamp_float(f2 / Math.max(1, this.tpsSamples.size()), 0.0F, 20.0F);
    }
 
-   private static void drawCenteredText(String text, float f2, float f3) {
-      float f4 = f2 + (16 - Fonts.rubikRegularSize14.getStringWidth(text)) / 2.0F;
-      Fonts.rubikRegularSize14.drawStringWithNiceShadowNoColor(text, f4, f3 - 4.0F, -1);
+   private void drawCenteredText(String text, float f2, float f3) {
+      float f4 = f2 + (16 - this.getFont().getStringWidth(text)) / 2.0F;
+      this.getFont().drawStringWithNiceShadowNoColor(text, f4, f3 - 4.0F, -1);
    }
 }

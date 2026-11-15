@@ -11,7 +11,9 @@ import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.setting.CheckboxSetting;
 import wtf.novoline.setting.ColorSetting;
+import wtf.novoline.setting.ComboSetting;
 import wtf.novoline.setting.NumberSetting;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.language.Language;
 import wtf.novoline.utils.math.InterpolationUtils;
 import wtf.novoline.utils.render.CFontRenderer;
@@ -21,6 +23,17 @@ import wtf.novoline.utils.time.Stopwatch;
 
 public class LagDetector extends Module {
    private final NumberSetting lagDetector = settingManager.register(new NumberSetting(this, "Delay (seconds)", 1, 1, 5));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
+      @Override
+      public boolean shouldShow() {
+         return LagDetector.this.font.getCurrentElement() != 5;
+      }
+   });
+
+   public FontAdapter getFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), true);
+   }
    private final CheckboxSetting alphaBlink = settingManager.register(new CheckboxSetting(this, "Alpha blink", true));
    private final CheckboxSetting glow = settingManager.register(new CheckboxSetting(this, "Glow", true));
    private static final ResourceLocation ICON = new ResourceLocation("novoline", "images/connection_problem.png");
@@ -45,7 +58,7 @@ public class LagDetector extends Module {
          }
 
          String text = Language.translate("feature.lagdetector.msg");
-         CFontRenderer cFontRenderer = Fonts.rubikSemiboldSize16;
+         FontAdapter cFontRenderer = this.getFont();
          if (this.glow.isEnabled()) {
             this.shadowRenderer.submit(() -> cFontRenderer.drawString(text, f - cFontRenderer.getStringWidth(text) / 2.0F, 85.0F, i));
          } else {

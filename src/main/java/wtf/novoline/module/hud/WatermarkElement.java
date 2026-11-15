@@ -11,6 +11,7 @@ import wtf.novoline.Novoline.Fonts;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.utils.hypixel.HypixelState;
 import wtf.novoline.utils.render.CFontRenderer;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.FilledPolygonRenderer;
 import wtf.novoline.utils.render.RenderUtils;
 
@@ -54,7 +55,8 @@ public class WatermarkElement extends HudElement {
             }
 
             this.watermarkText = stringBuilder.toString();
-            CFontRenderer cFontRenderer = Fonts.robotoRegularSize14;
+            FontAdapter customFont = ModuleManager.watermark.getFont(false);
+            FontAdapter cFontRenderer = customFont != null ? customFont : Fonts.robotoRegularSize14;
             int c1 = ModuleManager.themeColor.getColor(this.getX(), this.getY());
             int c2 = ModuleManager.themeColor.getColor(this.getX() + this.getWidth(), this.getY());
             RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 1.5F, 1610612736);
@@ -92,8 +94,10 @@ public class WatermarkElement extends HudElement {
             }
 
             this.watermarkText = stringBuilder2.toString();
-            CFontRenderer cFontRenderer2 = Fonts.museoSans900Size16;
-            CFontRenderer cFontRenderer3 = Fonts.museoSans700Size14;
+            FontAdapter customBold = ModuleManager.watermark.getFont(true);
+            FontAdapter customNorm = ModuleManager.watermark.getFont(false);
+            FontAdapter cFontRenderer2 = customBold != null ? customBold : Fonts.museoSans900Size16;
+            FontAdapter cFontRenderer3 = customNorm != null ? customNorm : Fonts.museoSans700Size14;
             String text3 = "Novoline".toUpperCase(Locale.ROOT);
             this.width = cFontRenderer2.getStringWidth(text3) + cFontRenderer3.getStringWidth(this.watermarkText) + 9.0F;
             RenderUtils.drawShadow(

@@ -16,13 +16,27 @@ import wtf.novoline.event.RenderWorldEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.module.ModuleManager;
+import wtf.novoline.Novoline.Fonts;
 import wtf.novoline.setting.ComboSetting;
+import wtf.novoline.setting.NumberSetting;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.animation.Animation;
 import wtf.novoline.utils.animation.Easing;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class DamageParticles extends Module {
    private final ComboSetting damageParticles = settingManager.register(new ComboSetting(this, "Works on", 0, "All", "Target"));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Minecraft", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 8, 24) {
+      @Override
+      public boolean shouldShow() {
+         return DamageParticles.this.font.getCurrentElement() != 0;
+      }
+   });
+
+   public FontAdapter getFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+   }
    private final List<DamageParticles.Holder> particles = new ArrayList<>();
    @EventLink
    public final Listener<RenderWorldEvent> onRenderWorld = renderWorldEvent -> {
@@ -131,11 +145,10 @@ public class DamageParticles extends Module {
             GlStateManager.enableBlend();
             RenderUtils.applyBlendFunc();
             GlStateManager.alphaFunc(516, 0.001F);
-            DamageParticles.access$300()
-               .fontRendererObj
-               .drawStringWithShadow(
-                  String.format("%.1f", this.damage), 0.0F, 0.0F, RenderUtils.withAlphaFraction(this.damage < 0.0F ? -12469 : -12657535, 1.0F)
-               );
+            FontAdapter fontAdapter = ModuleManager.damageParticles.getFont();
+            fontAdapter.drawStringWithShadow(
+               String.format("%.1f", this.damage), 0.0F, 0.0F, RenderUtils.withAlphaFraction(this.damage < 0.0F ? -12469 : -12657535, 1.0F)
+            );
             GlStateManager.alphaFunc(516, 0.1F);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.doPolygonOffset(1.0F, 1500000.0F);

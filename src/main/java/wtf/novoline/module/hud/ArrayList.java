@@ -1,6 +1,9 @@
 package wtf.novoline.module.hud;
 
 import wtf.novoline.Novoline;
+import wtf.novoline.Novoline.Fonts;
+import wtf.novoline.setting.ComboSetting;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.setting.CheckboxSetting;
@@ -9,6 +12,23 @@ import wtf.novoline.setting.MultiComboSetting;
 import wtf.novoline.setting.NumberSetting;
 
 public class ArrayList extends Module {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft") {
+      @Override
+      public void interactCallback() {
+         Novoline.getNovoline().getModuleManager().updateCachedFeatures();
+      }
+   });
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
+      @Override
+      public void interactCallback() {
+         Novoline.getNovoline().getModuleManager().updateCachedFeatures();
+      }
+   });
+
+   public FontAdapter getFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+   }
+
    public final MultiComboSetting arrayList = settingManager.register((new MultiComboSetting(this, "Limitations") {
       @Override
       public void interactCallback() {

@@ -11,6 +11,7 @@ import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.MultiComboSetting.Option;
 import wtf.novoline.utils.math.SmoothingUtils;
 import wtf.novoline.utils.render.CFontRenderer;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.RenderUtils;
 import wtf.novoline.utils.render.ShadowRenderer;
 
@@ -49,7 +50,7 @@ public class ArrayListElement extends HudElement {
       return this.width;
    }
 
-   private float[] measureEntry(Module module2, CFontRenderer cFontRenderer, boolean flag, float f) {
+   private float[] measureEntry(Module module2, FontAdapter cFontRenderer, boolean flag, float f) {
       String name = module2.getName();
       String suffix = module2.getSuffix();
       float stringWidth = cFontRenderer.getStringWidth(name);
@@ -82,7 +83,7 @@ public class ArrayListElement extends HudElement {
          boolean selected = ((Option)elements.get(0)).isSelected();
          boolean selected2 = ((Option)elements.get(1)).isSelected();
          boolean selected3 = ((Option)elements.get(2)).isSelected();
-         CFontRenderer cFontRenderer = Fonts.rubikRegularSize16;
+         FontAdapter cFontRenderer = arrayList2.getFont();
          List list = flag3 ? ModuleManager.modulesByWidthReversed : ModuleManager.modulesByWidth;
          float currentValue = arrayList2.widthPadding.getCurrentValue();
          float currentValue2 = arrayList2.heightPadding.getCurrentValue();

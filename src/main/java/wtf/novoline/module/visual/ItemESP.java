@@ -14,6 +14,8 @@ import wtf.novoline.module.Module;
 import wtf.novoline.setting.CheckboxSetting;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.ComboSetting;
+import wtf.novoline.setting.NumberSetting;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class ItemESP extends Module {
@@ -25,6 +27,22 @@ public class ItemESP extends Module {
       }
    });
    private final CheckboxSetting itemName = settingManager.register(new CheckboxSetting(this, "Item name", false));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft") {
+      @Override
+      public boolean shouldShow() {
+         return ItemESP.this.itemName.isEnabled();
+      }
+   });
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 24) {
+      @Override
+      public boolean shouldShow() {
+         return ItemESP.this.itemName.isEnabled() && ItemESP.this.font.getCurrentElement() != 5;
+      }
+   });
+
+   public FontAdapter getFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+   }
    @EventLink
    public final Listener<RenderWorldEvent> onRenderWorld = renderWorldEvent -> {
       if (this.itemESP.getCurrentElement() == 1) {
@@ -89,8 +107,8 @@ public class ItemESP extends Module {
 
                   if (this.itemName.isEnabled()) {
                      String displayName = ((EntityItem)entity2).getEntityItem().getDisplayName();
-                     Fonts.rubikRegularSize14
-                        .drawStringWithShadow(displayName, fArray[0] - Fonts.rubikRegularSize14.getStringWidth(displayName) / 2.0F, fArray[1] + f5 + 3.0F, color2);
+                     FontAdapter fontAdapter = this.getFont();
+                     fontAdapter.drawStringWithShadow(displayName, fArray[0] - fontAdapter.getStringWidth(displayName) / 2.0F, fArray[1] + f5 + 3.0F, color2);
                   }
                }
             }

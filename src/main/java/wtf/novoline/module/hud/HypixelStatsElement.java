@@ -5,6 +5,7 @@ import wtf.novoline.Novoline.Fonts;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.module.misc.HypixelStats;
 import wtf.novoline.module.misc.HypixelStats.PlayTimeType;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class HypixelStatsElement extends HudElement {
@@ -33,18 +34,20 @@ public class HypixelStatsElement extends HudElement {
             c2,
             false
          );
-         Fonts.rubikSemiboldSize16.drawStringWithShadow("Hypixel Stats", this.getX() + 3.0F, this.getY() + 7.0F, -1);
+         FontAdapter titleFont = this.hypixelStats.getTitleFont();
+         titleFont.drawStringWithShadow("Hypixel Stats", this.getX() + 3.0F, this.getY() + 7.0F, -1);
          int i = 20;
+         FontAdapter contentFont = this.hypixelStats.getContentFont();
 
          for (java.util.Map.Entry entry : this.hypixelStats.getStats().getValues().entrySet()) {
             if ((entry.getKey() != PlayTimeType.PLAY_TIME || this.hypixelStats.showPlayTime.isEnabled())
                && (entry.getKey() != PlayTimeType.STAFF_BANS_SINCE_LOGIN || this.hypixelStats.hypixelStats.isEnabled())) {
                String displayName = ((PlayTimeType)entry.getKey()).getDisplayName();
-               Fonts.rubikRegularSize14.drawStringWithShadow(displayName, this.getX() + 3.0F, this.getY() + i, -1);
-               Fonts.rubikRegularSize14
+               contentFont.drawStringWithShadow(displayName, this.getX() + 3.0F, this.getY() + i, -1);
+               contentFont
                   .drawStringWithShadow(
                      (String)entry.getValue(),
-                     this.getX() + this.getWidth() - 5.0F - Fonts.rubikRegularSize14.getStringWidth((String)entry.getValue()),
+                     this.getX() + this.getWidth() - 5.0F - contentFont.getStringWidth((String)entry.getValue()),
                      this.getY() + i,
                      -1
                   );

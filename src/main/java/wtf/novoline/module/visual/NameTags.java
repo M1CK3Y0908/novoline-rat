@@ -22,11 +22,27 @@ import wtf.novoline.module.Module;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.module.misc.NameProtect;
 import wtf.novoline.setting.CheckboxSetting;
+import wtf.novoline.Novoline.Fonts;
+import wtf.novoline.setting.ComboSetting;
+import wtf.novoline.setting.NumberSetting;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.setting.ColorSetting;
 import wtf.novoline.setting.MultiComboSetting;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class NameTags extends Module {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Minecraft", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 24) {
+      @Override
+      public boolean shouldShow() {
+         return NameTags.this.font.getCurrentElement() != 0;
+      }
+   });
+
+   public FontAdapter getFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+   }
+
    public MultiComboSetting nameTags = settingManager.register(new MultiComboSetting(this, "Hide targets").add("Bots", false).add("Self", false));
    public MultiComboSetting elements = settingManager.register(
       new MultiComboSetting(this, "Elements").add("Potions", false).add("Armor & items", false).add("Distance", false).add("Ping", false)
@@ -76,8 +92,8 @@ public class NameTags extends Module {
                   }
                }
 
-               float f4 = minecraft.fontRendererObj.getInt3(formattedText) / 2.0F;
-               float f5 = minecraft.fontRendererObj.FONT_HEIGHT / 2.0F;
+               float f4 = this.getFont().getStringWidth(formattedText) / 2.0F;
+               float f5 = this.getFont().getHeight() / 2.0F;
                GlStateManager.pushMatrix();
                GlStateManager.translate(fArray[0], fArray[1], 0.0F);
                if (this.addons.isSelected(0)) {
@@ -105,7 +121,7 @@ public class NameTags extends Module {
                }
 
                RenderUtils.drawRect(fArray[0] - f4 - 2.0F, fArray[1] - f5 - 2.0F, fArray[0] + f4 + 2.0F, fArray[1] + f5 + 2.0F, i);
-               minecraft.fontRendererObj.drawStringWithShadow(formattedText, fArray[0] - f4, fArray[1] - f5, -1);
+               this.getFont().drawStringWithShadow(formattedText, fArray[0] - f4, fArray[1] - f5, -1);
                int i3 = 0;
                boolean flag = false;
                if (this.elements.isSelected(1)) {
@@ -152,13 +168,13 @@ public class NameTags extends Module {
                                        }
 
                                        GlStateManager.disableLighting();
-                                       minecraft.fontRendererObj.drawStringWithShadow(text2, 2.0F, -8 - i5, -1);
+                                       this.getFont().drawStringWithShadow(text2, 2.0F, -8 - i5, -1);
                                        GlStateManager.enableLighting();
                                        if (this.addons.isSelected(0)) {
                                           GlStateManager.scale(1.3333334F, 1.3333334F, 1.3333334F);
                                        }
 
-                                       i5 += minecraft.fontRendererObj.FONT_HEIGHT;
+                                       i5 += (int) this.getFont().getHeight();
                                     }
                                  }
                               }
@@ -179,11 +195,11 @@ public class NameTags extends Module {
 
                   for (PotionEffect potionEffect : entityPlayer.getActivePotionEffects()) {
                      String text3 = I18n.format(potionEffect.getEffectName()) + " " + (potionEffect.getAmplifier() + 1) + " §7(" + Potion.getDurationString(potionEffect) + ")";
-                     minecraft.fontRendererObj
+                     this.getFont()
                         .drawStringWithShadow(
                            text3,
                            fArray[0] - f4,
-                           fArray[1] - (flag ? 34 : 18) - i3 * minecraft.fontRendererObj.FONT_HEIGHT - i6 * minecraft.fontRendererObj.FONT_HEIGHT,
+                           fArray[1] - (flag ? 34 : 18) - i3 * (int) this.getFont().getHeight() - i6 * (int) this.getFont().getHeight(),
                            -1
                         );
                      i6++;

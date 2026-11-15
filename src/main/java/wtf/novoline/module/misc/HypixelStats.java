@@ -12,6 +12,8 @@ import net.minecraft.network.play.client.C01PacketChatMessage;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.util.Session;
 import wtf.novoline.Novoline;
+import wtf.novoline.Novoline.Fonts;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.enums.ServerType;
 import wtf.novoline.event.GameEndEvent;
 import wtf.novoline.event.GameStartEvent;
@@ -37,6 +39,21 @@ import wtf.novoline.utils.time.Stopwatch;
 public class HypixelStats extends Module {
    public final CheckboxSetting hypixelStats = settingManager.register(new CheckboxSetting(this, "Check Staff bans", true));
    public final CheckboxSetting showPlayTime = settingManager.register(new CheckboxSetting(this, "Show play time", true));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 14, 10, 24) {
+      @Override
+      public boolean shouldShow() {
+         return HypixelStats.this.font.getCurrentElement() != 5;
+      }
+   });
+
+   public FontAdapter getTitleFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue() + 2.0F, true);
+   }
+
+   public FontAdapter getContentFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), false);
+   }
    private PunishmentStats punishmentStats;
    private final NumberSetting delaySeconds = settingManager.register(new NumberSetting(this, "Delay (seconds)", 120, 30, 600));
    private final ComboSetting notify = settingManager.register(new ComboSetting(this, "Notify", 0, "Always", "When active"));

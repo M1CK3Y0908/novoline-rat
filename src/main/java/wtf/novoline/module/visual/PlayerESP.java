@@ -31,10 +31,30 @@ import wtf.novoline.utils.player.PlayerUtils;
 import wtf.novoline.utils.render.BloomRenderer;
 import wtf.novoline.utils.render.BlurFramebuffer;
 import wtf.novoline.utils.render.CFontRenderer;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.utils.render.RenderUtils;
 
 public class PlayerESP extends Module {
    public final ComboSetting playerESP = settingManager.register(new ComboSetting(this, "Mode", 3, "Vanilla", "Shader", "3D Box", "2D Box"));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Pixel", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Minecraft") {
+      @Override
+      public boolean shouldShow() {
+         return PlayerESP.this.playerESP.getCurrentElement() == 3;
+      }
+   });
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 8, 6, 20) {
+      @Override
+      public boolean shouldShow() {
+         return PlayerESP.this.playerESP.getCurrentElement() == 3 && PlayerESP.this.font.getCurrentElement() != 5;
+      }
+   });
+
+   public FontAdapter getFont() {
+      if (this.font.getCurrentElement() == 0 && Math.round(this.fontSize.getCurrentValue()) == 8) {
+         return Fonts.pixelSize8;
+      }
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+   }
    private BlurFramebuffer blurFramebuffer;
    private final MultiComboSetting elements = settingManager.register((new MultiComboSetting(this, "Elements") {
       @Override
@@ -243,7 +263,7 @@ public class PlayerESP extends Module {
                      }
                   }
 
-                  CFontRenderer cFontRenderer = Fonts.pixelSize8;
+                  FontAdapter cFontRenderer = this.getFont();
                   float f5 = f - 2.5F;
                   float f6 = (f2 - f4) / entityPlayer.getMaxHealth();
                   if (this.elements.getElements().get(2).isSelected()) {

@@ -12,7 +12,9 @@ import wtf.novoline.enums.RelationType;
 import wtf.novoline.event.RenderScreenEvent;
 import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
+import wtf.novoline.Novoline.Fonts;
 import wtf.novoline.module.ModuleManager;
+import wtf.novoline.utils.render.FontAdapter;
 import wtf.novoline.setting.CheckboxSetting;
 import wtf.novoline.setting.ColorSetting;
 import wtf.novoline.setting.ComboSetting;
@@ -43,6 +45,22 @@ public class Radar extends Module {
          return Radar.this.circle.isEnabled();
       }
    });
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Minecraft", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel") {
+      @Override
+      public boolean shouldShow() {
+         return Radar.this.direction.isEnabled();
+      }
+   });
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 10, 8, 20) {
+      @Override
+      public boolean shouldShow() {
+         return Radar.this.direction.isEnabled() && Radar.this.font.getCurrentElement() != 0;
+      }
+   });
+
+   public FontAdapter getFont() {
+      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+   }
    private final ColorSetting friendColor = settingManager.register(new ColorSetting(this, "Friend color", -12657535));
    private final ColorSetting targetColor = settingManager.register(new ColorSetting(this, "Target color", -2341314));
    @EventLink
@@ -176,7 +194,8 @@ public class Radar extends Module {
                String text = String.valueOf(enumFacing2.getName().charAt(0)).toUpperCase(Locale.ROOT);
                GlStateManager.pushMatrix();
                GlStateManager.translate(d + d4 * Math.cos(d11), d2 + d5 * Math.sin(d11), 0.0);
-               minecraft.fontRendererObj.drawStringWithShadow(text, -2.5F, -4.5F, i8);
+               FontAdapter fontAdapter = this.getFont();
+               fontAdapter.drawStringWithShadow(text, -fontAdapter.getStringWidth(text) / 2.0F, -fontAdapter.getHeight() / 2.0F, i8);
                GlStateManager.popMatrix();
             }
          }
