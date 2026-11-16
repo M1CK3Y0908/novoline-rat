@@ -243,7 +243,7 @@ public class MenuClickGuiScreen extends GuiScreen {
       this.visibility = MathHelper.clamp_float((float)this.animation.getValue(), 0.0F, 100.0F);
    }
 
-   public void renderEffects(boolean bloom, boolean glow, ScaledResolution sr) {
+   public void renderEffects(boolean bloom, ScaledResolution sr) {
       this.updateAnimations();
 
       if (this.visibility <= 0.01F || (this.closing && (!this.animation.isAnimating() || this.resourcesReleased))) {
@@ -270,34 +270,57 @@ public class MenuClickGuiScreen extends GuiScreen {
       GlStateManager.translate(-midX, -midY, 0.0);
 
       int themeColor = this.clickGuiTheme != null ? this.clickGuiTheme.getSecondaryColor(true) : ModuleManager.themeColor.getColor();
-      int drawColor;
-      if (!bloom) {
-         drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
-      } else if (glow) {
-         drawColor = RenderUtils.withAlpha(themeColor, (int)(255.0F * alpha));
-      } else {
-         drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
-      }
 
       if (!this.dashboardOpen) {
-         for (MenuCategoryPanel panel : this.buttons) {
-            float px = panel.getX();
-            float py = panel.getY();
-            float pw = MenuCategoryPanel.getWidth();
-            float headerH = MenuCategoryPanel.getHeaderHeight();
-            float bottomY = panel.getBottomY();
+         if (!bloom) {
+            int drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
+            for (MenuCategoryPanel panel : this.buttons) {
+               float px = panel.getX();
+               float py = panel.getY();
+               float pw = MenuCategoryPanel.getWidth();
+               float headerH = MenuCategoryPanel.getHeaderHeight();
+               float bottomY = panel.getBottomY();
 
-            // Header rect (width 114, x - 2 to x + 112)
-            RenderUtils.drawRect(px - 2.0F, py, px + pw + 2.0F, py + headerH, drawColor);
+               // Header rect (width 114, x - 2 to x + 112)
+               RenderUtils.drawRect(px - 2.0F, py, px + pw + 2.0F, py + headerH, drawColor);
 
-            // Body rect (width 110, x to x + 110)
-            if (bottomY > py + headerH) {
-               RenderUtils.drawRect(px, py + headerH, px + pw, bottomY, drawColor);
+               // Body rect (width 110, x to x + 110)
+               if (bottomY > py + headerH) {
+                  RenderUtils.drawRect(px, py + headerH, px + pw, bottomY, drawColor);
+               }
+            }
+         } else {
+            int accentColor = RenderUtils.withAlpha(themeColor, (int)(255.0F * alpha));
+            for (MenuCategoryPanel panel : this.buttons) {
+               float px = panel.getX();
+               float py = panel.getY();
+               float pw = MenuCategoryPanel.getWidth();
+               float headerH = MenuCategoryPanel.getHeaderHeight();
+
+               if (panel.isExpanded() && !panel.getModuleWidgets().isEmpty()) {
+                  float bottomY = panel.getBottomY();
+                  float f5 = bottomY - 2.5F;
+                  RenderUtils.drawRect(px, f5, px + pw, bottomY, accentColor);
+
+                  for (MenuModuleWidget mw : panel.getModuleWidgets()) {
+                     if (mw.isExpanded()) {
+                        for (MenuSettingWidget sw : mw.getSettingWidgets()) {
+                           sw.drawBloom(accentColor);
+                        }
+                     }
+                  }
+               } else {
+                  RenderUtils.drawRect(px, py + headerH, px + pw, py + headerH + 2.5F, accentColor);
+               }
             }
          }
       }
 
       GlStateManager.popMatrix();
+   }
+
+   public void renderEffects(boolean bloom, boolean glow, ScaledResolution sr) {
+      this.renderEffects(bloom, sr);
    }
 
    @Override
@@ -373,7 +396,7 @@ public class MenuClickGuiScreen extends GuiScreen {
          ARBShaderObjects.glUseProgramObjectARB(0);
       }
 
-      if (flag3 && f2 >= 0.02F && this.clickGui.backgroundSettings.getElements().get(2).isSelected()) {
+      if (flag3 && f2 >= 0.02F && !usePostProcessing && this.clickGui.backgroundSettings.getElements().get(2).isSelected()) {
          int i3 = RenderUtils.withAlpha(0, (int)(255.0F * backgroundDimAmount * f2));
          RenderUtils.drawRect(0.0F, 0.0F, scaledResolution2.getScaledWidth(), scaledResolution2.getScaledHeight(), i3);
       }

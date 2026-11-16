@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
@@ -51,6 +52,10 @@ public class KawaseBloom {
    }
 
    public static void renderBlur(int framebufferTexture, int iterations, int offset) {
+      renderBlur(framebufferTexture, iterations, (float)offset, 1.0F);
+   }
+
+   public static void renderBlur(int framebufferTexture, int iterations, float offset, float alpha) {
       checkShaders();
       Minecraft mc = Minecraft.getMinecraft();
       if (currentIterations != iterations || framebuffer.framebufferWidth != mc.displayWidth || framebuffer.framebufferHeight != mc.displayHeight) {
@@ -63,16 +68,16 @@ public class KawaseBloom {
       GlStateManager.enableBlend();
       GlStateManager.blendFunc(GL11.GL_ONE, GL11.GL_ONE);
 
-      renderFBO(framebufferList.get(1), framebufferTexture, kawaseDown, (float)offset);
+      renderFBO(framebufferList.get(1), framebufferTexture, kawaseDown, offset);
 
       // Downsample
       for (int i = 1; i < iterations; i++) {
-         renderFBO(framebufferList.get(i + 1), framebufferList.get(i).framebufferTexture, kawaseDown, (float)offset);
+         renderFBO(framebufferList.get(i + 1), framebufferList.get(i).framebufferTexture, kawaseDown, offset);
       }
 
       // Upsample
       for (int i = iterations; i > 1; i--) {
-         renderFBO(framebufferList.get(i - 1), framebufferList.get(i).framebufferTexture, kawaseUp, (float)offset);
+         renderFBO(framebufferList.get(i - 1), framebufferList.get(i).framebufferTexture, kawaseUp, offset);
       }
 
       Framebuffer lastBuffer = framebufferList.get(0);
@@ -83,7 +88,7 @@ public class KawaseBloom {
       GlStateManager.disableDepth();
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       kawaseUp.init();
-      kawaseUp.setUniformf("offset", (float)offset, (float)offset);
+      kawaseUp.setUniformf("offset", offset, offset);
       kawaseUp.setUniformi("inTexture", 0);
       kawaseUp.setUniformi("check", 1);
       kawaseUp.setUniformi("textureToCheck", 1);
@@ -106,7 +111,7 @@ public class KawaseBloom {
       GlStateManager.enableTexture2D();
       GlStateManager.disableLighting();
       GlStateManager.disableDepth();
-      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.color(1.0F, 1.0F, 1.0F, MathHelper.clamp_float(alpha, 0.0F, 1.0F));
       GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(0).framebufferTexture);
       GlStateManager.enableAlpha();

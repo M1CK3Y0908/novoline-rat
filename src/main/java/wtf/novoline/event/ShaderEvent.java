@@ -6,6 +6,10 @@ public class ShaderEvent extends Event {
    private final boolean bloom;
    private final MultiComboSetting bloomOptions;
 
+   public ShaderEvent(boolean bloom) {
+      this(bloom, null);
+   }
+
    public ShaderEvent(boolean bloom, MultiComboSetting bloomOptions) {
       this.bloom = bloom;
       this.bloomOptions = bloomOptions;

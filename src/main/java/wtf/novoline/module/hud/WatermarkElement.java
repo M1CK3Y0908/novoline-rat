@@ -119,7 +119,7 @@ public class WatermarkElement extends HudElement {
       }
    }
 
-   public static void renderWatermarkEffects(boolean bloom, boolean glow) {
+   public static void renderWatermarkEffects(boolean bloom) {
       if (instance == null || ModuleManager.watermark == null || !ModuleManager.watermark.isEnabled()) {
          return;
       }
@@ -137,26 +137,17 @@ public class WatermarkElement extends HudElement {
             filledPolygonRenderer.putRoundedRect(x, y, w, 14.0F, 1.0F, -16777216);
             filledPolygonRenderer.draw();
          }
-      } else if (glow) {
+      } else {
          if (currentElement == 0) {
             int c1 = ModuleManager.themeColor.getColor(x, y);
             int c2 = ModuleManager.themeColor.getColor(x + w, y);
             RenderUtils.drawGradientLine(x, y, x + w, y, 3.0F, c1, c2, false);
-         } else if (currentElement == 1) {
-            int cTheme = ModuleManager.themeColor.getColor(x, y);
-            FilledPolygonRenderer fpr = new FilledPolygonRenderer();
-            fpr.putRoundedRect(x, y, w, 14.0F, 1.0F, cTheme);
-            fpr.draw();
-         }
-      } else {
-         if (currentElement == 0) {
-            RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
-         } else if (currentElement == 1) {
-            FilledPolygonRenderer fpr = new FilledPolygonRenderer();
-            fpr.putRoundedRect(x, y, w, 14.0F, 1.0F, -16777216);
-            fpr.draw();
          }
       }
+   }
+
+   public static void renderWatermarkEffects(boolean bloom, boolean glow) {
+      renderWatermarkEffects(bloom);
    }
 
    @Override

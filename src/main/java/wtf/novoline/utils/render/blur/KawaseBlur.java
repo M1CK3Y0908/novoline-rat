@@ -79,6 +79,10 @@ public class KawaseBlur {
    }
 
    public static void renderBlur(int stencilFrameBufferTexture, int iterations, int offset) {
+      renderBlur(stencilFrameBufferTexture, iterations, (float)offset);
+   }
+
+   public static void renderBlur(int stencilFrameBufferTexture, int iterations, float offset) {
       checkShaders();
       Minecraft mc = Minecraft.getMinecraft();
       if (currentIterations != iterations || framebuffer.framebufferWidth != mc.displayWidth || framebuffer.framebufferHeight != mc.displayHeight) {
@@ -86,16 +90,16 @@ public class KawaseBlur {
          currentIterations = iterations;
       }
 
-      renderFBO(framebufferList.get(1), mc.getFramebuffer().framebufferTexture, kawaseDown, (float)offset);
+      renderFBO(framebufferList.get(1), mc.getFramebuffer().framebufferTexture, kawaseDown, offset);
 
       // Downsample
       for (int i = 1; i < iterations; i++) {
-         renderFBO(framebufferList.get(i + 1), framebufferList.get(i).framebufferTexture, kawaseDown, (float)offset);
+         renderFBO(framebufferList.get(i + 1), framebufferList.get(i).framebufferTexture, kawaseDown, offset);
       }
 
       // Upsample
       for (int i = iterations; i > 1; i--) {
-         renderFBO(framebufferList.get(i - 1), framebufferList.get(i).framebufferTexture, kawaseUp, (float)offset);
+         renderFBO(framebufferList.get(i - 1), framebufferList.get(i).framebufferTexture, kawaseUp, offset);
       }
 
       Framebuffer lastBuffer = framebufferList.get(0);
@@ -106,7 +110,7 @@ public class KawaseBlur {
       GlStateManager.disableDepth();
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       kawaseUp.init();
-      kawaseUp.setUniformf("offset", (float)offset, (float)offset);
+      kawaseUp.setUniformf("offset", offset, offset);
       kawaseUp.setUniformi("inTexture", 0);
       kawaseUp.setUniformi("check", 1);
       kawaseUp.setUniformi("textureToCheck", 1);

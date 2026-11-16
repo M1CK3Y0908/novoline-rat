@@ -98,6 +98,12 @@ public class MenuComboWidget extends MenuSettingWidget {
    }
 
    @Override
+   public void drawBloom(int color) {
+      RenderUtils.drawRect(this.x + 4.0F, this.y + 3.5F, this.x + 6.0F, this.y + 16.5F, color);
+      RenderUtils.drawRect(this.x + this.getWidth() - 6.0F, this.y + 3.5F, this.x + this.getWidth() - 4.0F, this.y + 16.5F, color);
+   }
+
+   @Override
    public void renderText(FloatSupplier floatSupplier, WidgetType widgetType, float f, boolean flag) {
       if (widgetType == WidgetType.REGULAR) {
          ComboSetting comboSetting = (ComboSetting)this.moduleSetting;

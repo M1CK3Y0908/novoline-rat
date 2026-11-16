@@ -201,12 +201,15 @@ public class ArrayListElement extends HudElement {
       }
    }
 
-   public static void renderArrayListEffects(boolean bloom, boolean glow, ScaledResolution sr) {
+   public static void renderArrayListEffects(boolean bloom, ScaledResolution sr) {
       if (Minecraft.getMinecraft().gameSettings.showDebugInfo || ModuleManager.arrayList == null || !ModuleManager.arrayList.isEnabled()) {
          return;
       }
       ArrayList arrayList2 = ModuleManager.arrayList;
       if (!bloom && !arrayList2.background.isEnabled()) {
+         return;
+      }
+      if (bloom && !arrayList2.rightLine.isEnabled()) {
          return;
       }
       boolean flag3 = sr.getFloat2() / 2.0F < (instance != null ? instance.getY() : 0.0F);
@@ -237,14 +240,17 @@ public class ArrayListElement extends HudElement {
                float f5 = flag2 ? baseX + arrayListOffsetX - f3 + currentValue3 : baseX + (instance != null ? instance.getWidth() : 0.0F) - arrayListOffsetX - currentValue3;
                if (!bloom) {
                   RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, -16777216);
-               } else if (glow) {
-                  int color = ModuleManager.themeColor.getColor(f5, baseY + arrayListOffsetY);
-                  RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, color);
                } else {
-                  RenderUtils.drawRect(f5, baseY + arrayListOffsetY, f5 + f3, baseY + arrayListOffsetY + f2, -16777216);
+                  float f7 = flag2 ? 0.0F : f3;
+                  int color = ModuleManager.themeColor.getColor(f5 + f7, baseY + arrayListOffsetY);
+                  RenderUtils.drawRect(f5 + f7, baseY + arrayListOffsetY, f5 + f7 + currentValue3, baseY + arrayListOffsetY + f2, color);
                }
             }
          }
       }
+   }
+
+   public static void renderArrayListEffects(boolean bloom, boolean glow, ScaledResolution sr) {
+      renderArrayListEffects(bloom, sr);
    }
 }

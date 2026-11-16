@@ -38,6 +38,9 @@ public abstract class MenuSettingWidget implements MenuWidget {
       iRectRenderer.addRect(this.x, this.y, this.getWidth(), this.getHeight(), this.menuClickGuiScreen.getClickGuiTheme().getSettingBackgroundColor());
    }
 
+   public void drawBloom(int color) {
+   }
+
    public abstract float getHeight();
 
    public ModuleSetting getModuleSetting() {

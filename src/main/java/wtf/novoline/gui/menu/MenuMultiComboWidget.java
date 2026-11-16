@@ -61,6 +61,12 @@ public class MenuMultiComboWidget extends MenuSettingWidget {
    }
 
    @Override
+   public void drawBloom(int color) {
+      RenderUtils.drawRect(this.x + 4.0F, this.y + 3.5F, this.x + 6.0F, this.y + 16.5F, color);
+      RenderUtils.drawRect(this.x + this.getWidth() - 6.0F, this.y + 3.5F, this.x + this.getWidth() - 4.0F, this.y + 16.5F, color);
+   }
+
+   @Override
    public float getTotalHeight(float f, float f2, float f3) {
       int size2 = ((MultiComboSetting)this.moduleSetting).getElements().size();
       float totalOptionsHeight = size2 * OPTION_HEIGHT;

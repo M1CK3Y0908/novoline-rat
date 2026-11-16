@@ -12,7 +12,6 @@ import wtf.novoline.module.Category;
 import wtf.novoline.module.Module;
 import wtf.novoline.module.ModuleManager;
 import wtf.novoline.setting.CheckboxSetting;
-import wtf.novoline.setting.MultiComboSetting;
 import wtf.novoline.setting.NumberSetting;
 import wtf.novoline.utils.render.RenderUtils;
 import wtf.novoline.utils.render.blur.KawaseBloom;
@@ -20,13 +19,7 @@ import wtf.novoline.utils.render.blur.KawaseBlur;
 
 public class PostProcessing extends Module {
    public final CheckboxSetting blur = settingManager.register(new CheckboxSetting(this, "Blur", true));
-   public final NumberSetting iterations = settingManager.register(new NumberSetting(this, "Blur Iterations", 2, 1, 8) {
-      @Override
-      public boolean shouldShow() {
-         return PostProcessing.this.blur.isEnabled();
-      }
-   });
-   public final NumberSetting offset = settingManager.register(new NumberSetting(this, "Blur Offset", 3, 1, 10) {
+   public final NumberSetting blurIntensity = settingManager.register(new NumberSetting(this, "Blur Intensity", 50, 0, 100, "%") {
       @Override
       public boolean shouldShow() {
          return PostProcessing.this.blur.isEnabled();
@@ -34,21 +27,7 @@ public class PostProcessing extends Module {
    });
 
    public final CheckboxSetting bloom = settingManager.register(new CheckboxSetting(this, "Bloom", true));
-   public final MultiComboSetting glowOptions = settingManager.register(
-      (new MultiComboSetting(this, "Glow Options") {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.bloom.isEnabled();
-         }
-      }).add("ArrayList", false).add("ClickGui", false).add("Watermark", false).add("TargetHUD", false).add("Notifications", false)
-   );
-   public final NumberSetting shadowRadius = settingManager.register(new NumberSetting(this, "Bloom Iterations", 3, 1, 8) {
-      @Override
-      public boolean shouldShow() {
-         return PostProcessing.this.bloom.isEnabled();
-      }
-   });
-   public final NumberSetting shadowOffset = settingManager.register(new NumberSetting(this, "Bloom Offset", 1, 1, 10) {
+   public final NumberSetting glowIntensity = settingManager.register(new NumberSetting(this, "Glow Intensity", 50, 0, 100, "%") {
       @Override
       public boolean shouldShow() {
          return PostProcessing.this.bloom.isEnabled();
@@ -75,7 +54,7 @@ public class PostProcessing extends Module {
    }
 
    public boolean isBloomEnabled(String target) {
-      return this.isBloomEnabled() && this.glowOptions.isSelected(target);
+      return this.isBloomEnabled();
    }
 
    public static void runBloom(Runnable runnable, boolean blur, boolean bloom, int bloomRadius) {
@@ -85,7 +64,7 @@ public class PostProcessing extends Module {
          stencilFramebuffer.bindFramebuffer(false);
          runnable.run();
          stencilFramebuffer.unbindFramebuffer();
-         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, bloomRadius, 1);
+         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, bloomRadius, 1.0F, 1.0F);
       }
    }
 
@@ -93,7 +72,7 @@ public class PostProcessing extends Module {
       Minecraft mc = Minecraft.getMinecraft();
       float scaleFactor = sr.getScaleFactor();
 
-      if (mc.currentScreen instanceof GuiChat) {
+      if (!bloom && mc.currentScreen instanceof GuiChat) {
          RenderUtils.drawRect(2.0F, sr.getScaledHeight() - 14.0F, sr.getScaledWidth() - 4.0F, sr.getScaledHeight() - 2.0F, -16777216);
       }
 
@@ -101,23 +80,23 @@ public class PostProcessing extends Module {
       GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
 
       if (ModuleManager.targetHUD != null && ModuleManager.targetHUD.isEnabled()) {
-         TargetHudElement.renderTargetHudEffects(bloom, this.glowOptions.isSelected("TargetHUD"), sr);
+         TargetHudElement.renderTargetHudEffects(bloom, sr);
       }
 
       if (ModuleManager.arrayList != null && ModuleManager.arrayList.isEnabled()) {
-         ArrayListElement.renderArrayListEffects(bloom, this.glowOptions.isSelected("ArrayList"), sr);
+         ArrayListElement.renderArrayListEffects(bloom, sr);
       }
 
       if (ModuleManager.watermark != null && ModuleManager.watermark.isEnabled()) {
-         WatermarkElement.renderWatermarkEffects(bloom, this.glowOptions.isSelected("Watermark"));
+         WatermarkElement.renderWatermarkEffects(bloom);
       }
 
       if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
-         Novoline.getNovoline().getNotificationManager().renderEffects(bloom, this.glowOptions.isSelected("Notifications"), sr);
+         Novoline.getNovoline().getNotificationManager().renderEffects(bloom, sr);
       }
 
       if (Novoline.getNovoline().getMenuClickGuiScreen() != null) {
-         Novoline.getNovoline().getMenuClickGuiScreen().renderEffects(bloom, this.glowOptions.isSelected("ClickGui"), sr);
+         Novoline.getNovoline().getMenuClickGuiScreen().renderEffects(bloom, sr);
       }
 
       GlStateManager.popMatrix();
@@ -140,23 +119,38 @@ public class PostProcessing extends Module {
       sr.handleDouble(sr.getScaledHeight_double() / 2.0 * scaleFactor);
 
       if (this.blur.isEnabled()) {
-         stencilFramebuffer.framebufferClear();
-         stencilFramebuffer.bindFramebuffer(false);
-         Novoline.getNovoline().getBus().post(new ShaderEvent(false, this.glowOptions));
-         this.stuffToBlur(false, sr);
-         stencilFramebuffer.unbindFramebuffer();
+         float bIntensity = this.blurIntensity.getCurrentValue();
+         if (bIntensity > 0.0F) {
+            float bFactor = bIntensity / 100.0F;
+            int blurIterations = Math.max(1, Math.min(6, Math.round(1.0F + bFactor * 4.0F)));
+            float blurOffset = 1.0F + bFactor * 3.0F;
 
-         KawaseBlur.renderBlur(stencilFramebuffer.framebufferTexture, (int) this.iterations.getCurrentValue(), (int) this.offset.getCurrentValue());
+            stencilFramebuffer.framebufferClear();
+            stencilFramebuffer.bindFramebuffer(false);
+            Novoline.getNovoline().getBus().post(new ShaderEvent(false));
+            this.stuffToBlur(false, sr);
+            stencilFramebuffer.unbindFramebuffer();
+
+            KawaseBlur.renderBlur(stencilFramebuffer.framebufferTexture, blurIterations, blurOffset);
+         }
       }
 
       if (this.bloom.isEnabled()) {
-         stencilFramebuffer.framebufferClear();
-         stencilFramebuffer.bindFramebuffer(false);
-         Novoline.getNovoline().getBus().post(new ShaderEvent(true, this.glowOptions));
-         this.stuffToBlur(true, sr);
-         stencilFramebuffer.unbindFramebuffer();
+         float gIntensity = this.glowIntensity.getCurrentValue();
+         if (gIntensity > 0.0F) {
+            float gFactor = gIntensity / 100.0F;
+            int bloomIterations = Math.max(1, Math.min(6, Math.round(1.0F + gFactor * 3.0F)));
+            float bloomOffset = 0.5F + gFactor * 3.5F;
+            float bloomAlpha = gFactor;
 
-         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int) this.shadowRadius.getCurrentValue(), (int) this.shadowOffset.getCurrentValue());
+            stencilFramebuffer.framebufferClear();
+            stencilFramebuffer.bindFramebuffer(false);
+            Novoline.getNovoline().getBus().post(new ShaderEvent(true));
+            this.stuffToBlur(true, sr);
+            stencilFramebuffer.unbindFramebuffer();
+
+            KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, bloomIterations, bloomOffset, bloomAlpha);
+         }
       }
 
       GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);

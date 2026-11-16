@@ -55,7 +55,8 @@ public class MenuCategoryPanel implements MenuWidget {
             if (i == size2 - 1) {
                float bottomY = this.getBottomY();
                float f5 = bottomY - 2.5F;
-               if (MenuClickGuiScreen.shadersEnabled && ModuleManager.clickGui.glowSettings.getElements().get(2).isSelected()) {
+               boolean usePostProcessing = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
+               if (!usePostProcessing && MenuClickGuiScreen.shadersEnabled && ModuleManager.clickGui.glowSettings.getElements().get(2).isSelected()) {
                   this.menuClickGuiScreen
                      .bloomRenderer
                      .submit(() -> RenderUtils.drawRect(menuModuleWidget.getX(), f5, menuModuleWidget.getX() + MenuModuleWidget.getWidth(), bottomY, secondaryColor));

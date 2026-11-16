@@ -41,14 +41,26 @@ public class MenuCheckboxWidget extends MenuSettingWidget {
    }
 
    @Override
+   public void drawBloom(int color) {
+      CheckboxSetting checkboxSetting = (CheckboxSetting)this.moduleSetting;
+      if (checkboxSetting.isEnabled()) {
+         float f = this.y + this.getHeight() / 2.0F;
+         float f2 = this.x + this.getWidth() - 8.0F - this.knobOffset;
+         RenderUtils.drawRect(this.x + this.getWidth() - 8.0F - 6.0F - 4.0F, f - 3.0F, f2 - 3.0F, f + 3.0F, color);
+         RenderUtils.drawRect(f2 + 3.0F, f - 3.0F, this.x + this.getWidth() - 8.0F + 4.0F, f + 3.0F, color);
+      }
+   }
+
+   @Override
    public void render(float f, float f2, float f3) {
       CheckboxSetting checkboxSetting = (CheckboxSetting)this.moduleSetting;
       this.trackColor = RenderUtils.smoothBlendColors(this.trackColor, this.menuClickGuiScreen.getClickGuiTheme().getSecondaryColor(checkboxSetting.isEnabled()), 10.0F);
       this.knobColor = RenderUtils.smoothBlendColors(this.knobColor, this.menuClickGuiScreen.getClickGuiTheme().getPrimaryColor(checkboxSetting.isEnabled()), 10.0F);
       this.knobOffset = SmoothingUtils.approach(this.knobOffset, checkboxSetting.isEnabled() ? 0.0F : 6.0F, 10.0F);
+      boolean usePostProcessing = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
       if (this.knobOffset > 3.0) {
          this.drawSwitch();
-      } else if (MenuClickGuiScreen.shadersEnabled && ModuleManager.clickGui.glowSettings.isSelected(1)) {
+      } else if (!usePostProcessing && MenuClickGuiScreen.shadersEnabled && ModuleManager.clickGui.glowSettings.isSelected(1)) {
          this.menuClickGuiScreen.bloomRenderer.submit(this::drawSwitch);
       } else {
          this.drawSwitch();

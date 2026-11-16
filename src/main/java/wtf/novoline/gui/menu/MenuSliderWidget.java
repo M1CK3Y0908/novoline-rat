@@ -80,6 +80,17 @@ public class MenuSliderWidget extends MenuSettingWidget {
       }
    }
 
+   @Override
+   public void drawBloom(int color) {
+      NumberSetting numberSetting = (NumberSetting)this.moduleSetting;
+      if (numberSetting.getCurrentValue() > numberSetting.getMinValue()) {
+         float f = this.y + this.getHeight() / 2.0F;
+         RenderUtils.drawRect(
+            this.x + 4.0F, f + 3.0F, this.x + 4.0F + this.fillWidth, f + 5.0F, color
+         );
+      }
+   }
+
    private void drawFill(float f) {
       RenderUtils.drawRect(
          this.x + 4.0F, f + 3.0F, this.x + 4.0F + this.fillWidth, f + 5.0F, this.menuClickGuiScreen.getClickGuiTheme().getSecondaryColor(true)
