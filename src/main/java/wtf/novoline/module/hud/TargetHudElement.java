@@ -374,6 +374,11 @@ public class TargetHudElement extends HudElement {
    }
 
    public static void renderTargetHudEffects(boolean bloom, ScaledResolution sr) {
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
+      renderTargetHudEffects(bloom, glow, sr);
+   }
+
+   public static void renderTargetHudEffects(boolean bloom, boolean glow, ScaledResolution sr) {
       if (instance == null || ModuleManager.targetHUD == null || !ModuleManager.targetHUD.isEnabled()) {
          return;
       }
@@ -398,46 +403,11 @@ public class TargetHudElement extends HudElement {
       float y = instance.getY();
       float w = instance.getWidth();
       float h = instance.getHeight();
-      int currentElement = ModuleManager.targetHUD.targetHUD.getCurrentElement();
 
-      if (!bloom) {
-         RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
-      } else {
-         int hudColor = ModuleManager.themeColor.getColor(x, y);
-         if (currentElement == 3) {
-            float hp = instance.entityPlayer.getHealth() + instance.entityPlayer.getAbsorptionAmount();
-            float maxHP = instance.entityPlayer.getMaxHealth() + instance.entityPlayer.getAbsorptionAmount() - 0.05F;
-            float health = Math.min(hp, maxHP);
-            float percent = MathHelper.clamp_float(health * (100.0F / maxHP), 0.0F, 100.0F);
-            float rectLength = w + 6.0F;
-            float space = (rectLength - 50.0F) / 100.0F;
-            float barStartX = x + 40.0F;
-            float barY1 = y + 18.0F;
-            float barY2 = y + 28.8F;
-            RenderUtils.drawRect(barStartX, barY1, barStartX + percent * space, barY2, hudColor);
-         } else if (currentElement == 0) {
-            float maxHealth = instance.entityPlayer.getMaxHealth();
-            float f3 = w - 2.0F;
-            float f4 = f3 * (Math.min(instance.animatedHealth, maxHealth) / maxHealth);
-            RenderUtils.drawRect(x + 2.0F, y + 29.0F, x + f4, y + 29.0F + 1.5F, hudColor);
-         } else if (currentElement == 1) {
-            float maxHealth2 = instance.entityPlayer.getMaxHealth();
-            float f6 = w - 28.0F - 2.0F;
-            float f7 = f6 * (Math.min(instance.animatedHealth, maxHealth2) / maxHealth2);
-            RenderUtils.drawRect(x + 28.0F, y + 21.0F, x + 28.0F + f7, y + 24.0F + 1.5F, hudColor);
-         } else if (currentElement == 2) {
-            float maxHealth3 = instance.entityPlayer.getMaxHealth();
-            float f8 = w - 34.0F - 4.0F;
-            float f9 = f8 * (Math.min(instance.animatedHealth, maxHealth3) / maxHealth3);
-            RenderUtils.drawRect(x + 34.0F, y + 24.5F, x + 34.0F + f9, y + 26.5F + 1.5F, hudColor);
-         }
-      }
+      int hudColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor(x, y);
+      RenderUtils.drawRect(x, y, x + w, y + h, hudColor);
 
       GlStateManager.popMatrix();
-   }
-
-   public static void renderTargetHudEffects(boolean bloom, boolean glow, ScaledResolution sr) {
-      renderTargetHudEffects(bloom, sr);
    }
 
    @Override

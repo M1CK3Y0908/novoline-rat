@@ -66,6 +66,11 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
    }
 
    public void renderEffects(boolean bloom, ScaledResolution scaledResolution) {
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
+      this.renderEffects(bloom, glow, scaledResolution);
+   }
+
+   public void renderEffects(boolean bloom, boolean glow, ScaledResolution scaledResolution) {
       if (!this.isEmpty()) {
          float scaledWidth = scaledResolution.getScaledWidth();
          float scaledHeight = scaledResolution.getScaledHeight();
@@ -75,22 +80,12 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
             float f3 = 30.0F;
             float f5 = scaledWidth - notification2.offsetX;
             float f6 = scaledHeight - notification2.offsetY;
-            if (!bloom) {
-               FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
-               filledPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, -16777216);
-               filledPolygonRenderer.draw();
-            } else {
-               int accentColor = ModuleManager.themeColor.getColor(f5, f6);
-               FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
-               filledPolygonRenderer.putCustomRoundedRect(f5, f6, 24.0F, f3, 3.0F, 3.0F, 0.0F, 0.0F, accentColor);
-               filledPolygonRenderer.draw();
-            }
+            int color = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor(f5, f6);
+            FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
+            filledPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, color);
+            filledPolygonRenderer.draw();
          }
       }
-   }
-
-   public void renderEffects(boolean bloom, boolean glow, ScaledResolution scaledResolution) {
-      renderEffects(bloom, scaledResolution);
    }
 
    public void renderAll(ScaledResolution scaledResolution) {

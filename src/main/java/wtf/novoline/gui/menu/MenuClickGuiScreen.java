@@ -244,6 +244,11 @@ public class MenuClickGuiScreen extends GuiScreen {
    }
 
    public void renderEffects(boolean bloom, ScaledResolution sr) {
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
+      this.renderEffects(bloom, glow, sr);
+   }
+
+   public void renderEffects(boolean bloom, boolean glow, ScaledResolution sr) {
       this.updateAnimations();
 
       if (this.visibility <= 0.01F || (this.closing && (!this.animation.isAnimating() || this.resourcesReleased))) {
@@ -270,57 +275,34 @@ public class MenuClickGuiScreen extends GuiScreen {
       GlStateManager.translate(-midX, -midY, 0.0);
 
       int themeColor = this.clickGuiTheme != null ? this.clickGuiTheme.getSecondaryColor(true) : ModuleManager.themeColor.getColor();
+      int drawColor;
+      if (!bloom) {
+         drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
+      } else if (glow) {
+         drawColor = RenderUtils.withAlpha(themeColor, (int)(255.0F * alpha));
+      } else {
+         drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
+      }
 
       if (!this.dashboardOpen) {
-         if (!bloom) {
-            int drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
-            for (MenuCategoryPanel panel : this.buttons) {
-               float px = panel.getX();
-               float py = panel.getY();
-               float pw = MenuCategoryPanel.getWidth();
-               float headerH = MenuCategoryPanel.getHeaderHeight();
-               float bottomY = panel.getBottomY();
+         for (MenuCategoryPanel panel : this.buttons) {
+            float px = panel.getX();
+            float py = panel.getY();
+            float pw = MenuCategoryPanel.getWidth();
+            float headerH = MenuCategoryPanel.getHeaderHeight();
+            float bottomY = panel.getBottomY();
 
-               // Header rect (width 114, x - 2 to x + 112)
-               RenderUtils.drawRect(px - 2.0F, py, px + pw + 2.0F, py + headerH, drawColor);
+            // Header rect (width 114, x - 2 to x + 112)
+            RenderUtils.drawRect(px - 2.0F, py, px + pw + 2.0F, py + headerH, drawColor);
 
-               // Body rect (width 110, x to x + 110)
-               if (bottomY > py + headerH) {
-                  RenderUtils.drawRect(px, py + headerH, px + pw, bottomY, drawColor);
-               }
-            }
-         } else {
-            int accentColor = RenderUtils.withAlpha(themeColor, (int)(255.0F * alpha));
-            for (MenuCategoryPanel panel : this.buttons) {
-               float px = panel.getX();
-               float py = panel.getY();
-               float pw = MenuCategoryPanel.getWidth();
-               float headerH = MenuCategoryPanel.getHeaderHeight();
-
-               if (panel.isExpanded() && !panel.getModuleWidgets().isEmpty()) {
-                  float bottomY = panel.getBottomY();
-                  float f5 = bottomY - 2.5F;
-                  RenderUtils.drawRect(px, f5, px + pw, bottomY, accentColor);
-
-                  for (MenuModuleWidget mw : panel.getModuleWidgets()) {
-                     if (mw.isExpanded()) {
-                        for (MenuSettingWidget sw : mw.getSettingWidgets()) {
-                           sw.drawBloom(accentColor);
-                        }
-                     }
-                  }
-               } else {
-                  RenderUtils.drawRect(px, py + headerH, px + pw, py + headerH + 2.5F, accentColor);
-               }
+            // Body rect (width 110, x to x + 110)
+            if (bottomY > py + headerH) {
+               RenderUtils.drawRect(px, py + headerH, px + pw, bottomY, drawColor);
             }
          }
       }
 
       GlStateManager.popMatrix();
-   }
-
-   public void renderEffects(boolean bloom, boolean glow, ScaledResolution sr) {
-      this.renderEffects(bloom, sr);
    }
 
    @Override

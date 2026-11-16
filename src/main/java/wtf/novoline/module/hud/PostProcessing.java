@@ -28,6 +28,12 @@ public class PostProcessing extends Module {
    });
 
    public final CheckboxSetting bloom = settingManager.register(new CheckboxSetting(this, "Bloom", true));
+   public final CheckboxSetting glow = settingManager.register(new CheckboxSetting(this, "Glow", false) {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.bloom.isEnabled();
+      }
+   });
    public final NumberSetting glowIntensity = settingManager.register(new NumberSetting(this, "Glow Intensity", 50, 0, 100, "%") {
       @Override
       public boolean shouldShow() {
@@ -58,6 +64,14 @@ public class PostProcessing extends Module {
       return this.isBloomEnabled();
    }
 
+   public boolean isGlowEnabled() {
+      return this.isBloomEnabled() && this.glow.isEnabled();
+   }
+
+   public boolean isGlowEnabled(String target) {
+      return this.isGlowEnabled();
+   }
+
    public static void runBloom(Runnable runnable, boolean blur, boolean bloom, int bloomRadius) {
       if (bloom) {
          stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
@@ -72,6 +86,7 @@ public class PostProcessing extends Module {
    public void stuffToBlur(boolean bloom, ScaledResolution sr) {
       Minecraft mc = Minecraft.getMinecraft();
       float scaleFactor = sr.getScaleFactor();
+      boolean glow = this.isGlowEnabled();
 
       if (!bloom && mc.currentScreen instanceof GuiChat) {
          RenderUtils.drawRect(2.0F, sr.getScaledHeight() - 14.0F, sr.getScaledWidth() - 4.0F, sr.getScaledHeight() - 2.0F, -16777216);
@@ -81,23 +96,23 @@ public class PostProcessing extends Module {
       GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
 
       if (ModuleManager.targetHUD != null && ModuleManager.targetHUD.isEnabled()) {
-         TargetHudElement.renderTargetHudEffects(bloom, sr);
+         TargetHudElement.renderTargetHudEffects(bloom, glow, sr);
       }
 
       if (ModuleManager.arrayList != null && ModuleManager.arrayList.isEnabled()) {
-         ArrayListElement.renderArrayListEffects(bloom, sr);
+         ArrayListElement.renderArrayListEffects(bloom, glow, sr);
       }
 
       if (ModuleManager.watermark != null && ModuleManager.watermark.isEnabled()) {
-         WatermarkElement.renderWatermarkEffects(bloom);
+         WatermarkElement.renderWatermarkEffects(bloom, glow);
       }
 
       if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
-         Novoline.getNovoline().getNotificationManager().renderEffects(bloom, sr);
+         Novoline.getNovoline().getNotificationManager().renderEffects(bloom, glow, sr);
       }
 
       if (Novoline.getNovoline().getMenuClickGuiScreen() != null) {
-         Novoline.getNovoline().getMenuClickGuiScreen().renderEffects(bloom, sr);
+         Novoline.getNovoline().getMenuClickGuiScreen().renderEffects(bloom, glow, sr);
       }
 
       GlStateManager.popMatrix();
@@ -146,7 +161,7 @@ public class PostProcessing extends Module {
 
             stencilFramebuffer.framebufferClear();
             stencilFramebuffer.bindFramebuffer(false);
-            Novoline.getNovoline().getBus().post(new ShaderEvent(true));
+            Novoline.getNovoline().getBus().post(new ShaderEvent(true, this.isGlowEnabled()));
             this.stuffToBlur(true, sr);
             stencilFramebuffer.unbindFramebuffer();
 
