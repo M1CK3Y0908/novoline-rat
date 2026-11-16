@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL13;
 import wtf.novoline.Novoline;
 import wtf.novoline.event.ShaderEvent;
@@ -122,8 +123,8 @@ public class PostProcessing extends Module {
          float bIntensity = this.blurIntensity.getCurrentValue();
          if (bIntensity > 0.0F) {
             float bFactor = bIntensity / 100.0F;
-            int blurIterations = Math.max(1, Math.min(6, Math.round(1.0F + bFactor * 4.0F)));
-            float blurOffset = 1.0F + bFactor * 3.0F;
+            int blurIterations = Math.max(1, Math.min(8, Math.round(bFactor * 8.0F)));
+            float blurOffset = Math.max(1.0F, Math.min(10.0F, bFactor * 10.0F));
 
             stencilFramebuffer.framebufferClear();
             stencilFramebuffer.bindFramebuffer(false);
@@ -139,9 +140,9 @@ public class PostProcessing extends Module {
          float gIntensity = this.glowIntensity.getCurrentValue();
          if (gIntensity > 0.0F) {
             float gFactor = gIntensity / 100.0F;
-            int bloomIterations = Math.max(1, Math.min(6, Math.round(1.0F + gFactor * 3.0F)));
-            float bloomOffset = 0.5F + gFactor * 3.5F;
-            float bloomAlpha = gFactor;
+            int bloomIterations = Math.max(1, Math.min(8, Math.round(gFactor * 8.0F)));
+            float bloomOffset = Math.max(1.0F, Math.min(10.0F, gFactor * 10.0F));
+            float bloomAlpha = MathHelper.clamp_float(gFactor, 0.0F, 1.0F);
 
             stencilFramebuffer.framebufferClear();
             stencilFramebuffer.bindFramebuffer(false);

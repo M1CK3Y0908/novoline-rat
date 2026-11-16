@@ -68,6 +68,7 @@ public class KawaseBloom {
       GlStateManager.enableBlend();
       GlStateManager.blendFunc(GL11.GL_ONE, GL11.GL_ONE);
 
+      GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
       renderFBO(framebufferList.get(1), framebufferTexture, kawaseDown, offset);
 
       // Downsample
@@ -83,53 +84,46 @@ public class KawaseBloom {
       Framebuffer lastBuffer = framebufferList.get(0);
       lastBuffer.framebufferClear();
       lastBuffer.bindFramebuffer(false);
-      GlStateManager.enableTexture2D();
-      GlStateManager.disableLighting();
-      GlStateManager.disableDepth();
-      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       kawaseUp.init();
       kawaseUp.setUniformf("offset", offset, offset);
       kawaseUp.setUniformi("inTexture", 0);
       kawaseUp.setUniformi("check", 1);
-      kawaseUp.setUniformi("textureToCheck", 1);
+      kawaseUp.setUniformi("textureToCheck", 16);
       kawaseUp.setUniformf("halfpixel", 1.0F / (float)lastBuffer.framebufferWidth, 1.0F / (float)lastBuffer.framebufferHeight);
       kawaseUp.setUniformf("iResolution", (float)lastBuffer.framebufferWidth, (float)lastBuffer.framebufferHeight);
 
-      GlStateManager.setActiveTexture(GL13.GL_TEXTURE1);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE16);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferTexture);
       GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(1).framebufferTexture);
       ShaderUtil.drawQuads();
       kawaseUp.unload();
 
-      GlStateManager.setActiveTexture(GL13.GL_TEXTURE1);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE16);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
       GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
-      mc.getFramebuffer().bindFramebuffer(true);
-      GlStateManager.enableTexture2D();
-      GlStateManager.disableLighting();
-      GlStateManager.disableDepth();
-      GlStateManager.color(1.0F, 1.0F, 1.0F, MathHelper.clamp_float(alpha, 0.0F, 1.0F));
-      GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
+      GlStateManager.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
+      mc.getFramebuffer().bindFramebuffer(false);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(0).framebufferTexture);
       GlStateManager.enableAlpha();
       GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
       GlStateManager.enableBlend();
       GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      GlStateManager.color(1.0F, 1.0F, 1.0F, MathHelper.clamp_float(alpha, 0.0F, 1.0F));
       ShaderUtil.drawQuads();
-      GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+      GlStateManager.bindTexture(0);
+      GlStateManager.enableAlpha();
+      GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
+      GlStateManager.enableBlend();
+      GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
    private static void renderFBO(Framebuffer fb, int framebufferTexture, ShaderUtil shader, float offset) {
       fb.framebufferClear();
       fb.bindFramebuffer(false);
-      GlStateManager.enableTexture2D();
-      GlStateManager.disableLighting();
-      GlStateManager.disableDepth();
-      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       shader.init();
       GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferTexture);

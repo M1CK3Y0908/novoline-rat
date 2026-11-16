@@ -54,8 +54,7 @@ public class ShaderUtil {
           sum += smp7 * 2.0;
           vec4 result = sum / 12.0;
           vec3 rgb = result.a > 0.0001 ? result.rgb / result.a : vec3(0.0);
-          float alpha = mix(result.a, result.a * (1.0 - texture2D(textureToCheck, uv).a), float(check));
-          gl_FragColor = vec4(rgb, alpha);
+          gl_FragColor = vec4(rgb, mix(result.a, result.a * (1.0 - texture2D(textureToCheck, gl_TexCoord[0].st).a), float(check)));
       }
       """;
 
@@ -67,8 +66,9 @@ public class ShaderUtil {
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
-          vec4 sum = texture2D(inTexture, uv) * 4.0;
+          vec4 sum = texture2D(inTexture, gl_TexCoord[0].st);
           sum.rgb *= sum.a;
+          sum *= 4.0;
           vec4 smp1 = texture2D(inTexture, uv - halfpixel.xy * offset);
           smp1.rgb *= smp1.a;
           sum += smp1;
@@ -105,7 +105,7 @@ public class ShaderUtil {
           sum += texture2D(inTexture, uv + vec2(0.0, -halfpixel.y * 2.0) * offset);
           sum += texture2D(inTexture, uv + vec2(-halfpixel.x, -halfpixel.y) * offset) * 2.0;
 
-          gl_FragColor = vec4(sum.rgb / 12.0, mix(1.0, texture2D(textureToCheck, uv).a, float(check)));
+          gl_FragColor = vec4(sum.rgb / 12.0, mix(1.0, texture2D(textureToCheck, gl_TexCoord[0].st).a, float(check)));
       }
       """;
 
@@ -117,7 +117,7 @@ public class ShaderUtil {
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
-          vec4 sum = texture2D(inTexture, uv) * 4.0;
+          vec4 sum = texture2D(inTexture, gl_TexCoord[0].st) * 4.0;
           sum += texture2D(inTexture, uv - halfpixel.xy * offset);
           sum += texture2D(inTexture, uv + halfpixel.xy * offset);
           sum += texture2D(inTexture, uv + vec2(halfpixel.x, -halfpixel.y) * offset);

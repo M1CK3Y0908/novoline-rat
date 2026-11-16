@@ -113,18 +113,18 @@ public class KawaseBlur {
       kawaseUp.setUniformf("offset", offset, offset);
       kawaseUp.setUniformi("inTexture", 0);
       kawaseUp.setUniformi("check", 1);
-      kawaseUp.setUniformi("textureToCheck", 1);
+      kawaseUp.setUniformi("textureToCheck", 16);
       kawaseUp.setUniformf("halfpixel", 1.0F / (float)lastBuffer.framebufferWidth, 1.0F / (float)lastBuffer.framebufferHeight);
       kawaseUp.setUniformf("iResolution", (float)lastBuffer.framebufferWidth, (float)lastBuffer.framebufferHeight);
 
-      GlStateManager.setActiveTexture(GL13.GL_TEXTURE1);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE16);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, stencilFrameBufferTexture);
       GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(1).framebufferTexture);
       ShaderUtil.drawQuads();
       kawaseUp.unload();
 
-      GlStateManager.setActiveTexture(GL13.GL_TEXTURE1);
+      GlStateManager.setActiveTexture(GL13.GL_TEXTURE16);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
       GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);

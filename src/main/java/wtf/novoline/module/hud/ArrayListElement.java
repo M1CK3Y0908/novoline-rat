@@ -243,7 +243,8 @@ public class ArrayListElement extends HudElement {
                } else {
                   float f7 = flag2 ? 0.0F : f3;
                   int color = ModuleManager.themeColor.getColor(f5 + f7, baseY + arrayListOffsetY);
-                  RenderUtils.drawRect(f5 + f7, baseY + arrayListOffsetY, f5 + f7 + currentValue3, baseY + arrayListOffsetY + f2, color);
+                  float lineWidth = Math.max(2.5F, currentValue3);
+                   RenderUtils.drawRect(f5 + f7, baseY + arrayListOffsetY, f5 + f7 + lineWidth, baseY + arrayListOffsetY + f2, color);
                }
             }
          }
