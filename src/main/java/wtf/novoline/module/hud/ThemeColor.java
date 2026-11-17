@@ -56,7 +56,7 @@ public class ThemeColor extends Module {
       }
    );
    public final NumberSetting gradientLength = settingManager.register(
-      new NumberSetting(this, "Gradient Length", 50, 0, 200, "px") {
+      new NumberSetting(this, "Gradient Length", 50, 1, 100, "%") {
          @Override
          public boolean shouldShow() {
             return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
@@ -198,48 +198,40 @@ public class ThemeColor extends Module {
       } else {
          double rad = Math.toRadians(this.angle.getCurrentValue());
          double projected = x * Math.cos(rad) + y * Math.sin(rad);
-         double length = (double)this.gradientLength.getCurrentValue();
+         double length = Math.max(10.0, (double)this.gradientLength.getCurrentValue() * 10.0);
          long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
          double timeProgress = (double)(System.currentTimeMillis() % (speedMs * 3600000L)) / (double)speedMs;
+         double progress = projected / length + timeProgress;
 
          return switch (m) {
             case "Double Color" -> {
-               double phi = (length <= 0.0 ? 0.0 : projected / (2.0 * length)) + timeProgress;
-               float factor = (float)((1.0 - Math.cos(phi * 2.0 * Math.PI)) / 2.0);
+               float factor = (float)((1.0 - Math.cos(progress * Math.PI)) / 2.0);
                yield RenderUtils.lerpColor(this.firstColor.getColor(), this.secondColor.getColor(), factor);
             }
             case "Triple Color" -> {
-               double phi = (length <= 0.0 ? 0.0 : projected / (3.0 * length)) + timeProgress;
-               double p = phi % 1.0;
-               if (p < 0.0) p += 1.0;
+               double p = (progress % 3.0 + 3.0) % 3.0;
                int c1 = this.firstColor.getColor();
                int c2 = this.secondColor.getColor();
                int c3 = this.thirdColor.getColor();
-               if (p < 1.0 / 3.0) {
-                  float u = (float)(p * 3.0);
-                  float factor = (float)((1.0 - Math.cos(u * Math.PI)) / 2.0);
+               if (p < 1.0) {
+                  float factor = (float)((1.0 - Math.cos(p * Math.PI)) / 2.0);
                   yield RenderUtils.lerpColor(c1, c2, factor);
-               } else if (p < 2.0 / 3.0) {
-                  float u = (float)((p - 1.0 / 3.0) * 3.0);
-                  float factor = (float)((1.0 - Math.cos(u * Math.PI)) / 2.0);
+               } else if (p < 2.0) {
+                  float factor = (float)((1.0 - Math.cos((p - 1.0) * Math.PI)) / 2.0);
                   yield RenderUtils.lerpColor(c2, c3, factor);
                } else {
-                  float u = (float)((p - 2.0 / 3.0) * 3.0);
-                  float factor = (float)((1.0 - Math.cos(u * Math.PI)) / 2.0);
+                  float factor = (float)((1.0 - Math.cos((p - 2.0) * Math.PI)) / 2.0);
                   yield RenderUtils.lerpColor(c3, c1, factor);
                }
             }
             case "Rainbow" -> {
-               double phi = (length <= 0.0 ? 0.0 : projected / length) + timeProgress;
-               double p = phi % 1.0;
-               if (p < 0.0) p += 1.0;
+               double p = (progress % 1.0 + 1.0) % 1.0;
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
                yield Color.HSBtoRGB((float)p, sat, bri);
             }
             case "Astolfo" -> {
-               double phi = (length <= 0.0 ? 0.0 : projected / (2.0 * length)) + timeProgress;
-               float factor = (float)((1.0 - Math.cos(phi * 2.0 * Math.PI)) / 2.0);
+               float factor = (float)((1.0 - Math.cos(progress * Math.PI)) / 2.0);
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
                float hue = 0.5F + 0.35F * factor;

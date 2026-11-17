@@ -35,15 +35,21 @@ public class ArrayList extends Module {
          Novoline.getNovoline().getModuleManager().updateCachedFeatures();
       }
    }).add("Hide status", false).add("Hide visuals", false).add("Bound only", false));
-   public final NumberSetting rightLineWidth = settingManager.register(new NumberSetting(this, "Right Line Width", 1, 1, 5) {
+   public final MultiComboSetting outline = settingManager.register(
+      new MultiComboSetting(this, "Outline")
+         .add("Top", false)
+         .add("Bottom", false)
+         .add("Left", false)
+         .add("Right", true)
+   );
+   public final NumberSetting lineWidth = settingManager.register(new NumberSetting(this, "Line Width", 1, 1, 5) {
       @Override
       public boolean shouldShow() {
-         return ArrayList.this.rightLine.isEnabled();
+         return ArrayList.this.hasOutline();
       }
    });
    public final NumberSetting widthPadding = settingManager.register(new NumberSetting(this, "Width Padding", 4, 0, 10));
    public final NumberSetting heightPadding = settingManager.register(new NumberSetting(this, "Height Padding", 5, 0, 10));
-   public final CheckboxSetting rightLine = settingManager.register(new CheckboxSetting(this, "Right Line", true));
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", true));
    public final CheckboxSetting backgroundShadow = settingManager.register(new CheckboxSetting(this, "Background Shadow", true));
    public final ColorSetting status = settingManager.register(new ColorSetting(this, "Status", -1));
@@ -53,6 +59,15 @@ public class ArrayList extends Module {
          return ArrayList.this.background.isEnabled();
       }
    });
+
+   public boolean hasOutline() {
+      for (MultiComboSetting.Option option : this.outline.getElements()) {
+         if (option.isSelected()) {
+            return true;
+         }
+      }
+      return false;
+   }
 
    public ArrayList() {
       super(Category.VISUAL, "ArrayList", "");

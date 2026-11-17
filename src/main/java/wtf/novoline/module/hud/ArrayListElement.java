@@ -91,21 +91,26 @@ public class ArrayListElement extends HudElement {
          instance.scaledResolution = sr;
       }
       ArrayList arrayList2 = ModuleManager.arrayList;
-      float baseY = instance != null ? instance.getY() : 0.0F;
+      FontAdapter font = arrayList2.getFont();
+      float widthPadding = arrayList2.widthPadding.getCurrentValue();
+      float heightPadding = arrayList2.heightPadding.getCurrentValue();
+      float lineWidth = arrayList2.lineWidth.getCurrentValue();
+      float rowHeight = font.getHeight() + heightPadding;
+      float textPadY = (heightPadding + font.getHeight() / 2.0F) / 2.0F;
+      float textPadX = widthPadding / 2.0F;
+
+      boolean drawTop = arrayList2.outline.isSelected("Top");
+      boolean drawBottom = arrayList2.outline.isSelected("Bottom");
+      boolean drawLeft = arrayList2.outline.isSelected("Left");
+      boolean drawRight = arrayList2.outline.isSelected("Right");
+
+      float baseY = (instance != null ? instance.getY() : 0.0F) + (drawTop ? lineWidth : 0.0F);
       boolean isBottom = sr.getFloat2() / 2.0F < baseY;
       List<Option> elements = arrayList2.arrayList.getElements();
       boolean hideStatus = elements.get(0).isSelected();
       boolean hideVisuals = elements.get(1).isSelected();
       boolean boundOnly = elements.get(2).isSelected();
-      FontAdapter font = arrayList2.getFont();
       List<Module> list = isBottom ? ModuleManager.modulesByWidthReversed : ModuleManager.modulesByWidth;
-
-      float widthPadding = arrayList2.widthPadding.getCurrentValue();
-      float heightPadding = arrayList2.heightPadding.getCurrentValue();
-      float rightLineWidth = arrayList2.rightLineWidth.getCurrentValue();
-      float rowHeight = font.getHeight() + heightPadding;
-      float textPadY = (heightPadding + font.getHeight() / 2.0F) / 2.0F;
-      float textPadX = widthPadding / 2.0F;
 
       float baseX = instance != null ? instance.getX() : (sr.getFloat() - (instance != null ? instance.getWidth() : 0.0F));
       boolean isLeft = baseX < sr.getScaledWidth_double() / 2.0;
@@ -114,7 +119,7 @@ public class ArrayListElement extends HudElement {
       cachedRowHeight = rowHeight;
       cachedPadX = textPadX;
       cachedPadY = textPadY;
-      cachedLineWidth = rightLineWidth;
+      cachedLineWidth = lineWidth;
       cachedIsLeft = isLeft;
 
       float targetOffsetY = 0.0F;
@@ -122,7 +127,7 @@ public class ArrayListElement extends HudElement {
       float firstEntryWidth = 0.0F;
       entryCount = 0;
 
-      float retractTarget = -3.0F - rightLineWidth;
+      float retractTarget = -3.0F - lineWidth;
 
       for (Module module : list) {
          if (isFilteredOut(hideVisuals, boundOnly, module)) {
@@ -157,7 +162,7 @@ public class ArrayListElement extends HudElement {
 
          float offsetX = module.getArrayListOffsetX();
          if (offsetX > -2.0F && entryCount < ENTRIES.length) {
-            float rowX = isLeft ? baseX + offsetX - totalEntryWidth + rightLineWidth : rightEdge - offsetX - rightLineWidth;
+            float rowX = isLeft ? baseX + offsetX - totalEntryWidth + (drawLeft ? lineWidth : 0.0F) : rightEdge - offsetX - (drawRight ? lineWidth : 0.0F);
             float rowY = baseY + module.getArrayListOffsetY();
 
             Entry e = ENTRIES[entryCount++];
@@ -175,8 +180,8 @@ public class ArrayListElement extends HudElement {
       }
 
       if (instance != null) {
-         instance.width = firstEntryWidth > 0.0F ? firstEntryWidth : 60.0F;
-         instance.height = totalHeight > 0.0F ? totalHeight : rowHeight;
+         instance.width = (firstEntryWidth > 0.0F ? firstEntryWidth : 60.0F) + (drawLeft ? lineWidth : 0.0F) + (drawRight ? lineWidth : 0.0F);
+         instance.height = (totalHeight > 0.0F ? totalHeight : rowHeight) + (drawTop ? lineWidth : 0.0F) + (drawBottom ? lineWidth : 0.0F);
       }
    }
 
@@ -254,7 +259,11 @@ public class ArrayListElement extends HudElement {
       float lineWidth = cachedLineWidth;
       boolean isLeft = cachedIsLeft;
       boolean drawBackground = arrayList2.background.isEnabled();
-      boolean drawRightLine = arrayList2.rightLine.isEnabled();
+      boolean drawTop = arrayList2.outline.isSelected("Top");
+      boolean drawBottom = arrayList2.outline.isSelected("Bottom");
+      boolean drawLeft = arrayList2.outline.isSelected("Left");
+      boolean drawRight = arrayList2.outline.isSelected("Right");
+      boolean hasOutline = drawTop || drawBottom || drawLeft || drawRight;
 
       Tessellator tessellator = Tessellator.getInstance();
       WorldRenderer wr = tessellator.getWorldRenderer();
@@ -277,25 +286,98 @@ public class ArrayListElement extends HudElement {
          tessellator.draw();
       }
 
-      // Pass 2: Accent Lines (single batched draw call)
-      if (drawRightLine) {
+      // Pass 2: Outline (single batched draw call)
+      if (hasOutline) {
+         ThemeColor tc = ModuleManager.themeColor;
          GlStateManager.disableTexture2D();
          GlStateManager.enableBlend();
          RenderUtils.applyBlendFunc();
          wr.begin(7, DefaultVertexFormats.POSITION_COLOR);
-         for (int i = 0; i < entryCount; i++) {
-            Entry e = ENTRIES[i];
-            float lineX = isLeft ? e.x : e.x + e.width;
-            int col = e.nameColor;
-            float r = (col >> 16 & 0xFF) / 255.0F;
-            float g = (col >> 8 & 0xFF) / 255.0F;
-            float b = (col & 0xFF) / 255.0F;
-            float a = (col >> 24 & 0xFF) / 255.0F;
-            wr.pos(lineX, e.y + rowHeight, 0.0).color(r, g, b, a).endVertex();
-            wr.pos(lineX + lineWidth, e.y + rowHeight, 0.0).color(r, g, b, a).endVertex();
-            wr.pos(lineX + lineWidth, e.y, 0.0).color(r, g, b, a).endVertex();
-            wr.pos(lineX, e.y, 0.0).color(r, g, b, a).endVertex();
+
+         // 1. Top Outline
+         if (drawTop) {
+            Entry e0 = ENTRIES[0];
+            float x1 = e0.x - (drawLeft ? lineWidth : 0.0F);
+            float x2 = e0.x + e0.width + (drawRight ? lineWidth : 0.0F);
+            float y1 = e0.y - lineWidth;
+            float y2 = e0.y;
+            drawHorizontalQuad(wr, tc, x1, y1, x2, y2);
          }
+
+         // 2. Bottom Outline
+         if (drawBottom) {
+            Entry eLast = ENTRIES[entryCount - 1];
+            float x1 = eLast.x - (drawLeft ? lineWidth : 0.0F);
+            float x2 = eLast.x + eLast.width + (drawRight ? lineWidth : 0.0F);
+            float y1 = eLast.y + rowHeight;
+            float y2 = eLast.y + rowHeight + lineWidth;
+            drawHorizontalQuad(wr, tc, x1, y1, x2, y2);
+         }
+
+         // 3. Left Outline
+         if (drawLeft) {
+            for (int i = 0; i < entryCount; i++) {
+               Entry e = ENTRIES[i];
+               float x1 = e.x - lineWidth;
+               float x2 = e.x;
+               float y1 = e.y;
+               float y2 = e.y + rowHeight;
+               drawVerticalQuad(wr, tc, x1, y1, x2, y2);
+
+               if (i < entryCount - 1) {
+                  Entry next = ENTRIES[i + 1];
+                  if (e.x < next.x) {
+                     // Current row is wider to the left; step is below current row
+                     float sx1 = e.x - lineWidth;
+                     float sx2 = next.x - lineWidth;
+                     float sy1 = e.y + rowHeight;
+                     float sy2 = e.y + rowHeight + lineWidth;
+                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                  } else if (e.x > next.x) {
+                     // Next row is wider to the left; step is above next row
+                     float sx1 = next.x - lineWidth;
+                     float sx2 = e.x - lineWidth;
+                     float sy1 = e.y + rowHeight - lineWidth;
+                     float sy2 = e.y + rowHeight;
+                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                  }
+               }
+            }
+         }
+
+         // 4. Right Outline
+         if (drawRight) {
+            for (int i = 0; i < entryCount; i++) {
+               Entry e = ENTRIES[i];
+               float x1 = e.x + e.width;
+               float x2 = e.x + e.width + lineWidth;
+               float y1 = e.y;
+               float y2 = e.y + rowHeight;
+               drawVerticalQuad(wr, tc, x1, y1, x2, y2);
+
+               if (i < entryCount - 1) {
+                  Entry next = ENTRIES[i + 1];
+                  float rCurr = e.x + e.width;
+                  float rNext = next.x + next.width;
+                  if (rCurr > rNext) {
+                     // Current row is wider to the right; step is below current row
+                     float sx1 = rNext + lineWidth;
+                     float sx2 = rCurr + lineWidth;
+                     float sy1 = e.y + rowHeight;
+                     float sy2 = e.y + rowHeight + lineWidth;
+                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                  } else if (rCurr < rNext) {
+                     // Next row is wider to the right; step is above next row
+                     float sx1 = rCurr + lineWidth;
+                     float sx2 = rNext + lineWidth;
+                     float sy1 = e.y + rowHeight - lineWidth;
+                     float sy2 = e.y + rowHeight;
+                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                  }
+               }
+            }
+         }
+
          tessellator.draw();
       }
 
@@ -312,5 +394,52 @@ public class ArrayListElement extends HudElement {
 
       GlStateManager.disableBlend();
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+   }
+
+   private static void drawColoredQuad(WorldRenderer wr, float x1, float y1, float x2, float y2, int cBottomLeft, int cBottomRight, int cTopRight, int cTopLeft) {
+      float r1 = (cBottomLeft >> 16 & 0xFF) / 255.0F;
+      float g1 = (cBottomLeft >> 8 & 0xFF) / 255.0F;
+      float b1 = (cBottomLeft & 0xFF) / 255.0F;
+      float a1 = (cBottomLeft >> 24 & 0xFF) / 255.0F;
+
+      float r2 = (cBottomRight >> 16 & 0xFF) / 255.0F;
+      float g2 = (cBottomRight >> 8 & 0xFF) / 255.0F;
+      float b2 = (cBottomRight & 0xFF) / 255.0F;
+      float a2 = (cBottomRight >> 24 & 0xFF) / 255.0F;
+
+      float r3 = (cTopRight >> 16 & 0xFF) / 255.0F;
+      float g3 = (cTopRight >> 8 & 0xFF) / 255.0F;
+      float b3 = (cTopRight & 0xFF) / 255.0F;
+      float a3 = (cTopRight >> 24 & 0xFF) / 255.0F;
+
+      float r4 = (cTopLeft >> 16 & 0xFF) / 255.0F;
+      float g4 = (cTopLeft >> 8 & 0xFF) / 255.0F;
+      float b4 = (cTopLeft & 0xFF) / 255.0F;
+      float a4 = (cTopLeft >> 24 & 0xFF) / 255.0F;
+
+      wr.pos(x1, y2, 0.0).color(r1, g1, b1, a1).endVertex();
+      wr.pos(x2, y2, 0.0).color(r2, g2, b2, a2).endVertex();
+      wr.pos(x2, y1, 0.0).color(r3, g3, b3, a3).endVertex();
+      wr.pos(x1, y1, 0.0).color(r4, g4, b4, a4).endVertex();
+   }
+
+   private static void drawVerticalQuad(WorldRenderer wr, ThemeColor tc, float x1, float y1, float x2, float y2) {
+      float minX = Math.min(x1, x2);
+      float maxX = Math.max(x1, x2);
+      float minY = Math.min(y1, y2);
+      float maxY = Math.max(y1, y2);
+      int cTop = tc.getColor((minX + maxX) * 0.5, minY);
+      int cBottom = tc.getColor((minX + maxX) * 0.5, maxY);
+      drawColoredQuad(wr, minX, minY, maxX, maxY, cBottom, cBottom, cTop, cTop);
+   }
+
+   private static void drawHorizontalQuad(WorldRenderer wr, ThemeColor tc, float x1, float y1, float x2, float y2) {
+      float minX = Math.min(x1, x2);
+      float maxX = Math.max(x1, x2);
+      float minY = Math.min(y1, y2);
+      float maxY = Math.max(y1, y2);
+      int cLeft = tc.getColor(minX, (minY + maxY) * 0.5);
+      int cRight = tc.getColor(maxX, (minY + maxY) * 0.5);
+      drawColoredQuad(wr, minX, minY, maxX, maxY, cLeft, cRight, cRight, cLeft);
    }
 }
