@@ -181,8 +181,7 @@ public class ArrayListElement extends HudElement {
    }
 
    public static void renderArrayListEffects(boolean bloom, ScaledResolution sr) {
-      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
-      renderArrayListEffects(bloom, glow, sr);
+      renderArrayListEffects(bloom, false, sr);
    }
 
    public static void renderArrayListEffects(boolean bloom, boolean glow, ScaledResolution sr) {

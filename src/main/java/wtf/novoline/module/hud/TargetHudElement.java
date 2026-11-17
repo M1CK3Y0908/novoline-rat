@@ -404,7 +404,7 @@ public class TargetHudElement extends HudElement {
       float w = instance.getWidth();
       float h = instance.getHeight();
 
-      int hudColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor(x, y);
+      int hudColor = -16777216;
       RenderUtils.drawRect(x, y, x + w, y + h, hudColor);
 
       GlStateManager.popMatrix();

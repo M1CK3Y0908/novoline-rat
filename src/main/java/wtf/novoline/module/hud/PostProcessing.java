@@ -28,20 +28,29 @@ public class PostProcessing extends Module {
    });
 
    public final CheckboxSetting bloom = settingManager.register(new CheckboxSetting(this, "Bloom", true));
-   public final CheckboxSetting glow = settingManager.register(new CheckboxSetting(this, "Glow", false) {
-      @Override
-      public boolean shouldShow() {
-         return PostProcessing.this.bloom.isEnabled();
-      }
-   });
+   public final CheckboxSetting glow = settingManager.register(new CheckboxSetting(this, "Glow", false));
    public final NumberSetting glowIntensity = settingManager.register(new NumberSetting(this, "Glow Intensity", 50, 0, 100, "%") {
       @Override
       public boolean shouldShow() {
-         return PostProcessing.this.bloom.isEnabled();
+         return PostProcessing.this.bloom.isEnabled() || PostProcessing.this.glow.isEnabled();
       }
    });
 
    private static Framebuffer stencilFramebuffer = new Framebuffer(1, 1, false);
+   private static Framebuffer uiFramebuffer = new Framebuffer(1, 1, false);
+
+   public static Framebuffer getUiFramebuffer() {
+      Minecraft mc = Minecraft.getMinecraft();
+      if (uiFramebuffer == null || uiFramebuffer.framebufferWidth != mc.displayWidth || uiFramebuffer.framebufferHeight != mc.displayHeight) {
+         if (uiFramebuffer != null) {
+            uiFramebuffer.deleteFramebuffer();
+         }
+         uiFramebuffer = new Framebuffer(mc.displayWidth, mc.displayHeight, true);
+         uiFramebuffer.setFramebufferFilter(org.lwjgl.opengl.GL11.GL_LINEAR);
+         uiFramebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+      }
+      return uiFramebuffer;
+   }
 
    public PostProcessing() {
       super(Category.CLIENT, "PostProcessing", "Tenacity Kawase blur and bloom post-processing");
@@ -65,7 +74,7 @@ public class PostProcessing extends Module {
    }
 
    public boolean isGlowEnabled() {
-      return this.isBloomEnabled() && this.glow.isEnabled();
+      return this.isEnabled() && this.glow.isEnabled();
    }
 
    public boolean isGlowEnabled(String target) {
@@ -86,7 +95,7 @@ public class PostProcessing extends Module {
    public void stuffToBlur(boolean bloom, ScaledResolution sr) {
       Minecraft mc = Minecraft.getMinecraft();
       float scaleFactor = sr.getScaleFactor();
-      boolean glow = this.isGlowEnabled();
+      boolean glow = false;
 
       if (!bloom && mc.currentScreen instanceof GuiChat) {
          RenderUtils.drawRect(2.0F, sr.getScaledHeight() - 14.0F, sr.getScaledWidth() - 4.0F, sr.getScaledHeight() - 2.0F, -16777216);
@@ -159,7 +168,7 @@ public class PostProcessing extends Module {
 
             stencilFramebuffer.framebufferClear();
             stencilFramebuffer.bindFramebuffer(false);
-            Novoline.getNovoline().getBus().post(new ShaderEvent(true, this.isGlowEnabled()));
+            Novoline.getNovoline().getBus().post(new ShaderEvent(true, false));
             this.stuffToBlur(true, sr);
             stencilFramebuffer.unbindFramebuffer();
 

@@ -80,7 +80,7 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
             float f3 = 30.0F;
             float f5 = scaledWidth - notification2.offsetX;
             float f6 = scaledHeight - notification2.offsetY;
-            int color = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor(f5, f6);
+            int color = -16777216;
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
             filledPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, color);
             filledPolygonRenderer.draw();
@@ -93,8 +93,6 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
       if (notifications2.isEnabled() && !this.isEmpty()) {
          boolean shadowEnabled = notifications2.shadow.isEnabled();
          boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
-         Framebuffer framebuffer = Minecraft.getMinecraft().getFramebuffer();
-         framebuffer.bindFramebuffer(true);
          float scaledWidth = scaledResolution.getScaledWidth();
          float scaledHeight = scaledResolution.getScaledHeight();
          float f3 = 30.0F;

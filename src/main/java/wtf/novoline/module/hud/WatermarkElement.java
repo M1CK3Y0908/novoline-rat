@@ -134,7 +134,7 @@ public class WatermarkElement extends HudElement {
       float h = instance.getHeight();
       int currentElement = ModuleManager.watermark.watermark.getCurrentElement();
 
-      int hudColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor(x, y);
+      int hudColor = -16777216;
       if (currentElement == 0) {
          RenderUtils.drawRect(x, y, x + w, y + h, hudColor);
       } else if (currentElement == 1) {
