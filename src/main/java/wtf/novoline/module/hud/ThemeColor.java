@@ -10,7 +10,7 @@ import wtf.novoline.utils.render.RenderUtils;
 
 public class ThemeColor extends Module {
    public final ComboSetting mode = settingManager.register(
-      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
+      new ComboSetting(this, "Mode", 1, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
    );
    public final ComboSetting animationMode = settingManager.register(
       new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing") {
@@ -30,7 +30,7 @@ public class ThemeColor extends Module {
       }
    );
    public final ColorSetting secondColor = settingManager.register(
-      new ColorSetting(this, "Second Color", -7383320) {
+      new ColorSetting(this, "Second Color", 0xFFC7C3E5) {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
@@ -56,7 +56,7 @@ public class ThemeColor extends Module {
       }
    );
    public final NumberSetting gradientLength = settingManager.register(
-      new NumberSetting(this, "Gradient Length", 50, 1, 100, "%") {
+      new NumberSetting(this, "Gradient Length", 50, 0, 100, "%") {
          @Override
          public boolean shouldShow() {
             return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
@@ -129,7 +129,7 @@ public class ThemeColor extends Module {
    }
 
    public int getColor(int index) {
-      return this.getColor((double)(index * 20));
+      return this.getColor(0.0, index * 14.0, index);
    }
 
    public int getColor(long timeOffset) {
@@ -142,6 +142,10 @@ public class ThemeColor extends Module {
    }
 
    public int getColor(double x, double y) {
+      return this.getColor(x, y, -1);
+   }
+
+   public int getColor(double x, double y, int index) {
       String m = this.mode.getCurrentElementAsString();
       if (m.equals("Single Color")) {
          return this.firstColor.getColor();
@@ -198,8 +202,48 @@ public class ThemeColor extends Module {
       } else {
          double rad = Math.toRadians(this.angle.getCurrentValue());
          double projected = x * Math.cos(rad) + y * Math.sin(rad);
-         double length = Math.max(10.0, (double)this.gradientLength.getCurrentValue() * 10.0);
+         float gLen = this.gradientLength.getCurrentValue();
          long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
+
+         // 0%: 一行一个颜色 无渐变
+         if (gLen <= 0.0F) {
+            int row = index >= 0 ? index : (int) Math.floor(projected / 14.0);
+            int timeStep = (int)((System.currentTimeMillis() % (speedMs * 3600000L)) / speedMs);
+            int step = row - timeStep;
+
+            return switch (m) {
+               case "Double Color" -> {
+                  int k = (step % 2 + 2) % 2;
+                  yield k == 0 ? this.firstColor.getColor() : this.secondColor.getColor();
+               }
+               case "Triple Color" -> {
+                  int k = (step % 3 + 3) % 3;
+                  yield switch (k) {
+                     case 0 -> this.firstColor.getColor();
+                     case 1 -> this.secondColor.getColor();
+                     default -> this.thirdColor.getColor();
+                  };
+               }
+               case "Rainbow" -> {
+                  int k = (step % 12 + 12) % 12;
+                  float hue = (float)k / 12.0F;
+                  float sat = this.saturation.getCurrentValue() / 100.0F;
+                  float bri = this.brightness.getCurrentValue() / 100.0F;
+                  yield Color.HSBtoRGB(hue, sat, bri);
+               }
+               case "Astolfo" -> {
+                  int k = (step % 6 + 6) % 6;
+                  float hue = 0.5F + 0.35F * ((float)k / 5.0F);
+                  float sat = this.saturation.getCurrentValue() / 100.0F;
+                  float bri = this.brightness.getCurrentValue() / 100.0F;
+                  yield Color.HSBtoRGB(hue, sat, bri);
+               }
+               default -> this.firstColor.getColor();
+            };
+         }
+
+         // > 0%: 整体/10 (100% now corresponds to previous 10%, i.e. 100px)
+         double length = Math.max(1.0, (double)gLen);
          double timeProgress = (double)(System.currentTimeMillis() % (speedMs * 3600000L)) / (double)speedMs;
          double progress = projected / length + timeProgress;
 

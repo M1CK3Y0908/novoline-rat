@@ -165,6 +165,7 @@ public class ArrayListElement extends HudElement {
             float rowX = isLeft ? baseX + offsetX - totalEntryWidth + (drawLeft ? lineWidth : 0.0F) : rightEdge - offsetX - (drawRight ? lineWidth : 0.0F);
             float rowY = baseY + module.getArrayListOffsetY();
 
+            int rowIndex = entryCount;
             Entry e = ENTRIES[entryCount++];
             e.module = module;
             e.name = module.getName();
@@ -174,7 +175,7 @@ public class ArrayListElement extends HudElement {
             e.y = rowY;
             e.width = totalEntryWidth;
             e.nameWidth = nameWidth;
-            e.nameColor = ModuleManager.themeColor.getColor(rowX, rowY);
+            e.nameColor = ModuleManager.themeColor.getColor(rowX, rowY, rowIndex);
             e.suffixColor = arrayList2.status.getColor();
          }
       }
@@ -288,7 +289,6 @@ public class ArrayListElement extends HudElement {
 
       // Pass 2: Outline (single batched draw call)
       if (hasOutline) {
-         ThemeColor tc = ModuleManager.themeColor;
          GlStateManager.disableTexture2D();
          GlStateManager.enableBlend();
          RenderUtils.applyBlendFunc();
@@ -301,7 +301,7 @@ public class ArrayListElement extends HudElement {
             float x2 = e0.x + e0.width + (drawRight ? lineWidth : 0.0F);
             float y1 = e0.y - lineWidth;
             float y2 = e0.y;
-            drawHorizontalQuad(wr, tc, x1, y1, x2, y2);
+            drawSolidQuad(wr, x1, y1, x2, y2, e0.nameColor);
          }
 
          // 2. Bottom Outline
@@ -311,7 +311,7 @@ public class ArrayListElement extends HudElement {
             float x2 = eLast.x + eLast.width + (drawRight ? lineWidth : 0.0F);
             float y1 = eLast.y + rowHeight;
             float y2 = eLast.y + rowHeight + lineWidth;
-            drawHorizontalQuad(wr, tc, x1, y1, x2, y2);
+            drawSolidQuad(wr, x1, y1, x2, y2, eLast.nameColor);
          }
 
          // 3. Left Outline
@@ -322,7 +322,7 @@ public class ArrayListElement extends HudElement {
                float x2 = e.x;
                float y1 = e.y;
                float y2 = e.y + rowHeight;
-               drawVerticalQuad(wr, tc, x1, y1, x2, y2);
+               drawSolidQuad(wr, x1, y1, x2, y2, e.nameColor);
 
                if (i < entryCount - 1) {
                   Entry next = ENTRIES[i + 1];
@@ -332,14 +332,14 @@ public class ArrayListElement extends HudElement {
                      float sx2 = next.x - lineWidth;
                      float sy1 = e.y + rowHeight;
                      float sy2 = e.y + rowHeight + lineWidth;
-                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                     drawSolidQuad(wr, sx1, sy1, sx2, sy2, e.nameColor);
                   } else if (e.x > next.x) {
                      // Next row is wider to the left; step is above next row
                      float sx1 = next.x - lineWidth;
                      float sx2 = e.x - lineWidth;
                      float sy1 = e.y + rowHeight - lineWidth;
                      float sy2 = e.y + rowHeight;
-                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                     drawSolidQuad(wr, sx1, sy1, sx2, sy2, next.nameColor);
                   }
                }
             }
@@ -353,7 +353,7 @@ public class ArrayListElement extends HudElement {
                float x2 = e.x + e.width + lineWidth;
                float y1 = e.y;
                float y2 = e.y + rowHeight;
-               drawVerticalQuad(wr, tc, x1, y1, x2, y2);
+               drawSolidQuad(wr, x1, y1, x2, y2, e.nameColor);
 
                if (i < entryCount - 1) {
                   Entry next = ENTRIES[i + 1];
@@ -365,14 +365,14 @@ public class ArrayListElement extends HudElement {
                      float sx2 = rCurr + lineWidth;
                      float sy1 = e.y + rowHeight;
                      float sy2 = e.y + rowHeight + lineWidth;
-                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                     drawSolidQuad(wr, sx1, sy1, sx2, sy2, e.nameColor);
                   } else if (rCurr < rNext) {
                      // Next row is wider to the right; step is above next row
                      float sx1 = rCurr + lineWidth;
                      float sx2 = rNext + lineWidth;
                      float sy1 = e.y + rowHeight - lineWidth;
                      float sy2 = e.y + rowHeight;
-                     drawHorizontalQuad(wr, tc, sx1, sy1, sx2, sy2);
+                     drawSolidQuad(wr, sx1, sy1, sx2, sy2, next.nameColor);
                   }
                }
             }
@@ -396,50 +396,18 @@ public class ArrayListElement extends HudElement {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
-   private static void drawColoredQuad(WorldRenderer wr, float x1, float y1, float x2, float y2, int cBottomLeft, int cBottomRight, int cTopRight, int cTopLeft) {
-      float r1 = (cBottomLeft >> 16 & 0xFF) / 255.0F;
-      float g1 = (cBottomLeft >> 8 & 0xFF) / 255.0F;
-      float b1 = (cBottomLeft & 0xFF) / 255.0F;
-      float a1 = (cBottomLeft >> 24 & 0xFF) / 255.0F;
-
-      float r2 = (cBottomRight >> 16 & 0xFF) / 255.0F;
-      float g2 = (cBottomRight >> 8 & 0xFF) / 255.0F;
-      float b2 = (cBottomRight & 0xFF) / 255.0F;
-      float a2 = (cBottomRight >> 24 & 0xFF) / 255.0F;
-
-      float r3 = (cTopRight >> 16 & 0xFF) / 255.0F;
-      float g3 = (cTopRight >> 8 & 0xFF) / 255.0F;
-      float b3 = (cTopRight & 0xFF) / 255.0F;
-      float a3 = (cTopRight >> 24 & 0xFF) / 255.0F;
-
-      float r4 = (cTopLeft >> 16 & 0xFF) / 255.0F;
-      float g4 = (cTopLeft >> 8 & 0xFF) / 255.0F;
-      float b4 = (cTopLeft & 0xFF) / 255.0F;
-      float a4 = (cTopLeft >> 24 & 0xFF) / 255.0F;
-
-      wr.pos(x1, y2, 0.0).color(r1, g1, b1, a1).endVertex();
-      wr.pos(x2, y2, 0.0).color(r2, g2, b2, a2).endVertex();
-      wr.pos(x2, y1, 0.0).color(r3, g3, b3, a3).endVertex();
-      wr.pos(x1, y1, 0.0).color(r4, g4, b4, a4).endVertex();
-   }
-
-   private static void drawVerticalQuad(WorldRenderer wr, ThemeColor tc, float x1, float y1, float x2, float y2) {
+   private static void drawSolidQuad(WorldRenderer wr, float x1, float y1, float x2, float y2, int col) {
       float minX = Math.min(x1, x2);
       float maxX = Math.max(x1, x2);
       float minY = Math.min(y1, y2);
       float maxY = Math.max(y1, y2);
-      int cTop = tc.getColor((minX + maxX) * 0.5, minY);
-      int cBottom = tc.getColor((minX + maxX) * 0.5, maxY);
-      drawColoredQuad(wr, minX, minY, maxX, maxY, cBottom, cBottom, cTop, cTop);
-   }
-
-   private static void drawHorizontalQuad(WorldRenderer wr, ThemeColor tc, float x1, float y1, float x2, float y2) {
-      float minX = Math.min(x1, x2);
-      float maxX = Math.max(x1, x2);
-      float minY = Math.min(y1, y2);
-      float maxY = Math.max(y1, y2);
-      int cLeft = tc.getColor(minX, (minY + maxY) * 0.5);
-      int cRight = tc.getColor(maxX, (minY + maxY) * 0.5);
-      drawColoredQuad(wr, minX, minY, maxX, maxY, cLeft, cRight, cRight, cLeft);
+      float r = (col >> 16 & 0xFF) / 255.0F;
+      float g = (col >> 8 & 0xFF) / 255.0F;
+      float b = (col & 0xFF) / 255.0F;
+      float a = (col >> 24 & 0xFF) / 255.0F;
+      wr.pos(minX, maxY, 0.0).color(r, g, b, a).endVertex();
+      wr.pos(maxX, maxY, 0.0).color(r, g, b, a).endVertex();
+      wr.pos(maxX, minY, 0.0).color(r, g, b, a).endVertex();
+      wr.pos(minX, minY, 0.0).color(r, g, b, a).endVertex();
    }
 }
