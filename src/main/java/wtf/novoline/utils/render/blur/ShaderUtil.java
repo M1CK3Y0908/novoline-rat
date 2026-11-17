@@ -25,6 +25,7 @@ public class ShaderUtil {
       uniform sampler2D inTexture, textureToCheck;
       uniform vec2 halfpixel, offset, iResolution;
       uniform int check;
+      uniform float alpha;
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
@@ -54,7 +55,13 @@ public class ShaderUtil {
           sum += smp7 * 2.0;
           vec4 result = sum / 12.0;
           vec3 rgb = result.a > 0.0001 ? result.rgb / result.a : vec3(0.0);
-          gl_FragColor = vec4(rgb, mix(result.a, result.a * (1.0 - texture2D(textureToCheck, gl_TexCoord[0].st).a), float(check)));
+          if (check == 1) {
+              float mask = 1.0 - texture2D(textureToCheck, uv).a;
+              float shadowAlpha = (1.0 - exp(-3.0 * result.a)) * mask * alpha;
+              gl_FragColor = vec4(rgb, shadowAlpha);
+          } else {
+              gl_FragColor = vec4(rgb, result.a);
+          }
       }
       """;
 
@@ -195,7 +202,6 @@ public class ShaderUtil {
       float width = (float) sr.getScaledWidth_double();
       float height = (float) sr.getScaledHeight_double();
       GlStateManager.enableTexture2D();
-      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       glBegin(GL_QUADS);
       glTexCoord2f(0.0F, 1.0F);
       glVertex2f(0.0F, 0.0F);

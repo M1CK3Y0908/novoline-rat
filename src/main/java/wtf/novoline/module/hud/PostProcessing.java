@@ -79,7 +79,7 @@ public class PostProcessing extends Module {
          stencilFramebuffer.bindFramebuffer(false);
          runnable.run();
          stencilFramebuffer.unbindFramebuffer();
-         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, bloomRadius, 1.0F, 1.0F);
+         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, 1.0F);
       }
    }
 
@@ -155,8 +155,6 @@ public class PostProcessing extends Module {
          float gIntensity = this.glowIntensity.getCurrentValue();
          if (gIntensity > 0.0F) {
             float gFactor = gIntensity / 100.0F;
-            int bloomIterations = Math.max(1, Math.min(8, Math.round(gFactor * 8.0F)));
-            float bloomOffset = Math.max(1.0F, Math.min(10.0F, gFactor * 10.0F));
             float bloomAlpha = MathHelper.clamp_float(gFactor, 0.0F, 1.0F);
 
             stencilFramebuffer.framebufferClear();
@@ -165,7 +163,7 @@ public class PostProcessing extends Module {
             this.stuffToBlur(true, sr);
             stencilFramebuffer.unbindFramebuffer();
 
-            KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, bloomIterations, bloomOffset, bloomAlpha);
+            KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, bloomAlpha);
          }
       }
 

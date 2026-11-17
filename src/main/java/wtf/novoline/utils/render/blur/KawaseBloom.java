@@ -11,6 +11,9 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 
 public class KawaseBloom {
+   public static final int SHADOW_ITERATIONS = 4;
+   public static final float SHADOW_OFFSET = 50.0F / 60.0F;
+
    private static final List<Framebuffer> framebufferList = new ArrayList<>();
    public static ShaderUtil kawaseDown;
    public static ShaderUtil kawaseUp;
@@ -51,6 +54,10 @@ public class KawaseBloom {
       }
    }
 
+   public static void renderBlur(int framebufferTexture, float alpha) {
+      renderBlur(framebufferTexture, SHADOW_ITERATIONS, SHADOW_OFFSET, alpha);
+   }
+
    public static void renderBlur(int framebufferTexture, int iterations, int offset) {
       renderBlur(framebufferTexture, iterations, (float)offset, 1.0F);
    }
@@ -88,6 +95,7 @@ public class KawaseBloom {
       kawaseUp.setUniformf("offset", offset, offset);
       kawaseUp.setUniformi("inTexture", 0);
       kawaseUp.setUniformi("check", 1);
+      kawaseUp.setUniformf("alpha", MathHelper.clamp_float(alpha, 0.0F, 1.0F));
       kawaseUp.setUniformi("textureToCheck", 16);
       kawaseUp.setUniformf("halfpixel", 1.0F / (float)lastBuffer.framebufferWidth, 1.0F / (float)lastBuffer.framebufferHeight);
       kawaseUp.setUniformf("iResolution", (float)lastBuffer.framebufferWidth, (float)lastBuffer.framebufferHeight);
@@ -105,13 +113,13 @@ public class KawaseBloom {
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
       GlStateManager.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
-      mc.getFramebuffer().bindFramebuffer(false);
+      mc.getFramebuffer().bindFramebuffer(true);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(0).framebufferTexture);
       GlStateManager.enableAlpha();
       GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
       GlStateManager.enableBlend();
       GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      GlStateManager.color(1.0F, 1.0F, 1.0F, MathHelper.clamp_float(alpha, 0.0F, 1.0F));
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       ShaderUtil.drawQuads();
       GlStateManager.bindTexture(0);
       GlStateManager.enableAlpha();
@@ -130,6 +138,7 @@ public class KawaseBloom {
       shader.setUniformf("offset", offset, offset);
       shader.setUniformi("inTexture", 0);
       shader.setUniformi("check", 0);
+      shader.setUniformf("alpha", 1.0F);
       shader.setUniformf("halfpixel", 1.0F / (float)fb.framebufferWidth, 1.0F / (float)fb.framebufferHeight);
       shader.setUniformf("iResolution", (float)fb.framebufferWidth, (float)fb.framebufferHeight);
       ShaderUtil.drawQuads();
