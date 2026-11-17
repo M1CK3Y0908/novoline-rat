@@ -110,7 +110,7 @@ import wtf.novoline.support.SneakyThrow;
 
 public class Novoline {
    public static final String VALUE_3_0 = "3.0";
-   public static final String BUILD_DATE = "111726";
+   public static final String BUILD_DATE = "111826";
    public static final String CLIENT_NAME = "Novoline.Rat";
    public static final String CLIENT_TITLE = "Novoline.Rat - Build " + BUILD_DATE;
    private Bus<? super Event> bus;

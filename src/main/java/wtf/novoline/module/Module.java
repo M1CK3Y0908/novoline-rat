@@ -15,6 +15,7 @@ import wtf.novoline.setting.MultiComboSetting.Option;
 import wtf.novoline.utils.language.Language;
 import wtf.novoline.utils.notification.Notification;
 import wtf.novoline.utils.notification.NotificationType;
+import wtf.novoline.utils.render.FontAdapter;
 
 public abstract class Module {
    private final List<Module> autoDisableTargets = new ArrayList<>();
@@ -23,6 +24,10 @@ public abstract class Module {
    private float arrayListOffsetX;
    private final List<Module> disabledByThis = new ArrayList<>();
    private String suffix = "";
+   private float cachedNameWidth = -1.0F;
+   private float cachedSuffixWidth = -1.0F;
+   private String lastSuffixForWidth = null;
+   private FontAdapter lastFontForWidth = null;
    protected static final Minecraft minecraft = Minecraft.getMinecraft();
    private int keyBind;
    private Module.PressType pressType = Module.PressType.PRESS;
@@ -223,6 +228,31 @@ public abstract class Module {
       this.arrayListOffsetX = f;
    }
 
+   public float getNameWidth(FontAdapter font) {
+      if (this.lastFontForWidth != font || this.cachedNameWidth < 0.0F) {
+         this.lastFontForWidth = font;
+         this.cachedNameWidth = (float) font.getStringWidth(this.name);
+         this.lastSuffixForWidth = null;
+      }
+      return this.cachedNameWidth;
+   }
+
+   public float getSuffixWidth(FontAdapter font) {
+      if (this.lastFontForWidth != font || this.lastSuffixForWidth == null || !this.lastSuffixForWidth.equals(this.suffix)) {
+         this.lastFontForWidth = font;
+         this.lastSuffixForWidth = this.suffix;
+         this.cachedSuffixWidth = (this.suffix == null || this.suffix.isEmpty()) ? 0.0F : (float) font.getStringWidth(this.suffix);
+      }
+      return this.cachedSuffixWidth;
+   }
+
+   public void clearWidthCache() {
+      this.cachedNameWidth = -1.0F;
+      this.cachedSuffixWidth = -1.0F;
+      this.lastSuffixForWidth = null;
+      this.lastFontForWidth = null;
+   }
+
    @Override
    public String toString() {
       return this.name + " - " + this.description;
@@ -257,10 +287,14 @@ public abstract class Module {
          String text3 = " " + text2;
          if (!this.suffix.equals(text3)) {
             this.suffix = text3;
+            this.lastSuffixForWidth = null;
+            this.cachedSuffixWidth = -1.0F;
             flag = true;
          }
-      } else if (this.suffix != null || !this.suffix.isEmpty()) {
+      } else if (this.suffix != null && !this.suffix.isEmpty()) {
          this.suffix = "";
+         this.lastSuffixForWidth = null;
+         this.cachedSuffixWidth = -1.0F;
          flag = true;
       }
 

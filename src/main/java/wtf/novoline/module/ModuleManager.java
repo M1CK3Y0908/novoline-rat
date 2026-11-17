@@ -206,13 +206,16 @@ public class ModuleManager {
    public static final BridgeAssist bridgeAssist = new BridgeAssist();
 
    public void updateCachedFeatures() {
-      boolean selected = arrayList.arrayList.isSelected(0);
+      if (arrayList == null) return;
+      boolean hideStatus = arrayList.arrayList.isSelected(0);
       FontAdapter cFontRenderer = arrayList.getFont();
+      modules.forEach(Module::clearWidthCache);
       modulesByWidth.sort(
-         (module2, module3) -> Integer.compare(
-            (int) cFontRenderer.getStringWidth(module3.getName() + (selected ? " " : module3.getSuffix())),
-            (int) cFontRenderer.getStringWidth(module2.getName() + (selected ? " " : module2.getSuffix()))
-         )
+         (module2, module3) -> {
+            float w3 = module3.getNameWidth(cFontRenderer) + (hideStatus ? 0.0F : module3.getSuffixWidth(cFontRenderer));
+            float w2 = module2.getNameWidth(cFontRenderer) + (hideStatus ? 0.0F : module2.getSuffixWidth(cFontRenderer));
+            return Float.compare(w3, w2);
+         }
       );
       modulesByWidthReversed = Lists.reverse(modulesByWidth);
    }
