@@ -27,12 +27,19 @@ public class PostProcessing extends Module {
       }
    });
 
-   public final CheckboxSetting bloom = settingManager.register(new CheckboxSetting(this, "Bloom", true));
-   public final CheckboxSetting glow = settingManager.register(new CheckboxSetting(this, "Glow", false));
+   public final CheckboxSetting bloom = settingManager.register(new CheckboxSetting(this, "Shadow", true));
+   public final NumberSetting shadowIntensity = settingManager.register(new NumberSetting(this, "Shadow Intensity", 50, 0, 100, "%") {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.bloom.isEnabled();
+      }
+   });
+
+   public final CheckboxSetting glow = settingManager.register(new CheckboxSetting(this, "Glow", true));
    public final NumberSetting glowIntensity = settingManager.register(new NumberSetting(this, "Glow Intensity", 50, 0, 100, "%") {
       @Override
       public boolean shouldShow() {
-         return PostProcessing.this.bloom.isEnabled() || PostProcessing.this.glow.isEnabled();
+         return PostProcessing.this.glow.isEnabled();
       }
    });
 
@@ -161,10 +168,10 @@ public class PostProcessing extends Module {
       }
 
       if (this.bloom.isEnabled()) {
-         float gIntensity = this.glowIntensity.getCurrentValue();
-         if (gIntensity > 0.0F) {
-            float gFactor = gIntensity / 100.0F;
-            float bloomAlpha = MathHelper.clamp_float(gFactor, 0.0F, 1.0F);
+         float sIntensity = this.shadowIntensity.getCurrentValue();
+         if (sIntensity > 0.0F) {
+            float sFactor = sIntensity / 100.0F;
+            float bloomAlpha = MathHelper.clamp_float(sFactor, 0.0F, 1.0F);
 
             stencilFramebuffer.framebufferClear();
             stencilFramebuffer.bindFramebuffer(false);

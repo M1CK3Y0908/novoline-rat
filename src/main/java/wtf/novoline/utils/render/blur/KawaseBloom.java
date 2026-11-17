@@ -134,12 +134,12 @@ public class KawaseBloom {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
-   public static void renderExposureGlow(int uiTexture, float exposure, float alpha) {
+   public static void renderExposureGlow(int uiTexture, float alpha) {
       if (alpha <= 0.001F) return;
       checkShaders();
       Minecraft mc = Minecraft.getMinecraft();
       int iterations = 3;
-      float offset = 1.2F;
+      float offset = 1.8F;
 
       if (framebufferList.size() < Math.max(SHADOW_ITERATIONS, iterations) + 1
             || framebuffer.framebufferWidth != mc.displayWidth
@@ -154,7 +154,7 @@ public class KawaseBloom {
 
       GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
 
-      // Downsample pass 1 (with bright luminance filtering: check = 2)
+      // Downsample pass 1 (with content color extraction: check = 2)
       renderFBO(framebufferList.get(1), uiTexture, kawaseDown, offset, 2);
 
       // Subsequent downsample passes (check = 0)
@@ -167,16 +167,15 @@ public class KawaseBloom {
          renderFBO(framebufferList.get(i - 1), framebufferList.get(i).framebufferTexture, kawaseUp, offset, 0);
       }
 
-      // Final upsample into framebufferList.get(0) with exposure tone mapping (check = 2)
+      // Final upsample into framebufferList.get(0) with content color saturation and falloff (check = 2)
       Framebuffer lastBuffer = framebufferList.get(0);
       lastBuffer.framebufferClear();
       lastBuffer.bindFramebuffer(false);
       kawaseUp.init();
       kawaseUp.setUniformf("offset", offset, offset);
       kawaseUp.setUniformi("inTexture", 0);
-      kawaseUp.setUniformi("check", 2); // check == 2 for Exposure Bloom
+      kawaseUp.setUniformi("check", 2);
       kawaseUp.setUniformf("alpha", MathHelper.clamp_float(alpha, 0.0F, 1.0F));
-      kawaseUp.setUniformf("exposure", exposure);
       kawaseUp.setUniformi("textureToCheck", 16);
       kawaseUp.setUniformf("halfpixel", 1.0F / (float)lastBuffer.framebufferWidth, 1.0F / (float)lastBuffer.framebufferHeight);
       kawaseUp.setUniformf("iResolution", (float)lastBuffer.framebufferWidth, (float)lastBuffer.framebufferHeight);
@@ -187,19 +186,20 @@ public class KawaseBloom {
       kawaseUp.unload();
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
-      // Additive composite onto mc.getFramebuffer()
+      // Composite colored glow onto mc.getFramebuffer() with alpha blending
       mc.getFramebuffer().bindFramebuffer(true);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebufferList.get(0).framebufferTexture);
       GlStateManager.enableAlpha();
       GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
       GlStateManager.enableBlend();
-      GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE); // True additive glow!
+      GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       ShaderUtil.drawQuads();
       GlStateManager.bindTexture(0);
+   }
 
-      // Restore standard blend state
-      GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+   public static void renderExposureGlow(int uiTexture, float exposure, float alpha) {
+      renderExposureGlow(uiTexture, alpha);
    }
 
    private static void renderFBO(Framebuffer fb, int framebufferTexture, ShaderUtil shader, float offset) {

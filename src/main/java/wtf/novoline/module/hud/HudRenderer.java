@@ -85,7 +85,14 @@ public class HudRenderer {
             uiFb.unbindFramebuffer();
             Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
 
-            // Blit UI onto screen
+            // 1. Render vibrant content-colored glow aura
+            float gIntensity = postProcessing.glowIntensity.getCurrentValue();
+            if (gIntensity > 0.0F) {
+               float gFactor = gIntensity / 100.0F;
+               KawaseBloom.renderExposureGlow(uiFb.framebufferTexture, gFactor);
+            }
+
+            // 2. Render crisp, sharp UI on top
             GlStateManager.enableAlpha();
             GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
             GlStateManager.enableBlend();
@@ -94,15 +101,6 @@ public class HudRenderer {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, uiFb.framebufferTexture);
             ShaderUtil.drawQuads();
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-
-            // Additive Exposure Glow
-            float gIntensity = postProcessing.glowIntensity.getCurrentValue();
-            if (gIntensity > 0.0F) {
-               float gFactor = gIntensity / 100.0F;
-               float exposure = 1.0F + gFactor * 1.5F;
-               float alpha = gFactor;
-               KawaseBloom.renderExposureGlow(uiFb.framebufferTexture, exposure, alpha);
-            }
          }
       }
    }
