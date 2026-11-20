@@ -25,6 +25,7 @@ public class ShaderUtil {
       uniform sampler2D inTexture, textureToCheck;
       uniform vec2 halfpixel, offset, iResolution;
       uniform int check;
+      uniform int shadow;
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
@@ -53,7 +54,9 @@ public class ShaderUtil {
           smp7.rgb *= smp7.a;
           sum += smp7 * 2.0;
           vec4 result = sum / 12.0;
-          gl_FragColor = vec4(result.a > 0.0 ? result.rgb / result.a : vec3(0.0), mix(result.a, result.a * (1.0 - texture2D(textureToCheck, gl_TexCoord[0].st).a), float(check)));
+          float mask = mix(result.a, result.a * (1.0 - texture2D(textureToCheck, gl_TexCoord[0].st).a), float(check));
+          vec3 rgb = shadow == 1 ? vec3(0.0) : (result.a > 0.0 ? result.rgb / result.a : vec3(0.0));
+          gl_FragColor = vec4(rgb, mask);
       }
       """;
 

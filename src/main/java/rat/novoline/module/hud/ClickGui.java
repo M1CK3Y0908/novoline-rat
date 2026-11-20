@@ -48,17 +48,17 @@ public class ClickGui extends Module {
       public boolean shouldShow() {
          return !ClickGui.this.performanceMode.isEnabled() && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
-   }).add("Blur", true).add("Desaturation", false).add("Obscuration", false).add("Anime", true));
+   }).add("Blur", true).add("Desaturation", false).add("Anime", true));
    public NumberSetting imageScale = new NumberSetting(this, "Image Scale", 1.2F, 1.0F, 2.0F) {
       @Override
       public boolean shouldShow() {
-         return ClickGui.this.backgroundSettings.isSelected(3) && ClickGui.this.clickGui.getCurrentElement() == 0;
+         return ClickGui.this.backgroundSettings.isSelected("Anime") && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    };
    public CheckboxSetting randomImage = new CheckboxSetting(this, "Random Image", false) {
       @Override
       public boolean shouldShow() {
-         return ClickGui.this.backgroundSettings.isSelected(3) && ClickGui.this.clickGui.getCurrentElement() == 0;
+         return ClickGui.this.backgroundSettings.isSelected("Anime") && ClickGui.this.clickGui.getCurrentElement() == 0;
       }
    };
    public final CheckboxSetting performanceMode = settingManager.register(new CheckboxSetting(this, "Performance Mode", false) {
@@ -114,7 +114,7 @@ public class ClickGui extends Module {
          ) {
             @Override
             public boolean shouldShow() {
-               return ClickGui.this.backgroundSettings.isSelected(3)
+               return ClickGui.this.backgroundSettings.isSelected("Anime")
                   && !ClickGui.this.randomImage.isEnabled()
                   && ClickGui.this.clickGui.getCurrentElement() == 0;
             }

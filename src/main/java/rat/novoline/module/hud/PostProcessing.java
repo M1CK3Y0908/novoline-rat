@@ -6,6 +6,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import rat.novoline.Novoline;
 import rat.novoline.event.ShaderEvent;
 import rat.novoline.module.Category;
@@ -152,6 +153,7 @@ public class PostProcessing extends Module {
       // Pass 1: Blur
       if (this.blur.isEnabled()) {
          stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
+         stencilFramebuffer.setFramebufferFilter(GL11.GL_LINEAR);
          stencilFramebuffer.framebufferClear();
          stencilFramebuffer.bindFramebuffer(false);
          Novoline.getNovoline().getBus().post(new ShaderEvent(false, false));
@@ -164,6 +166,7 @@ public class PostProcessing extends Module {
       // Pass 2: Shadow (Dark shadow bloom)
       if (this.shadow.isEnabled()) {
          stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
+         stencilFramebuffer.setFramebufferFilter(GL11.GL_LINEAR);
          stencilFramebuffer.framebufferClear();
          stencilFramebuffer.bindFramebuffer(false);
 
@@ -172,12 +175,13 @@ public class PostProcessing extends Module {
 
          stencilFramebuffer.unbindFramebuffer();
 
-         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int)this.shadowRadius.getCurrentValue(), (int)this.shadowOffset.getCurrentValue());
+         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int)this.shadowRadius.getCurrentValue(), (int)this.shadowOffset.getCurrentValue(), true);
       }
 
       // Pass 3: Glow (Dynamic colored neon bloom)
       if (this.glow.isEnabled()) {
          stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
+         stencilFramebuffer.setFramebufferFilter(GL11.GL_LINEAR);
          stencilFramebuffer.framebufferClear();
          stencilFramebuffer.bindFramebuffer(false);
 
@@ -186,7 +190,7 @@ public class PostProcessing extends Module {
 
          stencilFramebuffer.unbindFramebuffer();
 
-         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int)this.glowRadius.getCurrentValue(), (int)this.glowOffset.getCurrentValue());
+         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int)this.glowRadius.getCurrentValue(), (int)this.glowOffset.getCurrentValue(), false);
       }
    }
 }

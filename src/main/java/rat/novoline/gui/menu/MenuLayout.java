@@ -13,7 +13,7 @@ public class MenuLayout {
    }
 
    public float getBackgroundDimAmount() {
-      return 0.3F;
+      return 0.0F;
    }
 
    public float getBloomSigma() {
@@ -45,7 +45,7 @@ public class MenuLayout {
    }
 
    public float getPanelTextureAlpha() {
-      return 0.08F;
+      return 0.0F;
    }
 
    public int getBackgroundBlurRadius() {

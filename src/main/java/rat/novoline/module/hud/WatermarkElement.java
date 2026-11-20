@@ -134,13 +134,25 @@ public class WatermarkElement extends HudElement {
       float h = instance.getHeight();
       int currentElement = ModuleManager.watermark.watermark.getCurrentElement();
 
-      int hudColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor();
-      if (currentElement == 0) {
-         RenderUtils.drawRect(x, y, x + w, y + h, hudColor);
-      } else if (currentElement == 1) {
-         FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
-         filledPolygonRenderer.putRoundedRect(x, y, w, 14.0F, 1.0F, hudColor);
-         filledPolygonRenderer.draw();
+      if (!bloom || !glow) {
+         if (currentElement == 0) {
+            RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
+         } else if (currentElement == 1) {
+            FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
+            filledPolygonRenderer.putRoundedRect(x, y, w, 14.0F, 1.0F, -16777216);
+            filledPolygonRenderer.draw();
+         }
+      } else {
+         if (currentElement == 0) {
+            int c1 = ModuleManager.themeColor.getColor(x, y);
+            int c2 = ModuleManager.themeColor.getColor(x + w, y);
+            RenderUtils.drawGradientLine(x, y, x + w, y, 3.0F, c1, c2, false);
+         } else if (currentElement == 1) {
+            int cTheme = ModuleManager.themeColor.getColor(x, y);
+            FilledPolygonRenderer fpr = new FilledPolygonRenderer();
+            fpr.putRoundedRect(x, y, w, 14.0F, 1.0F, cTheme);
+            fpr.draw();
+         }
       }
    }
 

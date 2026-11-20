@@ -34,10 +34,13 @@ public class KawaseBloom {
 
       Minecraft mc = Minecraft.getMinecraft();
       framebufferList.add(framebuffer = KawaseBlur.createFrameBuffer(null, true));
+      framebuffer.setFramebufferFilter(GL11.GL_LINEAR);
+      framebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
 
       for (int i = 1; i <= iterations; i++) {
          Framebuffer currentBuffer = new Framebuffer((int)(mc.displayWidth / Math.pow(2.0, i)), (int)(mc.displayHeight / Math.pow(2.0, i)), true);
          currentBuffer.setFramebufferFilter(GL11.GL_LINEAR);
+         currentBuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
 
          GlStateManager.bindTexture(currentBuffer.framebufferTexture);
          GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL14.GL_MIRRORED_REPEAT);
@@ -49,6 +52,10 @@ public class KawaseBloom {
    }
 
    public static void renderBlur(int framebufferTexture, int iterations, int offset) {
+      renderBlur(framebufferTexture, iterations, offset, false);
+   }
+
+   public static void renderBlur(int framebufferTexture, int iterations, int offset, boolean shadow) {
       Minecraft mc = Minecraft.getMinecraft();
       if (!Display.isVisible() || mc.displayWidth <= 1 || mc.displayHeight <= 1) return;
       checkShaders();
@@ -83,6 +90,7 @@ public class KawaseBloom {
       kawaseUp.setUniformf("offset", (float)offset, (float)offset);
       kawaseUp.setUniformi("inTexture", 0);
       kawaseUp.setUniformi("check", 1);
+      kawaseUp.setUniformi("shadow", shadow ? 1 : 0);
       kawaseUp.setUniformi("textureToCheck", 16);
       kawaseUp.setUniformf("halfpixel", 1.0F / (float)lastBuffer.framebufferWidth, 1.0F / (float)lastBuffer.framebufferHeight);
       kawaseUp.setUniformf("iResolution", (float)lastBuffer.framebufferWidth, (float)lastBuffer.framebufferHeight);

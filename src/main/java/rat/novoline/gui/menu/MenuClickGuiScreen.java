@@ -136,7 +136,7 @@ public class MenuClickGuiScreen extends GuiScreen {
       this.animation2.update();
       this.visibility = MathHelper.clamp_float((float)this.animation.getValue(), 0.0F, 100.0F);
       ScaledResolution scaledResolution2 = new ScaledResolution(Minecraft.getMinecraft());
-      if (this.visibility > 0.0F && clickGui2.backgroundSettings.isSelected(3)) {
+      if (this.visibility > 0.0F && clickGui2.backgroundSettings.isSelected("Anime")) {
          RenderUtils.resetColor();
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          Entry entry2 = clickGui2.entry;
@@ -274,23 +274,50 @@ public class MenuClickGuiScreen extends GuiScreen {
       GlStateManager.scale(d3, d3, 1.0);
       GlStateManager.translate(-midX, -midY, 0.0);
 
-      int baseColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor();
-      int drawColor = RenderUtils.withAlpha(baseColor, (int)(255.0F * alpha));
+      if (!bloom || !glow) {
+         int drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
+         if (!this.dashboardOpen) {
+            for (MenuCategoryPanel panel : this.buttons) {
+               float px = panel.getX();
+               float py = panel.getY();
+               float pw = MenuCategoryPanel.getWidth();
+               float headerH = MenuCategoryPanel.getHeaderHeight();
+               float bottomY = panel.getBottomY();
 
-      if (!this.dashboardOpen) {
-         for (MenuCategoryPanel panel : this.buttons) {
-            float px = panel.getX();
-            float py = panel.getY();
-            float pw = MenuCategoryPanel.getWidth();
-            float headerH = MenuCategoryPanel.getHeaderHeight();
-            float bottomY = panel.getBottomY();
+               // Header rect (width 114, x - 2 to x + 112)
+               RenderUtils.drawRect(px - 2.0F, py, px + pw + 2.0F, py + headerH, drawColor);
 
-            // Header rect (width 114, x - 2 to x + 112)
-            RenderUtils.drawRect(px - 2.0F, py, px + pw + 2.0F, py + headerH, drawColor);
+               // Body rect (width 110, x to x + 110)
+               if (bottomY > py + headerH) {
+                  RenderUtils.drawRect(px, py + headerH, px + pw, bottomY, drawColor);
+               }
+            }
+         }
+      } else {
+         int themeColor = this.clickGuiTheme != null ? this.clickGuiTheme.getSecondaryColor(true) : ModuleManager.themeColor.getColor();
+         int accentColor = RenderUtils.withAlpha(themeColor, (int)(255.0F * alpha));
+         if (!this.dashboardOpen) {
+            for (MenuCategoryPanel panel : this.buttons) {
+               float px = panel.getX();
+               float py = panel.getY();
+               float pw = MenuCategoryPanel.getWidth();
+               float headerH = MenuCategoryPanel.getHeaderHeight();
 
-            // Body rect (width 110, x to x + 110)
-            if (bottomY > py + headerH) {
-               RenderUtils.drawRect(px, py + headerH, px + pw, bottomY, drawColor);
+               if (panel.isExpanded() && !panel.getModuleWidgets().isEmpty()) {
+                  float bottomY = panel.getBottomY();
+                  float f5 = bottomY - 2.5F;
+                  RenderUtils.drawRect(px, f5, px + pw, bottomY, accentColor);
+
+                  for (MenuModuleWidget mw : panel.getModuleWidgets()) {
+                     if (mw.isExpanded()) {
+                        for (MenuSettingWidget sw : mw.getSettingWidgets()) {
+                           sw.drawBloom(accentColor);
+                        }
+                     }
+                  }
+               } else {
+                  RenderUtils.drawRect(px, py + headerH, px + pw, py + headerH + 2.5F, accentColor);
+               }
             }
          }
       }
@@ -323,14 +350,12 @@ public class MenuClickGuiScreen extends GuiScreen {
          this.bloomRenderer.setEnabled(flag2);
       }
 
-      float backgroundDimAmount = this.menuLayout.getBackgroundDimAmount();
-      boolean flag3 = backgroundDimAmount != 0.0;
       ScaledResolution scaledResolution2 = new ScaledResolution(this.mc);
       int backgroundBlurRadius = this.menuLayout.getBackgroundBlurRadius();
       float backgroundBlurSigma = this.menuLayout.getBackgroundBlurSigma();
       int effectiveBlurRadius = (int)(f2 * backgroundBlurRadius);
       boolean clickGuiBlurAllowed = !usePostProcessing && (ModuleManager.postProcessing == null || ModuleManager.postProcessing.isBlurEnabled());
-      boolean flag4 = effectiveBlurRadius > 0 && backgroundBlurSigma > 0.0 && shadersEnabled && clickGuiBlurAllowed && this.clickGui.backgroundSettings.getElements().get(0).isSelected();
+      boolean flag4 = effectiveBlurRadius > 0 && backgroundBlurSigma > 0.0 && shadersEnabled && clickGuiBlurAllowed && this.clickGui.backgroundSettings.isSelected("Blur");
       if (flag4) {
          this.blurRenderer.blur("Background", framebuffer3, scaledResolution2, effectiveBlurRadius, backgroundBlurSigma, 1);
          framebuffer3.bindFramebuffer(true);
@@ -339,7 +364,7 @@ public class MenuClickGuiScreen extends GuiScreen {
       int desaturationColor = this.menuLayout.getDesaturationColor();
       float desaturationFactor = this.menuLayout.getDesaturationFactor();
       float effectiveDesaturation = f2 < 0.02F ? 0.0F : desaturationFactor * f2;
-      boolean flag5 = effectiveDesaturation > 0.0F && shadersEnabled && this.clickGui.backgroundSettings.getElements().get(1).isSelected();
+      boolean flag5 = effectiveDesaturation > 0.0F && shadersEnabled && this.clickGui.backgroundSettings.isSelected("Desaturation");
       if (flag5) {
          BlurFramebuffer blurFramebuffer = null;
          if (!flag4) {
@@ -371,15 +396,10 @@ public class MenuClickGuiScreen extends GuiScreen {
          ARBShaderObjects.glUseProgramObjectARB(0);
       }
 
-      if (flag3 && f2 >= 0.02F && !usePostProcessing && this.clickGui.backgroundSettings.getElements().get(2).isSelected()) {
-         int i3 = RenderUtils.withAlpha(0, (int)(255.0F * backgroundDimAmount * f2));
-         RenderUtils.drawRect(0.0F, 0.0F, scaledResolution2.getScaledWidth(), scaledResolution2.getScaledHeight(), i3);
-      }
-
       float panelOpacity = this.menuLayout.getPanelOpacity();
       if (shadersEnabled) {
          boolean flag6 = panelOpacity < 1.0;
-         this.panelBlurActive = flag6 && (flag4 || flag3) && flag && clickGuiBlurAllowed && this.clickGui.panelsSettings.getElements().get(0).isSelected();
+         this.panelBlurActive = flag6 && flag4 && flag && clickGuiBlurAllowed && this.clickGui.panelsSettings.getElements().get(0).isSelected();
          if (this.panelBlurActive) {
             this.blurRenderer.blur("Panel", framebuffer3, scaledResolution2, this.menuLayout.getPanelBlurRadius(), this.menuLayout.getPanelBlurSigma(), 1);
             framebuffer3.bindFramebuffer(true);
@@ -443,21 +463,7 @@ public class MenuClickGuiScreen extends GuiScreen {
                outlineRectRenderer.draw();
             }
 
-            float panelTextureAlpha = this.menuLayout.getPanelTextureAlpha();
-            if (panelTextureAlpha > 0.0 && this.clickGui.panelsSettings.getElements().get(0).isSelected() && !this.clickGui.performanceMode.isEnabled()) {
-               this.mc.getTextureManager().bindTexture(NOISE_TEXTURE);
-               GlStateManager.alphaFunc(516, 0.001F);
-               GlStateManager.color(1.0F, 1.0F, 1.0F, panelTextureAlpha);
-               RoundedRectRenderer roundedRectRenderer = new RoundedRectRenderer(256.0F, 256.0F);
 
-               for (MenuCategoryPanel menuCategoryPanel4 : this.buttons) {
-                  menuCategoryPanel4.addRects(roundedRectRenderer, f);
-               }
-
-               roundedRectRenderer.draw();
-               GlStateManager.alphaFunc(516, 0.1F);
-               GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
 
             for (MenuCategoryPanel menuCategoryPanel5 : this.buttons) {
                menuCategoryPanel5.render(f3, f4, f);

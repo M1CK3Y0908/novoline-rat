@@ -65,6 +65,7 @@ public class KawaseBlur {
 
       Minecraft mc = Minecraft.getMinecraft();
       framebufferList.add(framebuffer = createFrameBuffer(null, false));
+      framebuffer.setFramebufferFilter(GL11.GL_LINEAR);
       framebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
 
       for (int i = 1; i <= iterations; i++) {
