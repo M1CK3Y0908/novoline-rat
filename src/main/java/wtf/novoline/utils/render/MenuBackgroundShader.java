@@ -11,6 +11,9 @@ public class MenuBackgroundShader {
    private static final long START_NANOS = System.nanoTime();
 
    public void draw(ScaledResolution scaledResolution) {
+      if (!org.lwjgl.opengl.Display.isVisible() || scaledResolution.getScaledWidth() <= 0 || scaledResolution.getScaledHeight() <= 0) {
+         return;
+      }
       GlStateManager.disableCull();
       this.shaderProgram.use();
       GL20.glUniform1f(this.shaderProgram.getUniformLocation("time"), (float)(System.nanoTime() - START_NANOS) / 1000000.0F / 1000.0F);

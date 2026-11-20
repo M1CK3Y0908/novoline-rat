@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import wtf.novoline.Novoline;
 import wtf.novoline.event.RenderScreenEvent;
@@ -24,6 +25,9 @@ public class HudRenderer {
    }
 
    private void renderElements(ScaledResolution scaledResolution, float f, boolean flag, float f2, float f3) {
+      if (!Display.isVisible() || Minecraft.getMinecraft().displayWidth <= 1 || Minecraft.getMinecraft().displayHeight <= 1) {
+         return;
+      }
       SmoothingUtils.updateDelta();
       if (Minecraft.getMinecraft().thePlayer != null) {
          float scaleFactor = scaledResolution.getScaleFactor();

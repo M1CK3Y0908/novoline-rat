@@ -544,6 +544,12 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
    }
 
    public int getLimitFramerate() {
+      if (!Display.isVisible()) {
+         return 30;
+      }
+      if (!Display.isActive()) {
+         return Math.min(60, this.gameSettings.limitFramerate);
+      }
       return this.theWorld == null && this.currentScreen != null ? 240 : this.gameSettings.limitFramerate;
    }
 
@@ -807,7 +813,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 
       this.loadingScreen = new LoadingScreenRenderer(this);
       this.updateFramebufferSize();
-      Novoline.framebufferManager.resizeFreeFramebuffers();
+      if (Novoline.framebufferManager != null) {
+         Novoline.framebufferManager.resizeFreeFramebuffers();
+      }
    }
 
    public static Minecraft getMinecraft() {
@@ -829,20 +837,14 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 
    protected void checkWindowResize() {
       if (!this.fullscreen && Display.wasResized()) {
-         int displayWidth2 = this.displayWidth;
-         int displayHeight2 = this.displayHeight;
-         this.displayWidth = Display.getWidth();
-         this.displayHeight = Display.getHeight();
-         if (this.displayWidth != displayWidth2 || this.displayHeight != displayHeight2) {
-            if (this.displayWidth <= 0) {
-               this.displayWidth = 1;
+         int newWidth = Display.getWidth();
+         int newHeight = Display.getHeight();
+         if (newWidth > 0 && newHeight > 0) {
+            if (newWidth != this.displayWidth || newHeight != this.displayHeight) {
+               this.displayWidth = newWidth;
+               this.displayHeight = newHeight;
+               this.resize(this.displayWidth, this.displayHeight);
             }
-
-            if (this.displayHeight <= 0) {
-               this.displayHeight = 1;
-            }
-
-            this.resize(this.displayWidth, this.displayHeight);
          }
       }
    }
@@ -1934,45 +1936,50 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
       this.mcProfiler.endStartSection("sound");
       this.mcSoundHandler.setListener(this.thePlayer, this.timer.renderPartialTicks);
       this.mcProfiler.endSection();
-      this.mcProfiler.startSection("render");
-      GlStateManager.pushMatrix();
-      GlStateManager.clear(16640);
-      this.framebufferMc.bindFramebuffer(true);
-      this.mcProfiler.startSection("display");
-      GlStateManager.enableTexture2D();
-      if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock()) {
-         this.gameSettings.thirdPersonView = 0;
-      }
 
-      this.mcProfiler.endSection();
-      if (!this.skipRenderWorld) {
-         this.mcProfiler.endStartSection("gameRenderer");
-         this.entityRenderer.updateCameraAndRender(this.timer.renderPartialTicks, l);
-         this.mcProfiler.endSection();
-      }
-
-      this.mcProfiler.endSection();
-      if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI) {
-         if (!this.mcProfiler.profilingEnabled) {
-            this.mcProfiler.clearProfiling();
+      boolean canRender = Display.isVisible() && this.displayWidth > 0 && this.displayHeight > 0;
+      if (canRender) {
+         this.mcProfiler.startSection("render");
+         GlStateManager.pushMatrix();
+         GlStateManager.clear(16640);
+         this.framebufferMc.bindFramebuffer(true);
+         this.mcProfiler.startSection("display");
+         GlStateManager.enableTexture2D();
+         if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock()) {
+            this.gameSettings.thirdPersonView = 0;
          }
 
-         this.mcProfiler.profilingEnabled = true;
-         this.update();
-      } else {
-         this.mcProfiler.profilingEnabled = false;
-         this.prevFrameTime = System.nanoTime();
+         this.mcProfiler.endSection();
+         if (!this.skipRenderWorld) {
+            this.mcProfiler.endStartSection("gameRenderer");
+            this.entityRenderer.updateCameraAndRender(this.timer.renderPartialTicks, l);
+            this.mcProfiler.endSection();
+         }
+
+         this.mcProfiler.endSection();
+         if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI) {
+            if (!this.mcProfiler.profilingEnabled) {
+               this.mcProfiler.clearProfiling();
+            }
+
+            this.mcProfiler.profilingEnabled = true;
+            this.update();
+         } else {
+            this.mcProfiler.profilingEnabled = false;
+            this.prevFrameTime = System.nanoTime();
+         }
+
+         this.guiAchievement.updateAchievementWindow();
+         this.framebufferMc.unbindFramebuffer();
+         GlStateManager.popMatrix();
+         GlStateManager.pushMatrix();
+         this.framebufferMc.framebufferRender(this.displayWidth, this.displayHeight);
+         GlStateManager.popMatrix();
+         GlStateManager.pushMatrix();
+         this.entityRenderer.call3DRenderEvent(this.timer.renderPartialTicks);
+         GlStateManager.popMatrix();
       }
 
-      this.guiAchievement.updateAchievementWindow();
-      this.framebufferMc.unbindFramebuffer();
-      GlStateManager.popMatrix();
-      GlStateManager.pushMatrix();
-      this.framebufferMc.framebufferRender(this.displayWidth, this.displayHeight);
-      GlStateManager.popMatrix();
-      GlStateManager.pushMatrix();
-      this.entityRenderer.call3DRenderEvent(this.timer.renderPartialTicks);
-      GlStateManager.popMatrix();
       this.mcProfiler.startSection("root");
       this.updateDisplay();
       Thread.yield();
@@ -2012,7 +2019,12 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
          }
       }
 
-      if (this.isFramerateLimitBelowMax()) {
+      if (!canRender) {
+         try {
+            Thread.sleep(30L);
+         } catch (InterruptedException ignored) {
+         }
+      } else if (this.isFramerateLimitBelowMax()) {
          this.mcProfiler.startSection("fpslimit_wait");
          Display.sync(this.getLimitFramerate());
          this.mcProfiler.endSection();

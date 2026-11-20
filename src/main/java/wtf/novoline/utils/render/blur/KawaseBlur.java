@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
@@ -37,6 +38,9 @@ public class KawaseBlur {
 
    public static Framebuffer createFrameBuffer(Framebuffer fb, boolean depth) {
       Minecraft mc = Minecraft.getMinecraft();
+      if (mc.displayWidth <= 1 || mc.displayHeight <= 1) {
+         return fb;
+      }
       if (needsNewFramebuffer(fb)) {
          if (fb != null) {
             fb.deleteFramebuffer();
@@ -83,8 +87,10 @@ public class KawaseBlur {
    }
 
    public static void renderBlur(int stencilFrameBufferTexture, int iterations, float offset) {
-      checkShaders();
+      if (!Display.isVisible()) return;
       Minecraft mc = Minecraft.getMinecraft();
+      if (mc.displayWidth <= 1 || mc.displayHeight <= 1) return;
+      checkShaders();
       if (currentIterations != iterations || framebuffer.framebufferWidth != mc.displayWidth || framebuffer.framebufferHeight != mc.displayHeight) {
          initFramebuffers(iterations);
          currentIterations = iterations;

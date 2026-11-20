@@ -6,6 +6,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.MathHelper;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL13;
 import wtf.novoline.Novoline;
 import wtf.novoline.event.ShaderEvent;
@@ -48,6 +49,9 @@ public class PostProcessing extends Module {
 
    public static Framebuffer getUiFramebuffer() {
       Minecraft mc = Minecraft.getMinecraft();
+      if (mc.displayWidth <= 1 || mc.displayHeight <= 1) {
+         return uiFramebuffer;
+      }
       if (uiFramebuffer == null || uiFramebuffer.framebufferWidth != mc.displayWidth || uiFramebuffer.framebufferHeight != mc.displayHeight) {
          if (uiFramebuffer != null) {
             uiFramebuffer.deleteFramebuffer();
@@ -137,6 +141,9 @@ public class PostProcessing extends Module {
    public void blurScreen() {
       if (!this.isEnabled()) return;
       Minecraft mc = Minecraft.getMinecraft();
+      if (!Display.isVisible() || mc.displayWidth <= 1 || mc.displayHeight <= 1) {
+         return;
+      }
       if (stencilFramebuffer == null || stencilFramebuffer.framebufferWidth != mc.displayWidth || stencilFramebuffer.framebufferHeight != mc.displayHeight) {
          if (stencilFramebuffer != null) {
             stencilFramebuffer.deleteFramebuffer();

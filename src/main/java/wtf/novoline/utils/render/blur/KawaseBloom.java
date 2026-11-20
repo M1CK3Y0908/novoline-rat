@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.MathHelper;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
@@ -69,8 +70,10 @@ public class KawaseBloom {
    }
 
    public static void renderBlur(int framebufferTexture, int iterations, float offset, float alpha) {
-      checkShaders();
+      if (!Display.isVisible()) return;
       Minecraft mc = Minecraft.getMinecraft();
+      if (mc.displayWidth <= 1 || mc.displayHeight <= 1) return;
+      checkShaders();
       if (framebufferList.size() < iterations + 1 || framebuffer.framebufferWidth != mc.displayWidth || framebuffer.framebufferHeight != mc.displayHeight) {
          initFramebuffers(Math.max(SHADOW_ITERATIONS, iterations));
       }
@@ -136,8 +139,10 @@ public class KawaseBloom {
 
    public static void renderExposureGlow(int uiTexture, float alpha) {
       if (alpha <= 0.001F) return;
-      checkShaders();
+      if (!Display.isVisible()) return;
       Minecraft mc = Minecraft.getMinecraft();
+      if (mc.displayWidth <= 1 || mc.displayHeight <= 1) return;
+      checkShaders();
       int iterations = 3;
       float offset = 1.8F;
 

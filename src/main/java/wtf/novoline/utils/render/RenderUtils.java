@@ -646,6 +646,10 @@ public class RenderUtils {
    }
 
    public static Framebuffer ensureFramebuffer(Framebuffer framebuffer) {
+      if (minecraft.displayWidth <= 1 || minecraft.displayHeight <= 1) {
+         return framebuffer;
+      }
+
       if (framebuffer != null && framebuffer.framebufferWidth == minecraft.displayWidth && framebuffer.framebufferHeight == minecraft.displayHeight) {
          return framebuffer;
       }
