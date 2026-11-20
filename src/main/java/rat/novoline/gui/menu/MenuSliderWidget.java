@@ -69,7 +69,10 @@ public class MenuSliderWidget extends MenuSettingWidget {
             this.y + this.getHeight() / 2.0F - 1.0F,
             this.menuClickGuiScreen.getClickGuiTheme().getTextColor()
          );
-         String text = ((NumberSetting)this.moduleSetting).getFormattedValue(this.displayedValue);
+         NumberSetting numSetting = (NumberSetting)this.moduleSetting;
+         String text = numSetting.hasCustomLabel(numSetting.getCurrentValue())
+            ? numSetting.getFormattedValue()
+            : numSetting.getFormattedValue(this.displayedValue);
 
          floatSupplier.drawStringLeftMiddle(
             text,
@@ -118,10 +121,16 @@ public class MenuSliderWidget extends MenuSettingWidget {
 
    public MenuSliderWidget(MenuClickGuiScreen menuClickGuiScreen2, ModuleSetting moduleSetting2) {
       super(menuClickGuiScreen2, moduleSetting2);
+      if (moduleSetting2 instanceof NumberSetting) {
+         this.displayedValue = ((NumberSetting)moduleSetting2).getCurrentValue();
+      }
    }
 
    @Override
    public void reset() {
       this.dragging = false;
+      if (this.moduleSetting instanceof NumberSetting) {
+         this.displayedValue = ((NumberSetting)this.moduleSetting).getCurrentValue();
+      }
    }
 }

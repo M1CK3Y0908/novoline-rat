@@ -111,6 +111,21 @@ public class NumberSetting extends ModuleSetting {
       return Math.abs(this.currentValue - this.defaultValue) > 0.001F;
    }
 
+   public boolean hasCustomLabel(float val) {
+      if (this.customLabels != null) {
+         for (java.util.Map.Entry<Float, String> entry : this.customLabels.entrySet()) {
+            if (this.intType == IntType.INT) {
+               if (Math.round(val) == Math.round(entry.getKey())) {
+                  return true;
+               }
+            } else if (Math.abs(entry.getKey() - val) < 0.05F) {
+               return true;
+            }
+         }
+      }
+      return false;
+   }
+
    public String getFormattedValue() {
       return this.getFormattedValue(this.currentValue);
    }
@@ -118,8 +133,14 @@ public class NumberSetting extends ModuleSetting {
    public String getFormattedValue(float val) {
       if (this.customLabels != null) {
          for (java.util.Map.Entry<Float, String> entry : this.customLabels.entrySet()) {
-            if (Math.abs(entry.getKey() - val) < 0.001F) {
-               return entry.getValue();
+            if (this.intType == IntType.INT) {
+               if (Math.round(val) == Math.round(entry.getKey()) || Math.abs(this.currentValue - entry.getKey()) < 0.001F) {
+                  return entry.getValue();
+               }
+            } else {
+               if (Math.abs(entry.getKey() - val) < 0.05F || Math.abs(this.currentValue - entry.getKey()) < 0.001F) {
+                  return entry.getValue();
+               }
             }
          }
       }

@@ -14,15 +14,15 @@ import rat.novoline.setting.NumberSetting;
 import rat.novoline.utils.player.ItemUtils;
 
 public class AutoArmor extends Module {
-   public final NumberSetting autoArmor = settingManager.register(
-      new NumberSetting(this, "Auto armor", 1, -1, 20, " ticks").addLabel(-1.0f, "§cDisabled")
+   public final NumberSetting delay = settingManager.register(
+      new NumberSetting(this, "Delay", 1, 0, 20, " ticks")
    );
    public final CheckboxSetting disableInLobby = settingManager.register(new CheckboxSetting(this, "Disable in lobby", true));
    public final CheckboxSetting dropOldArmor = settingManager.register(new CheckboxSetting(this, "Drop old armor", true));
    public final CheckboxSetting closeInventory = settingManager.register(new CheckboxSetting(this, "Close inventory", false));
 
    public boolean processing;
-   private long delay = 0L;
+   private long currentDelay = 0L;
    private long waited = 0L;
 
    enum ArmorSlot {
@@ -53,24 +53,24 @@ public class AutoArmor extends Module {
    public final Listener<PreUpdateEvent> onPreUpdate = preUpdateEvent -> {
       this.processing = false;
       if (minecraft.thePlayer == null || minecraft.theWorld == null) {
-         this.delay = 0L;
+         this.currentDelay = 0L;
          this.waited = 0L;
          return;
       }
 
       if (minecraft.currentScreen == null || ItemUtils.pausedInLobby(this.disableInLobby.isEnabled())) {
-         this.delay = 0L;
+         this.currentDelay = 0L;
          this.waited = 0L;
          return;
       }
 
-      if (++this.waited < this.delay) {
+      if (++this.waited < this.currentDelay) {
          return;
       }
       this.waited = 0L;
 
       if (minecraft.currentScreen instanceof GuiInventory) {
-         int armorDelay = Math.round(this.autoArmor.getCurrentValue());
+         int armorDelay = Math.round(this.delay.getCurrentValue());
          if (armorDelay >= 0) {
             updateArmor();
             Scan s = new Scan(minecraft.thePlayer.inventory, true);
@@ -95,9 +95,9 @@ public class AutoArmor extends Module {
    };
 
    private boolean click(int slot, int button, int mode, long actionDelay) {
-      this.delay = actionDelay;
+      this.currentDelay = actionDelay;
       minecraft.playerController.windowClick(minecraft.thePlayer.openContainer.windowId, slot, button, mode, minecraft.thePlayer);
-      return this.delay != 0L;
+      return this.currentDelay != 0L;
    }
 
    private static void updateArmor() {
@@ -110,7 +110,7 @@ public class AutoArmor extends Module {
 
    @Override
    protected void onDisable() {
-      this.delay = 0L;
+      this.currentDelay = 0L;
       this.waited = 0L;
       this.processing = false;
    }

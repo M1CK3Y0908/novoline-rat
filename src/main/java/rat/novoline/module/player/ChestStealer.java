@@ -25,23 +25,6 @@ public class ChestStealer extends Module {
    public final CheckboxSetting stealFromCustomChests = settingManager.register(new CheckboxSetting(this, "Steal from custom chests", false));
    public final CheckboxSetting disableInLobby = settingManager.register(new CheckboxSetting(this, "Disable in lobby", true));
 
-   public final NumberSetting sword = settingManager.register(new NumberSetting(this, "Sword", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting bow = settingManager.register(new NumberSetting(this, "Bow", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting blocks = settingManager.register(new NumberSetting(this, "Blocks", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting goldenApple = settingManager.register(new NumberSetting(this, "Golden apple", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting projectile = settingManager.register(new NumberSetting(this, "Projectile/Rod", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting speedPotion = settingManager.register(new NumberSetting(this, "Speed potion", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting enderPearl = settingManager.register(new NumberSetting(this, "Ender pearl", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting waterBucket = settingManager.register(new NumberSetting(this, "Water bucket", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final NumberSetting lavaBucket = settingManager.register(new NumberSetting(this, "Lava bucket", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
-   public final CheckboxSetting rodOverProjectile = settingManager.register(new CheckboxSetting(this, "Rod over projectile", true));
-   public final CheckboxSetting onlyWithKnockback = settingManager.register(new CheckboxSetting(this, "^ Only with knockback", true) {
-      @Override
-      public boolean shouldShow() {
-         return ChestStealer.this.rodOverProjectile.isEnabled();
-      }
-   });
-
    enum ArmorSlot {
       BOOTS(0, 8), LEGGINGS(1, 7), CHESTPLATE(2, 6), HELMET(3, 5);
 
@@ -60,12 +43,6 @@ public class ChestStealer extends Module {
    }
 
    private static final ArmorSlot[] armor = ArmorSlot.values();
-   private static int bestSwordSlot = -1;
-   private static double bestSword = -1.0;
-   private static int swordDuplicates;
-   private static int bestBowSlot = -1;
-   private static double bestBow = -1.0;
-   private static int bowDuplicates;
    private long currentDelay = 0L;
    private long waited = 0L;
    private long chestTicks = 0L;
@@ -118,16 +95,16 @@ public class ChestStealer extends Module {
          c.dropWorse(p);
 
          if (p.size != p.filled) {
-            if (sortSword(c, false, stealDelay)) {
-               return;
-            }
-            if (sortBow(c, false, stealDelay)) {
-               return;
-            }
             for (int n = 0; n < c.armor[0].length; ++n) {
                if (c.armor[1][n] == -1.0 || !(c.armor[1][n] > armor[n].value) || !click((int) c.armor[0][n], 0, 1, stealDelay)) {
                   continue;
                }
+               return;
+            }
+            if (c.sword[1] != -1.0 && click((int) c.sword[0], 0, 1, stealDelay)) {
+               return;
+            }
+            if (c.bow[1] != -1.0 && click((int) c.bow[0], 0, 1, stealDelay)) {
                return;
             }
             for (int n = 0; n < c.size; ++n) {
@@ -136,89 +113,10 @@ public class ChestStealer extends Module {
                   continue;
                }
                Item item = stack.getItem();
-               int n16;
-               ItemStack other;
-               if (ItemUtils.isBlock(item)) {
-                  n16 = Math.round(this.blocks.getCurrentValue()) - 1;
-                  if (n16 == -1) {
-                     if (!click(n, 0, 1, stealDelay)) continue;
-                     return;
-                  }
-                  other = p.inv.getStackInSlot(n16);
-                  if ((other == null || !ItemUtils.isBlock(other.getItem())
-                        || ((ItemBlock) item).getBlock() != ((ItemBlock) other.getItem()).getBlock() && stack.stackSize > other.stackSize)
-                        && click(n, n16, 2, stealDelay)) {
-                     return;
-                  }
-               } else if (item == Items.golden_apple) {
-                  n16 = Math.round(this.goldenApple.getCurrentValue()) - 1;
-                  if (n16 == -1) {
-                     if (!click(n, 0, 1, stealDelay)) continue;
-                     return;
-                  }
-                  other = p.inv.getStackInSlot(n16);
-                  if ((other == null || other.getItem() != Items.golden_apple) && click(n, n16, 2, stealDelay)) {
-                     return;
-                  }
-               } else if (item == Items.snowball || item == Items.egg || item == Items.fishing_rod) {
-                  n16 = Math.round(this.projectile.getCurrentValue()) - 1;
-                  if (n16 == -1) {
-                     if (!click(n, 0, 1, stealDelay)) continue;
-                     return;
-                  }
-                  other = p.inv.getStackInSlot(n16);
-                  if (other == null || (other.getItem() != Items.snowball && other.getItem() != Items.egg && other.getItem() != Items.fishing_rod)
-                        || (preferredRod(stack) && !preferredRod(other))) {
-                     if (click(n, n16, 2, stealDelay)) {
-                        return;
-                     }
-                  } else if (stack.stackSize > other.stackSize && other.getItem() != Items.fishing_rod) {
-                     boolean done = item == other.getItem() ? (stack.stackSize <= 16 ? click(n, 0, 1, stealDelay) : click(n, n16, 2, stealDelay))
-                           : click(n, n16, 2, stealDelay);
-                     if (done) {
-                        return;
-                     }
-                  }
-               } else if (item == Items.water_bucket || item == Items.lava_bucket) {
-                  if (!(item == Items.water_bucket ? !p.water : !p.lava)) continue;
-                  n16 = Math.round((item == Items.water_bucket ? this.waterBucket : this.lavaBucket).getCurrentValue()) - 1;
-                  if (n16 == -1) {
-                     if (click(n, 0, 1, stealDelay)) {
-                        return;
-                     }
-                  } else if (click(n, n16, 2, stealDelay)) {
-                     return;
-                  }
-                  if (item == Items.water_bucket) {
-                     p.water = true;
-                  } else {
-                     p.lava = true;
-                  }
-                  continue;
-               } else if (item == Items.potionitem) {
-                  if (ItemUtils.isSpeedPotion(stack)) {
-                     n16 = Math.round(this.speedPotion.getCurrentValue()) - 1;
-                     if (n16 == -1) {
-                        if (!click(n, 0, 1, stealDelay)) continue;
-                        return;
-                     }
-                     other = p.inv.getStackInSlot(n16);
-                     if (!ItemUtils.isSpeedPotion(other) && click(n, n16, 2, stealDelay)) {
-                        return;
-                     }
-                  }
-               } else if (item == Items.ender_pearl) {
-                  n16 = Math.round(this.enderPearl.getCurrentValue()) - 1;
-                  if (n16 == -1) {
-                     if (!click(n, 0, 1, stealDelay)) continue;
-                     return;
-                  }
-                  other = p.inv.getStackInSlot(n16);
-                  if ((other == null || other.getItem() != Items.ender_pearl) && click(n, n16, 2, stealDelay)) {
-                     return;
-                  }
-               }
                if (item instanceof ItemBlock && !ItemUtils.isBlock(item) && !ItemUtils.isUtilityBlock(item)) {
+                  continue;
+               }
+               if (item == Items.potionitem && ItemUtils.isBadPotion(stack)) {
                   continue;
                }
                if (!click(n, 0, 1, stealDelay)) continue;
@@ -249,46 +147,6 @@ public class ChestStealer extends Module {
       }
    };
 
-   private boolean sortBow(Scan s, boolean player, long actionDelay) {
-      if (s.bow[1] != -1.0) {
-         int bw = Math.round(this.bow.getCurrentValue());
-         if (bw > 0) {
-            if (s.bow[1] > bestBow) {
-               int n = (int) s.bow[0];
-               if (player) {
-                  n = n < 9 ? n + 36 : n;
-               }
-               return click(n, bw - 1, 2, actionDelay);
-            }
-         } else if (!player) {
-            return click((int) s.bow[0], 0, 1, actionDelay);
-         }
-      }
-      return false;
-   }
-
-   private boolean sortSword(Scan s, boolean player, long actionDelay) {
-      if (s.sword[1] != -1.0) {
-         int sw = Math.round(this.sword.getCurrentValue());
-         if (sw > 0) {
-            if (s.sword[1] > bestSword) {
-               int n = (int) s.sword[0];
-               if (player) {
-                  n = n < 9 ? n + 36 : n;
-               }
-               return click(n, sw - 1, 2, actionDelay);
-            }
-         } else if (!player) {
-            return click((int) s.sword[0], 0, 1, actionDelay);
-         }
-      }
-      return false;
-   }
-
-   private boolean preferredRod(ItemStack stack) {
-      return ItemUtils.preferredRod(stack, this.rodOverProjectile.isEnabled(), this.onlyWithKnockback.isEnabled());
-   }
-
    private boolean click(int slot, int button, int mode, long actionDelay) {
       this.currentDelay = actionDelay;
       minecraft.playerController.windowClick(minecraft.thePlayer.openContainer.windowId, slot, button, mode, minecraft.thePlayer);
@@ -316,42 +174,15 @@ public class ChestStealer extends Module {
       final double[] sword = {-1.0, -1.0};
       final double[] bow = {-1.0, -1.0};
       final double[][] armor = {{-1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0}};
-      int emptyMain, filled;
-      boolean water, lava;
+      int filled;
 
       Scan(IInventory inv, boolean player) {
          this.inv = inv;
          this.size = !player ? inv.getSizeInventory() : inv.getSizeInventory() - 4;
-         int sw = Math.round(ChestStealer.this.sword.getCurrentValue()) - 1 + (!player ? (this.size != 54 ? 54 : 81) : 0);
-         int bw = Math.round(ChestStealer.this.bow.getCurrentValue()) - 1 + (!player ? (this.size != 54 ? 54 : 81) : 0);
          for (int i = 0; i < this.size; ++i) {
             ItemStack stack = inv.getStackInSlot(i);
             if (stack != null) {
                ++this.filled;
-               Item item = stack.getItem();
-               this.water |= item == Items.water_bucket;
-               this.lava |= item == Items.lava_bucket;
-            } else if (i >= 9) {
-               ++this.emptyMain;
-            }
-            if (i == sw) {
-               swordDuplicates = 0;
-               if (stack != null && ItemUtils.isSword(stack) && ItemUtils.durable(stack)) {
-                  bestSwordSlot = i;
-                  bestSword = ItemUtils.attackDamage(stack);
-                  continue;
-               }
-               bestSwordSlot = -1;
-               bestSword = -1;
-            } else if (i == bw) {
-               bowDuplicates = 0;
-               if (stack != null && ItemUtils.isBow(stack) && ItemUtils.durable(stack)) {
-                  bestBowSlot = i;
-                  bestBow = ItemUtils.bowEnchantLevels(stack);
-                  continue;
-               }
-               bestBowSlot = -1;
-               bestBow = -1;
             }
             if (stack == null || !ItemUtils.durable(stack)) continue;
             if (ItemUtils.isSword(stack)) {

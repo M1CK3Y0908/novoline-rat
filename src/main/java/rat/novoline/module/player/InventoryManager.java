@@ -10,7 +10,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import org.lwjgl.input.Mouse;
 import rat.novoline.event.PreUpdateEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
@@ -110,18 +109,12 @@ public class InventoryManager extends Module {
    public final NumberSetting inventoryCleaner = settingManager.register(
       new NumberSetting(this, "Inventory cleaner", -1, -1, 20, " ticks").addLabel(-1.0f, "§cDisabled")
    );
-   public final CheckboxSetting middleClickToClean = settingManager.register(new CheckboxSetting(this, "Middle click to clean", false));
-
-   public final NumberSetting autoArmor = settingManager.register(
-      new NumberSetting(this, "Auto armor", -1, -1, 20, " ticks").addLabel(-1.0f, "§cDisabled")
-   );
 
    enum Action {
-      AUTOARMOR, SORT, CLEANER;
+      SORT, CLEANER;
 
       long getDelay(InventoryManager inv) {
          switch (this) {
-            case AUTOARMOR: return Math.round(inv.autoArmor.getCurrentValue());
             case SORT: return Math.round(inv.sortDelay.getCurrentValue());
             default: return Math.round(inv.inventoryCleaner.getCurrentValue());
          }
@@ -183,27 +176,11 @@ public class InventoryManager extends Module {
 
       if (minecraft.currentScreen instanceof GuiInventory) {
          boolean hasSort = this.autoSort.isEnabled();
-         boolean hasArmor = Math.round(this.autoArmor.getCurrentValue()) >= 0;
          boolean hasCleaner = Math.round(this.inventoryCleaner.getCurrentValue()) >= 0;
 
-         if (hasArmor || hasSort || hasCleaner) {
+         if (hasSort || hasCleaner) {
             updateArmor();
             Scan s = new Scan(minecraft.thePlayer.inventory);
-
-            if (hasArmor) {
-               for (int n = 0; n < s.armor[0].length; ++n) {
-                  if (s.armor[1][n] == -1.0) continue;
-                  ArmorSlot a = armor[n];
-                  if (!(s.armor[1][n] > a.value)) continue;
-                  if (a.getItemStack() != null) {
-                     click(a.slot, 0, 4, Action.AUTOARMOR);
-                  }
-                  int n2 = (int) s.armor[0][n];
-                  int n3 = n2 < 9 ? n2 + 36 : n2;
-                  if (!click(n3, 0, 1, Action.AUTOARMOR)) continue;
-                  return;
-               }
-            }
 
             if (hasSort) {
                if (sortSword(s)) {
@@ -297,7 +274,7 @@ public class InventoryManager extends Module {
                }
             }
 
-            if (hasCleaner && (!this.middleClickToClean.isEnabled() || Mouse.isButtonDown(2))) {
+            if (hasCleaner) {
                ArrayList<Integer> seen = new ArrayList<Integer>();
                for (int i = 0; i < s.size; ++i) {
                   ItemStack stack = s.inv.getStackInSlot(i);
