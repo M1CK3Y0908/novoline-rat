@@ -7,7 +7,12 @@ import rat.novoline.utils.ClientPreferences;
 public class PreferencesSection extends ConfigSection {
    @Override
    public JsonObject serialize() {
-      return gson.toJsonTree(Novoline.getNovoline().getClientPreferences()).getAsJsonObject();
+      ClientPreferences prefs = Novoline.getNovoline().getClientPreferences();
+      if (prefs == null) {
+         return new JsonObject();
+      }
+      com.google.gson.JsonElement tree = gson.toJsonTree(prefs);
+      return tree.isJsonObject() ? tree.getAsJsonObject() : new JsonObject();
    }
 
    @Override

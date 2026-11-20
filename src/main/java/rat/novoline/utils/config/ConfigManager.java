@@ -93,12 +93,22 @@ public class ConfigManager {
       Path path = (flag ? Directories.STORAGE_DIR : Directories.CONFIGS_DIR).resolve(text + ".novo");
 
       try {
+         if (!Files.exists(path)) {
+            return;
+         }
          JsonObject jsonObject = gson.fromJson(Files.readString(path), JsonObject.class);
+         if (jsonObject == null) {
+            return;
+         }
 
          for (ConfigSection configSection : configSections) {
-            JsonObject asJsonObject = jsonObject.getAsJsonObject(configSection.getName());
-            if (asJsonObject != null) {
-               configSection.deserialize(asJsonObject);
+            try {
+               JsonObject asJsonObject = jsonObject.getAsJsonObject(configSection.getName());
+               if (asJsonObject != null) {
+                  configSection.deserialize(asJsonObject);
+               }
+            } catch (Throwable t) {
+               Novoline.taggedLogger.error(t, "Failed to deserialize section: {}", configSection.getName());
             }
          }
       } catch (Throwable throwable) {
@@ -139,15 +149,22 @@ public class ConfigManager {
       JsonObject jsonObject = new JsonObject();
 
       for (ConfigSection configSection : configSections) {
-         JsonObject jsonObject2 = configSection.serialize();
-         if (jsonObject2 != null) {
-            jsonObject.add(configSection.getName(), jsonObject2);
+         try {
+            JsonObject jsonObject2 = configSection.serialize();
+            if (jsonObject2 != null) {
+               jsonObject.add(configSection.getName(), jsonObject2);
+            }
+         } catch (Throwable t) {
+            Novoline.taggedLogger.error(t, "Failed to serialize section: {}", configSection.getName());
          }
       }
 
       try {
+         if (path.getParent() != null && !Files.exists(path.getParent())) {
+            Files.createDirectories(path.getParent());
+         }
          Files.writeString(path, gson.toJson(jsonObject));
-      } catch (IOException ioException) {
+      } catch (Throwable ioException) {
          Novoline.taggedLogger.error(ioException, "Can't save config file!");
       }
    }

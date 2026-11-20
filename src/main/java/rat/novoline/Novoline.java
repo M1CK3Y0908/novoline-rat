@@ -227,13 +227,38 @@ public class Novoline {
    public void saveAll() {
       try {
          this.configRegistry.getConfigManager().saveGlobal();
+      } catch (Throwable throwable2) {
+         taggedLogger.error(throwable2, "Couldn't save global config");
+      }
+
+      try {
          this.configRegistry.getConfigManager().save(true, "proxies", ConfigRegistry.proxiesSection);
+      } catch (Throwable throwable2) {
+         taggedLogger.error(throwable2, "Couldn't save proxies");
+      }
+
+      try {
          this.accountManager.save();
+      } catch (Throwable throwable2) {
+         taggedLogger.error(throwable2, "Couldn't save accounts");
+      }
+
+      try {
          this.relationManager.save();
+      } catch (Throwable throwable2) {
+         taggedLogger.error(throwable2, "Couldn't save relations");
+      }
+
+      try {
          ModuleManager.killsults.saveMessages();
+      } catch (Throwable throwable2) {
+         taggedLogger.error(throwable2, "Couldn't save killsults");
+      }
+
+      try {
          ModuleManager.spammer.saveMessages();
       } catch (Throwable throwable2) {
-         taggedLogger.error(throwable2, "Couldn't save data");
+         taggedLogger.error(throwable2, "Couldn't save spammer");
       }
    }
 

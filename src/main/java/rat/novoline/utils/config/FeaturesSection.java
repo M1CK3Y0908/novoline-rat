@@ -108,11 +108,11 @@ public class FeaturesSection extends ConfigSection {
                   }
                } else {
                   List elements = ((MultiComboSetting)setting3).getElements();
-                  JsonArray jsonArray = new JsonArray(elements.size());
+                  JsonArray jsonArray = new JsonArray();
 
                   for (Option option : (Iterable<MultiComboSetting.Option>) elements) {
                      if (option.isSelected()) {
-                        jsonArray.add(option.getName());
+                        jsonArray.add(new JsonPrimitive(option.getName()));
                      }
                   }
 

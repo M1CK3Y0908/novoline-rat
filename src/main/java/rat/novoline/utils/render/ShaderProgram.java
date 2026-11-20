@@ -66,9 +66,9 @@ public class ShaderProgram {
 
    private static String readSource(ResourceLocation resourceLocation) {
       try {
-      return IOUtils.toString(Minecraft.getMinecraft().getResourceManager().getResource(resourceLocation).getInputStream(), StandardCharsets.UTF_8);
-   } catch (Throwable sneakyThrowable) {
-         throw SneakyThrow.sneak(sneakyThrowable);
+         return IOUtils.toString(Minecraft.getMinecraft().getResourceManager().getResource(resourceLocation).getInputStream(), StandardCharsets.UTF_8);
+      } catch (Throwable sneakyThrowable) {
+         throw new RuntimeException(sneakyThrowable);
       }
    }
 

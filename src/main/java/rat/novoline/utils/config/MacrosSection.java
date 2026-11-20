@@ -33,7 +33,9 @@ public class MacrosSection extends ConfigSection {
       if (jsonObject.size() > 0) {
          for (java.util.Map.Entry entry : jsonObject.entrySet()) {
             JsonObject asJsonObject = ((JsonElement)entry.getValue()).getAsJsonObject();
-            this.macroManager.addMacro(new ChatMacro((String)entry.getKey(), asJsonObject.get("hotkey").getAsInt(), asJsonObject.get("msg").getAsString()));
+            String msg = asJsonObject.has("message") ? asJsonObject.get("message").getAsString() : (asJsonObject.has("msg") ? asJsonObject.get("msg").getAsString() : "");
+            int hotkey = asJsonObject.has("hotkey") ? asJsonObject.get("hotkey").getAsInt() : 0;
+            this.macroManager.addMacro(new ChatMacro((String)entry.getKey(), hotkey, msg));
          }
       }
    }

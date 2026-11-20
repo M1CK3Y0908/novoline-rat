@@ -3,6 +3,7 @@ package rat.novoline.utils.config;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.minecraft.block.Block;
 import rat.novoline.module.ModuleManager;
 import rat.novoline.module.world.XRay;
@@ -32,7 +33,7 @@ public class XRaySection extends ConfigSection {
       JsonArray jsonArray = new JsonArray();
 
       for (Block block2 : this.xRay.visibleBlocks) {
-         jsonArray.add(Block.getIdFromBlock(block2));
+         jsonArray.add(new JsonPrimitive(Block.getIdFromBlock(block2)));
       }
 
       jsonObject.add("blocks", jsonArray);
