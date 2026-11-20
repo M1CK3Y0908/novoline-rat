@@ -19,7 +19,7 @@ import rat.novoline.utils.player.ItemUtils;
 
 public class ChestStealer extends Module {
    public final NumberSetting delay = settingManager.register(
-      new NumberSetting(this, "Chest stealer", 1, -1, 20, " ticks").addLabel(-1.0f, "§cDisabled")
+      new NumberSetting(this, "Delay", 1, 0, 20, " ticks")
    );
    public final CheckboxSetting closeChest = settingManager.register(new CheckboxSetting(this, "Close chest", false));
    public final CheckboxSetting stealFromCustomChests = settingManager.register(new CheckboxSetting(this, "Steal from custom chests", false));
@@ -35,7 +35,12 @@ public class ChestStealer extends Module {
    public final NumberSetting waterBucket = settingManager.register(new NumberSetting(this, "Water bucket", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
    public final NumberSetting lavaBucket = settingManager.register(new NumberSetting(this, "Lava bucket", 0, 0, 9).addLabel(0.0f, "§cDisabled"));
    public final CheckboxSetting rodOverProjectile = settingManager.register(new CheckboxSetting(this, "Rod over projectile", true));
-   public final CheckboxSetting onlyWithKnockback = settingManager.register(new CheckboxSetting(this, "^ Only with knockback", true));
+   public final CheckboxSetting onlyWithKnockback = settingManager.register(new CheckboxSetting(this, "^ Only with knockback", true) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.rodOverProjectile.isEnabled();
+      }
+   });
 
    enum ArmorSlot {
       BOOTS(0, 8), LEGGINGS(1, 7), CHESTPLATE(2, 6), HELMET(3, 5);
