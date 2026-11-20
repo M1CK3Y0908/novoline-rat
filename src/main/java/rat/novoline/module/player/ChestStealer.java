@@ -24,7 +24,7 @@ public class ChestStealer extends Module {
       new NumberSetting(this, "Delay", 1, 0, 20, " ticks")
    );
    public final CheckboxSetting closeChest = settingManager.register(new CheckboxSetting(this, "Close chest", false));
-   public final CheckboxSetting ignoreJunk = settingManager.register(new CheckboxSetting(this, "Ignore junk", true));
+   public final CheckboxSetting ignoreTrash = settingManager.register(new CheckboxSetting(this, "Ignore trash", true));
    public final CheckboxSetting stealFromCustomChests = settingManager.register(new CheckboxSetting(this, "Steal from custom chests", false));
    public final CheckboxSetting disableInLobby = settingManager.register(new CheckboxSetting(this, "Disable in lobby", true));
 
@@ -96,7 +96,7 @@ public class ChestStealer extends Module {
          Scan c = new Scan(chest, false);
          Scan p = new Scan(minecraft.thePlayer.inventory, true);
 
-         if (this.ignoreJunk.isEnabled()) {
+         if (this.ignoreTrash.isEnabled()) {
             c.dropWorse(p);
          }
 
@@ -123,7 +123,7 @@ public class ChestStealer extends Module {
                if (stack == null) {
                   continue;
                }
-               if (this.ignoreJunk.isEnabled()) {
+               if (this.ignoreTrash.isEnabled()) {
                   if (!ItemUtils.isUsefulItem(stack)) {
                      continue;
                   }
@@ -147,7 +147,7 @@ public class ChestStealer extends Module {
             for (int i = 0; i < c.size; ++i) {
                ItemStack stack = c.inv.getStackInSlot(i);
                if (stack == null) continue;
-               if (this.ignoreJunk.isEnabled() && !ItemUtils.isUsefulItem(stack)) continue;
+               if (this.ignoreTrash.isEnabled() && !ItemUtils.isUsefulItem(stack)) continue;
                Item item = stack.getItem();
                for (int j = 0; j < p.size; ++j) {
                   ItemStack own = p.inv.getStackInSlot(j);
