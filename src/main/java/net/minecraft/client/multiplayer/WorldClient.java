@@ -38,10 +38,10 @@ import net.optifine.CustomGuis;
 import net.optifine.DynamicLights;
 import net.optifine.override.PlayerControllerOF;
 import net.optifine.reflect.Reflector;
-import wtf.novoline.Novoline;
-import wtf.novoline.event.ServerDisconnectEvent;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.util.FireworkEffects.EntityFXChild;
+import rat.novoline.Novoline;
+import rat.novoline.event.ServerDisconnectEvent;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.util.FireworkEffects.EntityFXChild;
 
 public class WorldClient extends World {
    private ChunkProviderClient clientChunkProvider;

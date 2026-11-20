@@ -19,7 +19,7 @@ import net.optifine.config.VillagerProfession;
 import net.optifine.config.Weather;
 import net.optifine.reflect.Reflector;
 import net.optifine.util.MathUtils;
-import wtf.novoline.utils.ArrayUtils;
+import rat.novoline.utils.ArrayUtils;
 
 public class RandomEntityRule {
    private String pathProps = null;

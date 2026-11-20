@@ -15,8 +15,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldType;
-import wtf.novoline.Novoline;
-import wtf.novoline.event.RenderBlockEvent;
+import rat.novoline.Novoline;
+import rat.novoline.event.RenderBlockEvent;
 
 public class BlockRendererDispatcher implements IResourceManagerReloadListener {
    private final BlockModelRenderer blockModelRenderer = new BlockModelRenderer();

@@ -9,7 +9,7 @@ Write-Host "Building Novoline.Rat (Build $buildDate)"
 Write-Host "=========================================="
 
 # 1. Update BUILD_DATE in Novoline.java if needed
-$novoFile = Join-Path $ProjectRoot "src\main\java\wtf\novoline\Novoline.java"
+$novoFile = Join-Path $ProjectRoot "src\main\java\rat\novoline\Novoline.java"
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $novoContent = [System.IO.File]::ReadAllText($novoFile, $utf8NoBom)
 $novoContent = $novoContent -replace 'public static final String BUILD_DATE = ".*?";', "public static final String BUILD_DATE = `"$buildDate`";"

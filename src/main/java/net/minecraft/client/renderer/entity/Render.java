@@ -24,9 +24,9 @@ import net.minecraft.world.World;
 import net.optifine.entity.model.IEntityRenderer;
 import net.optifine.shaders.Shaders;
 import org.lwjgl.opengl.GL11;
-import wtf.novoline.module.visual.Chams;
-import wtf.novoline.module.visual.PlayerESP;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.module.visual.Chams;
+import rat.novoline.module.visual.PlayerESP;
+import rat.novoline.utils.render.RenderUtils;
 
 public abstract class Render<T extends Entity> implements IEntityRenderer {
    protected float shadowOpaque = 1.0F;

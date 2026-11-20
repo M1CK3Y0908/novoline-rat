@@ -13,8 +13,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.visual.FreeLook;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.visual.FreeLook;
 
 public class ActiveRenderInfo {
    public static final IntBuffer VIEWPORT = GLAllocation.createDirectIntBuffer(16);

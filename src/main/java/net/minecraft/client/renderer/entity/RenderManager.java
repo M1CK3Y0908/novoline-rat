@@ -106,9 +106,9 @@ import net.optifine.entity.model.CustomEntityModels;
 import net.optifine.player.PlayerItemsLayer;
 import net.optifine.reflect.Reflector;
 import net.optifine.shaders.Shaders;
-import wtf.novoline.culling.Cullable;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.visual.FreeLook;
+import rat.novoline.culling.Cullable;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.visual.FreeLook;
 
 public class RenderManager {
    public float playerViewX;

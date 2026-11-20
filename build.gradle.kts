@@ -17,7 +17,7 @@ plugins {
     application
 }
 
-group = "wtf.novoline"
+group = "rat.novoline"
 version = "1.0.0"
 
 java {

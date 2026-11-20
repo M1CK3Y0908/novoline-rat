@@ -15,9 +15,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import wtf.novoline.Novoline.Fonts;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.player.InventoryMove;
+import rat.novoline.Novoline.Fonts;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.player.InventoryMove;
 
 public class GuiInventory extends InventoryEffectRenderer {
    private float oldMouseY;

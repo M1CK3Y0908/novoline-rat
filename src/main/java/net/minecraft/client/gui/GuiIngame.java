@@ -43,13 +43,13 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.world.border.WorldBorder;
 import net.optifine.CustomColors;
-import wtf.novoline.Novoline;
-import wtf.novoline.event.RenderGameOverlayEvent;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.hud.HudRenderer;
-import wtf.novoline.module.misc.NameProtect;
-import wtf.novoline.utils.NameUtils;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.Novoline;
+import rat.novoline.event.RenderGameOverlayEvent;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.hud.HudRenderer;
+import rat.novoline.module.misc.NameProtect;
+import rat.novoline.utils.NameUtils;
+import rat.novoline.utils.render.RenderUtils;
 import java.util.Collection;
 
 public class GuiIngame extends Gui {
@@ -283,7 +283,7 @@ public class GuiIngame extends Gui {
 
    private String getString(String text) {
       if (text.contains(".")) {
-         return "www.novoline.wtf";
+         return "www.novoline.rat";
       }
 
       NameProtect nameProtect2 = ModuleManager.nameProtect;
@@ -304,7 +304,7 @@ public class GuiIngame extends Gui {
             ScorePlayerTeam playersTeam = scoreboard2.getPlayersTeam(score.getPlayerName());
             String text = ScorePlayerTeam.formatPlayerName(playersTeam, score.getPlayerName());
             if (!text.contains(".")) {
-               arrayList2.add(0, this.getScore(scoreboard2, "www.novoline.wtf"));
+               arrayList2.add(0, this.getScore(scoreboard2, "www.novoline.rat"));
                arrayList2.add(1, this.getScore(scoreboard2, "§a§l"));
             }
          }

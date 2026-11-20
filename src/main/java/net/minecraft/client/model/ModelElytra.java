@@ -6,8 +6,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.utils.render.RenderUtils;
 
 public class ModelElytra extends ModelBase {
    private final ModelRenderer leftWing;

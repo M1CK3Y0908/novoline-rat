@@ -15,8 +15,8 @@ import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wtf.novoline.util.Helper1;
-import wtf.novoline.utils.MinecraftUtils;
+import rat.novoline.util.Helper1;
+import rat.novoline.utils.MinecraftUtils;
 
 public class OldServerPinger2 {
    private static final Logger logger = LogManager.getLogger();

@@ -42,10 +42,10 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import tv.twitch.chat.ChatUserInfo;
-import wtf.novoline.Novoline;
-import wtf.novoline.gui.AltManagerScreen;
-import wtf.novoline.gui.ProxyManagerScreen;
-import wtf.novoline.utils.math.SmoothingUtils;
+import rat.novoline.Novoline;
+import rat.novoline.gui.AltManagerScreen;
+import rat.novoline.gui.ProxyManagerScreen;
+import rat.novoline.utils.math.SmoothingUtils;
 
 public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
    protected Minecraft mc;

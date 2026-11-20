@@ -13,7 +13,7 @@ import net.minecraft.util.MinecraftError;
 import net.optifine.CustomLoadingScreen;
 import net.optifine.CustomLoadingScreens;
 import net.optifine.reflect.Reflector;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.utils.render.RenderUtils;
 
 public class LoadingScreenRenderer implements IProgressUpdate {
    private String message = "";

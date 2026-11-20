@@ -51,8 +51,8 @@ import net.optifine.util.TextureUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wtf.novoline.api.IResourceHolder;
-import wtf.novoline.util.Helper3;
+import rat.novoline.api.IResourceHolder;
+import rat.novoline.util.Helper3;
 
 public class ModelBakery {
    private static final Set<ResourceLocation> LOCATIONS_BUILTIN_TEXTURES = Sets.newHashSet(

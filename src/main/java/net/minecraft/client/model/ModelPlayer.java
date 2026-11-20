@@ -2,9 +2,9 @@ package net.minecraft.client.model;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
-import wtf.novoline.model.DemonModel;
-import wtf.novoline.model.SonicModel;
-import wtf.novoline.module.ModuleManager;
+import rat.novoline.model.DemonModel;
+import rat.novoline.model.SonicModel;
+import rat.novoline.module.ModuleManager;
 
 public class ModelPlayer extends ModelBiped {
    private final ModelElytra modelElytra = new ModelElytra();

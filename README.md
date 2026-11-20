@@ -22,9 +22,9 @@
 
 ## Overview
 
-Novoline.wtf fully deobf source code (remap)
+Novoline.rat fully deobf source code (remap)
 
-The original `Novoline-wtf.jar` was not created by this project's author. The
+The original `Novoline-rat.jar` was not created by this project's author. The
 source in this repository is the decompiled and remapped result of that original
 JAR.
 

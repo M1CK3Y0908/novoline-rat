@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
-import wtf.novoline.utils.render.MipmapData;
+import rat.novoline.utils.render.MipmapData;
 
 public class TextureUtil {
    private static final Logger logger = LogManager.getLogger();

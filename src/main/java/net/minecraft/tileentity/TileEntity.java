@@ -1,6 +1,6 @@
 package net.minecraft.tileentity;
 
-import wtf.novoline.culling.Cullable;
+import rat.novoline.culling.Cullable;
 
 import com.google.common.collect.Maps;
 import java.util.Map;

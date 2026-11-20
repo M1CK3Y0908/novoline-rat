@@ -18,8 +18,8 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wtf.novoline.Novoline;
-import wtf.novoline.event.ServerConnectEvent;
+import rat.novoline.Novoline;
+import rat.novoline.event.ServerConnectEvent;
 
 public class GuiConnecting extends GuiScreen {
    private static final AtomicInteger CONNECTION_ID = new AtomicInteger(0);

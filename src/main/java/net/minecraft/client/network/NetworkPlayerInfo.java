@@ -8,14 +8,14 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
-import wtf.novoline.Novoline;
-import wtf.novoline.client.IrcConnection;
-import wtf.novoline.client.discord.GatewayUser;
-import wtf.novoline.cosmetic.CapeCosmeticChild1;
-import wtf.novoline.enums.CapeType;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.visual.SkinChanger;
-import wtf.novoline.util.Profile;
+import rat.novoline.Novoline;
+import rat.novoline.client.IrcConnection;
+import rat.novoline.client.discord.GatewayUser;
+import rat.novoline.cosmetic.CapeCosmeticChild1;
+import rat.novoline.enums.CapeType;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.visual.SkinChanger;
+import rat.novoline.util.Profile;
 
 public class NetworkPlayerInfo {
    private ResourceLocation locationSkin;

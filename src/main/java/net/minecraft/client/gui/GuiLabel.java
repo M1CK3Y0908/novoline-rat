@@ -5,7 +5,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.utils.render.RenderUtils;
 
 public class GuiLabel extends Gui {
    protected int intValue = 200;

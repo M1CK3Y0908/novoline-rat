@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.src.Config;
 import net.minecraft.util.EnumFacing;
 import net.optifine.model.QuadBounds;
-import wtf.novoline.api.Contract3;
+import rat.novoline.api.Contract3;
 
 public class BakedQuad implements Contract3 {
    private int[] vertexDataSingle = null;

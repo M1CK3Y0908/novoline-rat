@@ -3,7 +3,7 @@ package net.minecraft.realms;
 import java.util.List;
 import net.minecraft.client.gui.CommandSuggestions;
 import net.minecraft.util.IChatComponent;
-import wtf.novoline.utils.MinecraftUtils;
+import rat.novoline.utils.MinecraftUtils;
 
 public class DisconnectedRealmsScreen extends CommandSuggestions {
    private final CommandSuggestions commandSuggestions;

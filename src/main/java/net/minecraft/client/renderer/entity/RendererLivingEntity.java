@@ -32,11 +32,11 @@ import net.optifine.shaders.Shaders;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.misc.NameProtect;
-import wtf.novoline.module.visual.Chams;
-import wtf.novoline.module.visual.PlayerESP;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.misc.NameProtect;
+import rat.novoline.module.visual.Chams;
+import rat.novoline.module.visual.PlayerESP;
+import rat.novoline.utils.render.RenderUtils;
 
 public abstract class RendererLivingEntity<T extends EntityLivingBase> extends Render<T> {
    private static final Logger logger = LogManager.getLogger();

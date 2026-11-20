@@ -12,12 +12,12 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wtf.novoline.Novoline;
-import wtf.novoline.Novoline.Fonts;
-import wtf.novoline.util.Room;
-import wtf.novoline.utils.math.SmoothingUtils;
-import wtf.novoline.utils.render.CFontRenderer;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.Novoline;
+import rat.novoline.Novoline.Fonts;
+import rat.novoline.util.Room;
+import rat.novoline.utils.math.SmoothingUtils;
+import rat.novoline.utils.render.CFontRenderer;
+import rat.novoline.utils.render.RenderUtils;
 
 public class GuiNewChat extends Gui {
    private final List<String> sentMessages = Lists.newArrayList();

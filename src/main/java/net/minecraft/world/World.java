@@ -53,10 +53,10 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
-import wtf.novoline.Novoline;
-import wtf.novoline.event.SpawnParticleEvent;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.Novoline;
+import rat.novoline.event.SpawnParticleEvent;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.utils.render.RenderUtils;
 
 public abstract class World implements IBlockAccess {
    private int seaLevel = 63;

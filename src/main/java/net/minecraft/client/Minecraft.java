@@ -186,16 +186,16 @@ import org.lwjgl.opengl.OpenGLException;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.glu.GLU;
 import ru.fals3r.aal.API;
-import wtf.novoline.Novoline;
-import wtf.novoline.Novoline.Fonts;
-import wtf.novoline.event.DeviceButtonDownEvent;
-import wtf.novoline.event.LoadWorldEvent;
-import wtf.novoline.event.RunTickEvent;
-import wtf.novoline.event.DeviceButtonDownEvent.MouseType;
-import wtf.novoline.gui.NovolineMainMenu;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.world.FastPlace;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.Novoline;
+import rat.novoline.Novoline.Fonts;
+import rat.novoline.event.DeviceButtonDownEvent;
+import rat.novoline.event.LoadWorldEvent;
+import rat.novoline.event.RunTickEvent;
+import rat.novoline.event.DeviceButtonDownEvent.MouseType;
+import rat.novoline.gui.NovolineMainMenu;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.world.FastPlace;
+import rat.novoline.utils.render.RenderUtils;
 
 public class Minecraft implements IThreadListener, IPlayerUsage {
    public MouseHelper mouseHelper;
@@ -1192,7 +1192,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 
    private void createDisplay() throws LWJGLException {
       Display.setResizable(true);
-      Display.setTitle(wtf.novoline.Novoline.CLIENT_TITLE);
+      Display.setTitle(rat.novoline.Novoline.CLIENT_TITLE);
 
       try {
          Display.create(new PixelFormat().withDepthBits(24));

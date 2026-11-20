@@ -29,11 +29,11 @@ import net.optifine.DynamicLights;
 import net.optifine.reflect.Reflector;
 import net.optifine.shaders.Shaders;
 import org.lwjgl.opengl.GL11;
-import wtf.novoline.module.ModuleManager;
-import wtf.novoline.module.visual.Animations;
-import wtf.novoline.module.visual.Chams;
-import wtf.novoline.module.visual.Animations.ItemTransformState;
-import wtf.novoline.utils.render.RenderUtils;
+import rat.novoline.module.ModuleManager;
+import rat.novoline.module.visual.Animations;
+import rat.novoline.module.visual.Chams;
+import rat.novoline.module.visual.Animations.ItemTransformState;
+import rat.novoline.utils.render.RenderUtils;
 
 public class ItemRenderer {
    private static final ResourceLocation RES_MAP_BACKGROUND = new ResourceLocation("textures/map/map_background.png");

@@ -110,8 +110,8 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Vector4f;
-import wtf.novoline.util.GlErrorThrottle;
-import wtf.novoline.util.ReportThrottle;
+import rat.novoline.util.GlErrorThrottle;
+import rat.novoline.util.ReportThrottle;
 
 public class Shaders {
    private static final int STAGE_COMPOSITE = 1;

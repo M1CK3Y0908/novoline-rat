@@ -19,7 +19,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
-import wtf.novoline.module.ModuleManager;
+import rat.novoline.module.ModuleManager;
 
 public abstract class GuiContainer extends GuiScreen {
    private long lastClickTime;
