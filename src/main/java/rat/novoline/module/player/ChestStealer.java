@@ -28,6 +28,114 @@ public class ChestStealer extends Module {
    public final CheckboxSetting stealFromCustomChests = settingManager.register(new CheckboxSetting(this, "Steal from custom chests", false));
    public final CheckboxSetting disableInLobby = settingManager.register(new CheckboxSetting(this, "Disable in lobby", true));
 
+   // --- Stealing Item Limit Sliders (shown when ignoreTrash is enabled) ---
+   // Non-stackable items (0 - 16)
+   public final NumberSetting sword = settingManager.register(new NumberSetting(this, "Sword", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting bow = settingManager.register(new NumberSetting(this, "Bow", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting armorSetting = settingManager.register(new NumberSetting(this, "Armor", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting tools = settingManager.register(new NumberSetting(this, "Tools", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting waterBucket = settingManager.register(new NumberSetting(this, "Water bucket", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting lavaBucket = settingManager.register(new NumberSetting(this, "Lava bucket", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting potions = settingManager.register(new NumberSetting(this, "Potions", 4, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting fishingRod = settingManager.register(new NumberSetting(this, "Fishing rod", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting flintAndSteel = settingManager.register(new NumberSetting(this, "Flint and steel", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting shears = settingManager.register(new NumberSetting(this, "Shears", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   // Stackable items (0 - 512)
+   public final NumberSetting blocks = settingManager.register(new NumberSetting(this, "Blocks", 128, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting goldenApple = settingManager.register(new NumberSetting(this, "Golden apple", 32, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting enderPearl = settingManager.register(new NumberSetting(this, "Ender pearl", 16, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting projectile = settingManager.register(new NumberSetting(this, "Projectiles", 32, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
+   public final NumberSetting arrows = settingManager.register(new NumberSetting(this, "Arrows", 64, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return ChestStealer.this.ignoreTrash.isEnabled();
+      }
+   }.addLabel(0.0f, "§cDisabled"));
+
    enum ArmorSlot {
       BOOTS(0, 8), LEGGINGS(1, 7), CHESTPLATE(2, 6), HELMET(3, 5);
 
@@ -118,6 +226,19 @@ public class ChestStealer extends Module {
                   return;
                }
             }
+
+            int blockLimit = Math.round(this.blocks.getCurrentValue());
+            int gappleLimit = Math.round(this.goldenApple.getCurrentValue());
+            int pearlLimit = Math.round(this.enderPearl.getCurrentValue());
+            int projLimit = Math.round(this.projectile.getCurrentValue());
+            int arrowLimit = Math.round(this.arrows.getCurrentValue());
+            int waterLimit = Math.round(this.waterBucket.getCurrentValue());
+            int lavaLimit = Math.round(this.lavaBucket.getCurrentValue());
+            int potionLimit = Math.round(this.potions.getCurrentValue());
+            int rodLimit = Math.round(this.fishingRod.getCurrentValue());
+            int flintLimit = Math.round(this.flintAndSteel.getCurrentValue());
+            int shearsLimit = Math.round(this.shears.getCurrentValue());
+
             for (int n = 0; n < c.size; ++n) {
                ItemStack stack = c.inv.getStackInSlot(n);
                if (stack == null) {
@@ -130,24 +251,59 @@ public class ChestStealer extends Module {
                   if (ItemUtils.isSword(stack) || ItemUtils.isBow(stack) || ItemUtils.isArmor(stack) || stack.getItem() instanceof ItemTool) {
                      continue;
                   }
-                  if (stack.getItem() == Items.fishing_rod && p.hasFishingRod) {
-                     continue;
-                  }
-                  if (stack.getItem() == Items.flint_and_steel && p.hasFlintAndSteel) {
-                     continue;
-                  }
-                  if (stack.getItem() == Items.shears && p.hasShears) {
-                     continue;
+                  Item item = stack.getItem();
+                  if (ItemUtils.isBlock(item)) {
+                     if (blockLimit <= 0 || p.blockCount >= blockLimit) continue;
+                  } else if (item == Items.golden_apple) {
+                     if (gappleLimit <= 0 || p.gappleCount >= gappleLimit) continue;
+                  } else if (item == Items.ender_pearl) {
+                     if (pearlLimit <= 0 || p.pearlCount >= pearlLimit) continue;
+                  } else if (item == Items.snowball || item == Items.egg) {
+                     if (projLimit <= 0 || p.projectileCount >= projLimit) continue;
+                  } else if (item == Items.arrow) {
+                     if (arrowLimit <= 0 || p.arrowCount >= arrowLimit) continue;
+                  } else if (item == Items.water_bucket) {
+                     if (waterLimit <= 0 || p.waterBucketCount >= waterLimit) continue;
+                  } else if (item == Items.lava_bucket) {
+                     if (lavaLimit <= 0 || p.lavaBucketCount >= lavaLimit) continue;
+                  } else if (ItemUtils.isGoodPotion(stack)) {
+                     if (potionLimit <= 0 || p.potionCount >= potionLimit) continue;
+                  } else if (item == Items.fishing_rod) {
+                     if (rodLimit <= 0 || p.fishingRodCount >= rodLimit) continue;
+                  } else if (item == Items.flint_and_steel) {
+                     if (flintLimit <= 0 || p.flintAndSteelCount >= flintLimit) continue;
+                  } else if (item == Items.shears) {
+                     if (shearsLimit <= 0 || p.shearsCount >= shearsLimit) continue;
                   }
                }
                if (!click(n, 0, 1, stealDelay)) continue;
                return;
             }
          } else {
+            int blockLimit = Math.round(this.blocks.getCurrentValue());
+            int gappleLimit = Math.round(this.goldenApple.getCurrentValue());
+            int pearlLimit = Math.round(this.enderPearl.getCurrentValue());
+            int projLimit = Math.round(this.projectile.getCurrentValue());
+            int arrowLimit = Math.round(this.arrows.getCurrentValue());
+
             for (int i = 0; i < c.size; ++i) {
                ItemStack stack = c.inv.getStackInSlot(i);
                if (stack == null) continue;
-               if (this.ignoreTrash.isEnabled() && !ItemUtils.isUsefulItem(stack)) continue;
+               if (this.ignoreTrash.isEnabled()) {
+                  if (!ItemUtils.isUsefulItem(stack)) continue;
+                  Item item = stack.getItem();
+                  if (ItemUtils.isBlock(item)) {
+                     if (blockLimit <= 0 || p.blockCount >= blockLimit) continue;
+                  } else if (item == Items.golden_apple) {
+                     if (gappleLimit <= 0 || p.gappleCount >= gappleLimit) continue;
+                  } else if (item == Items.ender_pearl) {
+                     if (pearlLimit <= 0 || p.pearlCount >= pearlLimit) continue;
+                  } else if (item == Items.snowball || item == Items.egg) {
+                     if (projLimit <= 0 || p.projectileCount >= projLimit) continue;
+                  } else if (item == Items.arrow) {
+                     if (arrowLimit <= 0 || p.arrowCount >= arrowLimit) continue;
+                  }
+               }
                Item item = stack.getItem();
                for (int j = 0; j < p.size; ++j) {
                   ItemStack own = p.inv.getStackInSlot(j);
@@ -193,9 +349,22 @@ public class ChestStealer extends Module {
       final double[][] armor = {{-1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0}};
       final double[][] tools = {{-1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0}};
       int filled;
-      boolean hasFishingRod;
-      boolean hasFlintAndSteel;
-      boolean hasShears;
+
+      int blockCount;
+      int gappleCount;
+      int pearlCount;
+      int projectileCount;
+      int arrowCount;
+      int waterBucketCount;
+      int lavaBucketCount;
+      int potionCount;
+      int fishingRodCount;
+      int flintAndSteelCount;
+      int shearsCount;
+      int swordCount;
+      int bowCount;
+      int toolCount;
+      int armorCount;
 
       Scan(IInventory inv, boolean player) {
          this.inv = inv;
@@ -205,28 +374,49 @@ public class ChestStealer extends Module {
             if (stack != null) {
                ++this.filled;
                Item item = stack.getItem();
-               if (item == Items.fishing_rod) {
-                  this.hasFishingRod = true;
+               if (ItemUtils.isBlock(item)) {
+                  this.blockCount += stack.stackSize;
+               } else if (item == Items.golden_apple) {
+                  this.gappleCount += stack.stackSize;
+               } else if (item == Items.ender_pearl) {
+                  this.pearlCount += stack.stackSize;
+               } else if (item == Items.snowball || item == Items.egg) {
+                  this.projectileCount += stack.stackSize;
+               } else if (item == Items.arrow) {
+                  this.arrowCount += stack.stackSize;
+               } else if (item == Items.water_bucket) {
+                  ++this.waterBucketCount;
+               } else if (item == Items.lava_bucket) {
+                  ++this.lavaBucketCount;
+               } else if (ItemUtils.isGoodPotion(stack)) {
+                  ++this.potionCount;
+               } else if (item == Items.fishing_rod) {
+                  ++this.fishingRodCount;
                } else if (item == Items.flint_and_steel) {
-                  this.hasFlintAndSteel = true;
+                  ++this.flintAndSteelCount;
                } else if (item == Items.shears) {
-                  this.hasShears = true;
+                  ++this.shearsCount;
                }
             }
+
             if (stack == null || !ItemUtils.durable(stack)) continue;
+
             if (ItemUtils.isSword(stack)) {
+               ++this.swordCount;
                double d = ItemUtils.attackDamage(stack);
                if (d > this.sword[1]) {
                   this.sword[1] = d;
                   this.sword[0] = i;
                }
             } else if (ItemUtils.isBow(stack)) {
+               ++this.bowCount;
                double d = ItemUtils.bowEnchantLevels(stack);
                if (d > this.bow[1]) {
                   this.bow[1] = d;
                   this.bow[0] = i;
                }
             } else if (ItemUtils.isArmor(stack)) {
+               ++this.armorCount;
                int type = 3 - ((ItemArmor) stack.getItem()).armorType;
                double d = ItemUtils.armorValue(stack);
                if (d > this.armor[1][type]) {
@@ -236,6 +426,7 @@ public class ChestStealer extends Module {
             } else if (stack.getItem() instanceof ItemTool && !(stack.getItem() instanceof ItemHoe)) {
                int toolType = ItemUtils.getToolType(stack);
                if (toolType >= 0 && toolType < 3) {
+                  ++this.toolCount;
                   double d = ItemUtils.getToolScore(stack);
                   if (d > this.tools[1][toolType]) {
                      this.tools[1][toolType] = d;
@@ -247,20 +438,24 @@ public class ChestStealer extends Module {
       }
 
       void dropWorse(Scan player) {
-         if (player.sword[1] >= this.sword[1]) {
+         int swordLimit = Math.round(ChestStealer.this.sword.getCurrentValue());
+         if (swordLimit <= 0 || (player.swordCount >= swordLimit && player.sword[1] >= this.sword[1])) {
             this.sword[1] = -1.0;
          }
-         if (player.bow[1] >= this.bow[1]) {
+         int bowLimit = Math.round(ChestStealer.this.bow.getCurrentValue());
+         if (bowLimit <= 0 || (player.bowCount >= bowLimit && player.bow[1] >= this.bow[1])) {
             this.bow[1] = -1.0;
          }
+         int armorLimit = Math.round(ChestStealer.this.armorSetting.getCurrentValue());
          for (int i = 0; i < this.armor[0].length; ++i) {
             double playerArmorVal = Math.max(ChestStealer.armor[i].value, player.armor[1][i]);
-            if (playerArmorVal >= this.armor[1][i]) {
+            if (armorLimit <= 0 || playerArmorVal >= this.armor[1][i]) {
                this.armor[1][i] = -1.0;
             }
          }
+         int toolLimit = Math.round(ChestStealer.this.tools.getCurrentValue());
          for (int t = 0; t < 3; ++t) {
-            if (player.tools[1][t] >= this.tools[1][t]) {
+            if (toolLimit <= 0 || (player.toolCount >= toolLimit && player.tools[1][t] >= this.tools[1][t])) {
                this.tools[1][t] = -1.0;
             }
          }
