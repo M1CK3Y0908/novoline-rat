@@ -14,6 +14,7 @@ public class NumberSetting extends ModuleSetting {
    private final float minValue;
    private final float maxValue;
    private String unit = "";
+   private java.util.Map<Float, String> customLabels;
 
    private static final DecimalFormat decimalFormat = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
 
@@ -98,11 +99,31 @@ public class NumberSetting extends ModuleSetting {
       return this;
    }
 
+   public NumberSetting addLabel(float value, String label) {
+      if (this.customLabels == null) {
+         this.customLabels = new java.util.HashMap<>();
+      }
+      this.customLabels.put(value, label);
+      return this;
+   }
+
+   public boolean isNotDefault() {
+      return Math.abs(this.currentValue - this.defaultValue) > 0.001F;
+   }
+
    public String getFormattedValue() {
       return this.getFormattedValue(this.currentValue);
    }
 
    public String getFormattedValue(float val) {
+      if (this.customLabels != null) {
+         for (java.util.Map.Entry<Float, String> entry : this.customLabels.entrySet()) {
+            if (Math.abs(entry.getKey() - val) < 0.001F) {
+               return entry.getValue();
+            }
+         }
+      }
+
       String numStr = this.intType == IntType.DECIMAL ? decimalFormat.format(val) : String.valueOf(Math.round(val));
       if (numStr.equals("-0")) {
          numStr = "0";

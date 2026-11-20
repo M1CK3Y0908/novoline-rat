@@ -3,135 +3,138 @@ package rat.novoline.module.player;
 import io.github.nevalackin.homoBus.Listener;
 import io.github.nevalackin.homoBus.annotations.EventLink;
 import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C0DPacketCloseWindow;
-import net.minecraft.network.play.client.C16PacketClientStatus;
-import net.minecraft.network.play.client.C16PacketClientStatus.EnumState;
-import rat.novoline.event.GameEndEvent;
-import rat.novoline.event.LoadWorldEvent;
 import rat.novoline.event.PreUpdateEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
 import rat.novoline.setting.CheckboxSetting;
-import rat.novoline.setting.MultiComboSetting;
 import rat.novoline.setting.NumberSetting;
-import rat.novoline.utils.language.Language;
-import rat.novoline.utils.notification.NotificationType;
-import rat.novoline.utils.player.InventoryUtils;
-import rat.novoline.utils.time.Stopwatch;
+import rat.novoline.utils.player.ItemUtils;
 
 public class AutoArmor extends Module {
-   private final MultiComboSetting autoArmor = settingManager.register(
-      new MultiComboSetting(this, "Disable rules").add("World change", false).add("Death", false).add("Game end", false)
+   public final NumberSetting autoArmor = settingManager.register(
+      new NumberSetting(this, "Auto armor", 1, -1, 20, " ticks").addLabel(-1.0f, "§cDisabled")
    );
-   private final CheckboxSetting onlyInOpenInventory = settingManager.register(new CheckboxSetting(this, "Only in open inventory", false));
-   private final CheckboxSetting silentlyOpenInventory = settingManager.register(new CheckboxSetting(this, "Silently open inventory", false) {
-      @Override
-      public boolean shouldShow() {
-         return AutoArmor.this.onlyInOpenInventory.isEnabled();
-      }
-   });
-   private final CheckboxSetting onlyWhileStanding = settingManager.register(new CheckboxSetting(this, "Only while standing", false));
-   private final CheckboxSetting dropOldArmor = settingManager.register(new CheckboxSetting(this, "Drop old armor", false));
-   private final NumberSetting delay = settingManager.register(new NumberSetting(this, "Delay", 150, 0, 1000));
-   private final NumberSetting startDelay = settingManager.register(new NumberSetting(this, "Start delay", 0, 0, 1000));
-   private final Stopwatch moveTimer = new Stopwatch();
-   private final Stopwatch startTimer = new Stopwatch();
-   @EventLink
-   public final Listener<GameEndEvent> onGameEnd = gameEndEvent -> {
-      if (this.autoArmor.isSelected(2)) {
-         this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "AutoArmor", Language.translate("feature.autoarmor.disable_rules.notification.game_end"), 2500L);
-      }
-   };
-   @EventLink
-   public final Listener<LoadWorldEvent> onLoadWorld = loadWorldEvent -> {
-      if (this.autoArmor.isSelected(0)) {
-         this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "AutoArmor", Language.translate("feature.autoarmor.disable_rules.notification.world_change"), 2500L);
-      }
-   };
+   public final CheckboxSetting disableInLobby = settingManager.register(new CheckboxSetting(this, "Disable in lobby", true));
+   public final CheckboxSetting dropOldArmor = settingManager.register(new CheckboxSetting(this, "Drop old armor", true));
+   public final CheckboxSetting closeInventory = settingManager.register(new CheckboxSetting(this, "Close inventory", false));
+
    public boolean processing;
-   @EventLink
-   public final Listener<PreUpdateEvent> onPreUpdate = preUpdateEvent -> {
-      if (!minecraft.thePlayer.isEntityAlive() && this.autoArmor.getElements().get(1).isSelected() && this.autoArmor.isSelected(1)) {
-         this.setEnabled(false);
-         this.showNotification(NotificationType.INFO, "AutoArmor", Language.translate("feature.autoarmor.disable_rules.notification.death"), 2500L);
+   private long delay = 0L;
+   private long waited = 0L;
+
+   enum ArmorSlot {
+      BOOTS(0, 8), LEGGINGS(1, 7), CHESTPLATE(2, 6), HELMET(3, 5);
+
+      final int index, slot;
+      double value;
+      int duplicates;
+
+      ArmorSlot(int index, int slot) {
+         this.index = index;
+         this.slot = slot;
       }
 
-      this.processing = false;
-      if (this.onlyInOpenInventory.isEnabled() && !this.silentlyOpenInventory.isEnabled() && !(minecraft.currentScreen instanceof GuiInventory)) {
-         this.moveTimer.reset();
-         this.startTimer.reset();
-      } else if (!this.onlyWhileStanding.isEnabled() || minecraft.thePlayer.moveStrafing == 0.0F && minecraft.thePlayer.moveForward == 0.0F) {
-         this.processing = true;
-         InventoryPlayer inventory2 = minecraft.thePlayer.inventory;
-         int i = -1;
-         int i2 = -1;
-
-         for (int i3 = 0; i3 < inventory2.armorInventory.length; i3++) {
-            int bestArmorSlot = InventoryUtils.findBestArmorSlot(i3);
-            if (bestArmorSlot != -1 && bestArmorSlot != 39 - i3) {
-               i = i3;
-               i2 = bestArmorSlot;
-               break;
-            }
-         }
-
-         if (i != -1) {
-            if (this.moveTimer.hasElapsed((long)this.delay.getCurrentValue()) && this.startTimer.hasElapsed((long)this.startDelay.getCurrentValue())) {
-               this.moveTimer.reset();
-               if (i2 < 9) {
-                  i2 += 36;
-               }
-
-               boolean flag = true;
-               ItemStack itemStack = inventory2.armorInventory[3 - i];
-               if (itemStack != null && itemStack.getItem() instanceof ItemArmor) {
-                  if (this.dropOldArmor.isEnabled()) {
-                     minecraft.playerController.windowClick(0, 5 + i, 0, 4, minecraft.thePlayer);
-                     return;
-                  }
-               } else {
-                  flag = false;
-               }
-
-               if (!this.inventoryOpened && this.silentlyOpenInventory.isEnabled()) {
-                  this.sendPacket(new C16PacketClientStatus(EnumState.OPEN_INVENTORY_ACHIEVEMENT));
-                  this.inventoryOpened = true;
-               }
-
-               if (flag) {
-                  minecraft.playerController.windowClick(0, i2, 1, 0, minecraft.thePlayer);
-                  minecraft.playerController.windowClick(0, 5 + i, 1, 0, minecraft.thePlayer);
-                  minecraft.playerController.windowClick(0, i2, 0, 0, minecraft.thePlayer);
-               } else {
-                  minecraft.playerController.windowClick(0, i2, 0, 1, minecraft.thePlayer);
-               }
-            }
-         } else {
-            if (this.inventoryOpened && this.silentlyOpenInventory.isEnabled()) {
-               this.sendPacket(new C0DPacketCloseWindow());
-               this.inventoryOpened = false;
-            }
-
-            this.processing = false;
-         }
-      } else {
-         this.moveTimer.reset();
-         this.startTimer.reset();
+      ItemStack getItemStack() {
+         return minecraft.thePlayer.inventory.armorItemInSlot(this.index);
       }
-   };
-   public boolean inventoryOpened;
+   }
+
+   private static final ArmorSlot[] armor = ArmorSlot.values();
 
    public AutoArmor() {
-      super(Category.PLAYER, "AutoArmor", "");
+      super(Category.PLAYER, "AutoArmor", "Equips best armor automatically.");
+      this.addAlias("Armor");
+   }
+
+   @EventLink
+   public final Listener<PreUpdateEvent> onPreUpdate = preUpdateEvent -> {
+      this.processing = false;
+      if (minecraft.thePlayer == null || minecraft.theWorld == null) {
+         this.delay = 0L;
+         this.waited = 0L;
+         return;
+      }
+
+      if (minecraft.currentScreen == null || ItemUtils.pausedInLobby(this.disableInLobby.isEnabled())) {
+         this.delay = 0L;
+         this.waited = 0L;
+         return;
+      }
+
+      if (++this.waited < this.delay) {
+         return;
+      }
+      this.waited = 0L;
+
+      if (minecraft.currentScreen instanceof GuiInventory) {
+         int armorDelay = Math.round(this.autoArmor.getCurrentValue());
+         if (armorDelay >= 0) {
+            updateArmor();
+            Scan s = new Scan(minecraft.thePlayer.inventory, true);
+            for (int n = 0; n < s.armor[0].length; ++n) {
+               if (s.armor[1][n] == -1.0) continue;
+               ArmorSlot a = armor[n];
+               if (!(s.armor[1][n] > a.value)) continue;
+               if (a.getItemStack() != null && this.dropOldArmor.isEnabled()) {
+                  click(a.slot, 0, 4, armorDelay);
+               }
+               int n2 = (int) s.armor[0][n];
+               int n3 = n2 < 9 ? n2 + 36 : n2;
+               if (!click(n3, 0, 1, armorDelay)) continue;
+               this.processing = true;
+               return;
+            }
+            if (this.closeInventory.isEnabled()) {
+               minecraft.thePlayer.closeScreen();
+            }
+         }
+      }
+   };
+
+   private boolean click(int slot, int button, int mode, long actionDelay) {
+      this.delay = actionDelay;
+      minecraft.playerController.windowClick(minecraft.thePlayer.openContainer.windowId, slot, button, mode, minecraft.thePlayer);
+      return this.delay != 0L;
+   }
+
+   private static void updateArmor() {
+      for (ArmorSlot a : armor) {
+         ItemStack stack = a.getItemStack();
+         a.value = stack != null && ItemUtils.isArmor(stack) && ItemUtils.durable(stack) ? ItemUtils.armorValue(stack) : 0.0;
+         a.duplicates = 0;
+      }
    }
 
    @Override
-   protected void onToggled() {
+   protected void onDisable() {
+      this.delay = 0L;
+      this.waited = 0L;
       this.processing = false;
+   }
+
+   static class Scan {
+      final IInventory inv;
+      final int size;
+      final double[][] armor = {{-1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0}};
+
+      Scan(IInventory inv, boolean player) {
+         this.inv = inv;
+         this.size = !player ? inv.getSizeInventory() : inv.getSizeInventory() - 4;
+         for (int i = 0; i < this.size; ++i) {
+            ItemStack stack = inv.getStackInSlot(i);
+            if (stack == null || !ItemUtils.durable(stack)) continue;
+            if (ItemUtils.isArmor(stack)) {
+               int type = 3 - ((ItemArmor) stack.getItem()).armorType;
+               double d = ItemUtils.armorValue(stack);
+               if (d > this.armor[1][type]) {
+                  this.armor[1][type] = d;
+                  this.armor[0][type] = i;
+               }
+            }
+         }
+      }
    }
 }

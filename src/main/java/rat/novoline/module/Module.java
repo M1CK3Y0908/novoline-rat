@@ -39,6 +39,7 @@ public abstract class Module {
    protected static final SettingManager settingManager = Novoline.getNovoline().getSettingManager();
    private MultiComboSetting multiComboSetting;
    private final String description;
+   private final List<String> aliases = new ArrayList<>();
 
    public boolean canBeToggled() {
       return true;
@@ -214,6 +215,17 @@ public abstract class Module {
 
    public String getName() {
       return this.name;
+   }
+
+   public List<String> getAliases() {
+      return this.aliases;
+   }
+
+   public Module addAlias(String alias) {
+      if (alias != null && !alias.isEmpty() && !this.aliases.contains(alias)) {
+         this.aliases.add(alias);
+      }
+      return this;
    }
 
    public String getDescription() {

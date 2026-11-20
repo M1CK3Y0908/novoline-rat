@@ -95,7 +95,7 @@ import rat.novoline.module.visual.WorldTime;
 import rat.novoline.module.world.AntiCactus;
 import rat.novoline.module.world.Breaker;
 import rat.novoline.module.world.BridgeAssist;
-import rat.novoline.module.world.ChestStealer;
+import rat.novoline.module.player.ChestStealer;
 import rat.novoline.module.world.FastPlace;
 import rat.novoline.module.world.LightningTracker;
 import rat.novoline.module.world.SafeWalk;
@@ -240,6 +240,9 @@ public class ModuleManager {
       modulesByWidth.add(module4);
       modulesByClass.put((Class<? extends Module>)module4.getClass(), module4);
       modulesByName.put(module4.getName().toLowerCase(Locale.ROOT), module4);
+      for (String alias : module4.getAliases()) {
+         modulesByName.put(alias.toLowerCase(Locale.ROOT), module4);
+      }
       return module4;
    }
 

@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $ProjectRoot = $PSScriptRoot
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-17"
 
-$buildDate = (Get-Date).ToString("MMddyy")
+$buildDate = "111826"
 Write-Host "=========================================="
 Write-Host "Building Novoline.Rat (Build $buildDate)"
 Write-Host "=========================================="
