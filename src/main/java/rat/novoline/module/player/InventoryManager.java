@@ -34,63 +34,63 @@ public class InventoryManager extends Module {
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting bow = settingManager.register(new NumberSetting(this, "Bow", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting blocks = settingManager.register(new NumberSetting(this, "Blocks", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting goldenApple = settingManager.register(new NumberSetting(this, "Golden apple", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting projectile = settingManager.register(new NumberSetting(this, "Projectile/Rod", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting speedPotion = settingManager.register(new NumberSetting(this, "Speed potion", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting enderPearl = settingManager.register(new NumberSetting(this, "Ender pearl", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting waterBucket = settingManager.register(new NumberSetting(this, "Water bucket", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting lavaBucket = settingManager.register(new NumberSetting(this, "Lava bucket", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
          return InventoryManager.this.autoSort.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final CheckboxSetting rodOverProjectile = settingManager.register(new CheckboxSetting(this, "Rod over projectile", true) {
       @Override
