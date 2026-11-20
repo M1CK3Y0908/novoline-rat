@@ -33,6 +33,10 @@ public class ShaderEvent extends Event {
       return this.glow;
    }
 
+   public boolean isGlow(String target) {
+      return this.bloom && this.bloomOptions != null && this.bloomOptions.isSelected(target);
+   }
+
    public MultiComboSetting getBloomOptions() {
       return this.bloomOptions;
    }

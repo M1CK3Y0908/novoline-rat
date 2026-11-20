@@ -25,39 +25,35 @@ public class ShaderUtil {
       uniform sampler2D inTexture, textureToCheck;
       uniform vec2 halfpixel, offset, iResolution;
       uniform int check;
-      uniform float alpha;
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
 
           vec4 sum = texture2D(inTexture, uv + vec2(-halfpixel.x * 2.0, 0.0) * offset);
-          sum += texture2D(inTexture, uv + vec2(-halfpixel.x, halfpixel.y) * offset) * 2.0;
-          sum += texture2D(inTexture, uv + vec2(0.0, halfpixel.y * 2.0) * offset);
-          sum += texture2D(inTexture, uv + vec2(halfpixel.x, halfpixel.y) * offset) * 2.0;
-          sum += texture2D(inTexture, uv + vec2(halfpixel.x * 2.0, 0.0) * offset);
-          sum += texture2D(inTexture, uv + vec2(halfpixel.x, -halfpixel.y) * offset) * 2.0;
-          sum += texture2D(inTexture, uv + vec2(0.0, -halfpixel.y * 2.0) * offset);
-          sum += texture2D(inTexture, uv + vec2(-halfpixel.x, -halfpixel.y) * offset) * 2.0;
+          sum.rgb *= sum.a;
+          vec4 smpl1 =  texture2D(inTexture, uv + vec2(-halfpixel.x, halfpixel.y) * offset);
+          smpl1.rgb *= smpl1.a;
+          sum += smpl1 * 2.0;
+          vec4 smp2 = texture2D(inTexture, uv + vec2(0.0, halfpixel.y * 2.0) * offset);
+          smp2.rgb *= smp2.a;
+          sum += smp2;
+          vec4 smp3 = texture2D(inTexture, uv + vec2(halfpixel.x, halfpixel.y) * offset);
+          smp3.rgb *= smp3.a;
+          sum += smp3 * 2.0;
+          vec4 smp4 = texture2D(inTexture, uv + vec2(halfpixel.x * 2.0, 0.0) * offset);
+          smp4.rgb *= smp4.a;
+          sum += smp4;
+          vec4 smp5 = texture2D(inTexture, uv + vec2(halfpixel.x, -halfpixel.y) * offset);
+          smp5.rgb *= smp5.a;
+          sum += smp5 * 2.0;
+          vec4 smp6 = texture2D(inTexture, uv + vec2(0.0, -halfpixel.y * 2.0) * offset);
+          smp6.rgb *= smp6.a;
+          sum += smp6;
+          vec4 smp7 = texture2D(inTexture, uv + vec2(-halfpixel.x, -halfpixel.y) * offset);
+          smp7.rgb *= smp7.a;
+          sum += smp7 * 2.0;
           vec4 result = sum / 12.0;
-
-          if (check == 1) {
-              float mask = 1.0 - texture2D(textureToCheck, uv).a;
-              float shadowAlpha = (1.0 - exp(-3.0 * result.a)) * mask * alpha;
-              gl_FragColor = vec4(vec3(0.0), shadowAlpha);
-          } else if (check == 2) {
-              float maxC = max(result.r, max(result.g, result.b));
-              if (maxC > 0.001) {
-                  vec3 normCol = result.rgb / maxC;
-                  float gray = dot(normCol, vec3(0.299, 0.587, 0.114));
-                  vec3 glowColor = clamp(mix(vec3(gray), normCol, 1.4), 0.0, 1.0);
-                  float glowAlpha = (1.0 - exp(-result.a * 3.5)) * alpha;
-                  gl_FragColor = vec4(glowColor, glowAlpha);
-              } else {
-                  gl_FragColor = vec4(0.0);
-              }
-          } else {
-              gl_FragColor = result;
-          }
+          gl_FragColor = vec4(result.a > 0.0 ? result.rgb / result.a : vec3(0.0), mix(result.a, result.a * (1.0 - texture2D(textureToCheck, gl_TexCoord[0].st).a), float(check)));
       }
       """;
 
@@ -66,25 +62,26 @@ public class ShaderUtil {
 
       uniform sampler2D inTexture;
       uniform vec2 offset, halfpixel, iResolution;
-      uniform int check;
 
       void main() {
           vec2 uv = vec2(gl_FragCoord.xy / iResolution);
-          vec4 sum = texture2D(inTexture, gl_TexCoord[0].st) * 4.0;
-          sum += texture2D(inTexture, uv - halfpixel.xy * offset);
-          sum += texture2D(inTexture, uv + halfpixel.xy * offset);
-          sum += texture2D(inTexture, uv + vec2(halfpixel.x, -halfpixel.y) * offset);
-          sum += texture2D(inTexture, uv - vec2(halfpixel.x, -halfpixel.y) * offset);
+          vec4 sum = texture2D(inTexture, gl_TexCoord[0].st);
+          sum.rgb *= sum.a;
+          sum *= 4.0;
+          vec4 smp1 = texture2D(inTexture, uv - halfpixel.xy * offset);
+          smp1.rgb *= smp1.a;
+          sum += smp1;
+          vec4 smp2 = texture2D(inTexture, uv + halfpixel.xy * offset);
+          smp2.rgb *= smp2.a;
+          sum += smp2;
+          vec4 smp3 = texture2D(inTexture, uv + vec2(halfpixel.x, -halfpixel.y) * offset);
+          smp3.rgb *= smp3.a;
+          sum += smp3;
+          vec4 smp4 = texture2D(inTexture, uv - vec2(halfpixel.x, -halfpixel.y) * offset);
+          smp4.rgb *= smp4.a;
+          sum += smp4;
           vec4 result = sum / 8.0;
-
-          if (check == 2) {
-              vec4 col = texture2D(inTexture, gl_TexCoord[0].st);
-              float maxVal = max(col.r, max(col.g, col.b));
-              float factor = smoothstep(0.12, 0.28, maxVal) * col.a;
-              gl_FragColor = vec4(col.rgb, factor);
-          } else {
-              gl_FragColor = result;
-          }
+          gl_FragColor = vec4(result.a > 0.0 ? result.rgb / result.a : vec3(0.0), result.a);
       }
       """;
 

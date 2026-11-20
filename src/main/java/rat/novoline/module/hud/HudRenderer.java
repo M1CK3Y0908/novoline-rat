@@ -3,15 +3,11 @@ package rat.novoline.module.hud;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.shader.Framebuffer;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 import rat.novoline.Novoline;
 import rat.novoline.event.RenderScreenEvent;
 import rat.novoline.module.ModuleManager;
 import rat.novoline.utils.math.SmoothingUtils;
-import rat.novoline.utils.render.blur.KawaseBloom;
-import rat.novoline.utils.render.blur.ShaderUtil;
 
 public class HudRenderer {
    private final HudManager hudManager;
@@ -51,15 +47,6 @@ public class HudRenderer {
             ModuleManager.postProcessing.blurScreen();
          }
 
-         PostProcessing postProcessing = ModuleManager.postProcessing;
-         boolean glow = postProcessing != null && postProcessing.isGlowEnabled();
-         Framebuffer uiFb = glow ? PostProcessing.getUiFramebuffer() : null;
-
-         if (glow && uiFb != null) {
-            uiFb.framebufferClear();
-            uiFb.bindFramebuffer(false);
-         }
-
          GlStateManager.pushMatrix();
          GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
          Novoline.getNovoline().getBus().post(new RenderScreenEvent(scaledResolution, f));
@@ -79,33 +66,11 @@ public class HudRenderer {
          GlStateManager.popMatrix();
          Novoline.getNovoline()
             .getMenuClickGuiScreen()
-            .handleFramebuffer(glow && uiFb != null ? uiFb : Minecraft.getMinecraft().getFramebuffer(), Minecraft.getMinecraft().timer.renderPartialTicks);
+            .handleFramebuffer(Minecraft.getMinecraft().getFramebuffer(), Minecraft.getMinecraft().timer.renderPartialTicks);
          GlStateManager.pushMatrix();
          GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
          Novoline.getNovoline().getNotificationManager().renderAll(scaledResolution);
          GlStateManager.popMatrix();
-
-         if (glow && uiFb != null) {
-            uiFb.unbindFramebuffer();
-            Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
-
-            // 1. Render vibrant content-colored glow aura
-            float gIntensity = postProcessing.glowIntensity.getCurrentValue();
-            if (gIntensity > 0.0F) {
-               float gFactor = gIntensity / 100.0F;
-               KawaseBloom.renderExposureGlow(uiFb.framebufferTexture, gFactor);
-            }
-
-            // 2. Render crisp, sharp UI on top
-            GlStateManager.enableAlpha();
-            GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, uiFb.framebufferTexture);
-            ShaderUtil.drawQuads();
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-         }
       }
    }
 

@@ -244,7 +244,8 @@ public class MenuClickGuiScreen extends GuiScreen {
    }
 
    public void renderEffects(boolean bloom, ScaledResolution sr) {
-      this.renderEffects(bloom, false, sr);
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled("ClickGui");
+      this.renderEffects(bloom, glow, sr);
    }
 
    public void renderEffects(boolean bloom, boolean glow, ScaledResolution sr) {
@@ -273,7 +274,8 @@ public class MenuClickGuiScreen extends GuiScreen {
       GlStateManager.scale(d3, d3, 1.0);
       GlStateManager.translate(-midX, -midY, 0.0);
 
-      int drawColor = RenderUtils.withAlpha(-16777216, (int)(255.0F * alpha));
+      int baseColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor();
+      int drawColor = RenderUtils.withAlpha(baseColor, (int)(255.0F * alpha));
 
       if (!this.dashboardOpen) {
          for (MenuCategoryPanel panel : this.buttons) {

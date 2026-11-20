@@ -66,7 +66,7 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
    }
 
    public void renderEffects(boolean bloom, ScaledResolution scaledResolution) {
-      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled("Notifications");
       this.renderEffects(bloom, glow, scaledResolution);
    }
 
@@ -80,7 +80,7 @@ public class NotificationManager extends CopyOnWriteArrayList<Notification> {
             float f3 = 30.0F;
             float f5 = scaledWidth - notification2.offsetX;
             float f6 = scaledHeight - notification2.offsetY;
-            int color = -16777216;
+            int color = (!bloom || !glow) ? -16777216 : notification2.getType().getAccentColor();
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
             filledPolygonRenderer.putRoundedRect(f5, f6, f4, f3, 3.0F, color);
             filledPolygonRenderer.draw();

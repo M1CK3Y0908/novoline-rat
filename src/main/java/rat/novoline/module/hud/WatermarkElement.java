@@ -120,7 +120,7 @@ public class WatermarkElement extends HudElement {
    }
 
    public static void renderWatermarkEffects(boolean bloom) {
-      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled("Watermark");
       renderWatermarkEffects(bloom, glow);
    }
 
@@ -134,7 +134,7 @@ public class WatermarkElement extends HudElement {
       float h = instance.getHeight();
       int currentElement = ModuleManager.watermark.watermark.getCurrentElement();
 
-      int hudColor = -16777216;
+      int hudColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor();
       if (currentElement == 0) {
          RenderUtils.drawRect(x, y, x + w, y + h, hudColor);
       } else if (currentElement == 1) {

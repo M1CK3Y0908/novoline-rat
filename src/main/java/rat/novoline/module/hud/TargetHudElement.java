@@ -374,7 +374,7 @@ public class TargetHudElement extends HudElement {
    }
 
    public static void renderTargetHudEffects(boolean bloom, ScaledResolution sr) {
-      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled("TargetHud");
       renderTargetHudEffects(bloom, glow, sr);
    }
 
@@ -404,7 +404,7 @@ public class TargetHudElement extends HudElement {
       float w = instance.getWidth();
       float h = instance.getHeight();
 
-      int hudColor = -16777216;
+      int hudColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor();
       RenderUtils.drawRect(x, y, x + w, y + h, hudColor);
 
       GlStateManager.popMatrix();
