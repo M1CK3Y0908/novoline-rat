@@ -23,7 +23,7 @@ public class ConfigManager {
 
    public List readLocalInfo(Path path) {
       try {
-         JsonObject asJsonObject = JsonParser.parseString(Files.readString(path)).getAsJsonObject().getAsJsonObject("local-info");
+         JsonObject asJsonObject = new JsonParser().parse(Files.readString(path)).getAsJsonObject().getAsJsonObject("local-info");
          if (asJsonObject != null) {
             ArrayList arrayList = new ArrayList();
             arrayList.add(asJsonObject.get("creator").getAsString());
@@ -41,7 +41,7 @@ public class ConfigManager {
 
    public String readCloudResourceId(Path path) {
       try {
-         JsonObject asJsonObject = JsonParser.parseString(Files.readString(path)).getAsJsonObject().getAsJsonObject("cloud-info");
+         JsonObject asJsonObject = new JsonParser().parse(Files.readString(path)).getAsJsonObject().getAsJsonObject("cloud-info");
          return asJsonObject != null ? asJsonObject.get("resourceId").getAsString() : null;
       } catch (Exception exception) {
          exception.printStackTrace();
@@ -51,7 +51,7 @@ public class ConfigManager {
 
    public void writeLocalInfo(Path path, String text, String text2, String text3) {
       try {
-         JsonObject asJsonObject = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+         JsonObject asJsonObject = new JsonParser().parse(Files.readString(path)).getAsJsonObject();
          JsonObject jsonObject = new JsonObject();
          jsonObject.addProperty("creator", text);
          jsonObject.addProperty("short-description", text2);
@@ -74,7 +74,7 @@ public class ConfigManager {
 
    public void writeCloudInfo(Path path, String text) {
       try {
-         JsonObject asJsonObject = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+         JsonObject asJsonObject = new JsonParser().parse(Files.readString(path)).getAsJsonObject();
          JsonObject jsonObject = new JsonObject();
          jsonObject.addProperty("resourceId", text);
          asJsonObject.add("cloud-info", jsonObject);

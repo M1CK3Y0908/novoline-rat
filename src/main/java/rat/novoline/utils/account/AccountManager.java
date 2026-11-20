@@ -41,7 +41,7 @@ public class AccountManager extends ArrayList<Account> {
    public List readAccounts() throws IOException {
       try (GZIPInputStream gzipInputStream = new GZIPInputStream(Files.newInputStream(path))) {
          String text = new String(gzipInputStream.readAllBytes(), StandardCharsets.UTF_8);
-         JsonObject asJsonObject = JsonParser.parseString(text).getAsJsonObject();
+         JsonObject asJsonObject = new JsonParser().parse(text).getAsJsonObject();
          if (asJsonObject.has("last_alt")) {
             JsonObject asJsonObject2 = asJsonObject.get("last_alt").getAsJsonObject();
             this.account = gson.fromJson(asJsonObject2, Account.class);

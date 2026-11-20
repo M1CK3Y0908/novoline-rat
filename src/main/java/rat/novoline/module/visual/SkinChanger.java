@@ -73,7 +73,7 @@ public class SkinChanger extends Module {
          String ifAbsent = this.resolvedSkinNames.computeIfAbsent(text, string -> {
             try {
                String text2 = IOUtils.toString(URI.create("https://api.mojang.com/users/profiles/minecraft/" + string));
-               return JsonParser.parseString(text2).getAsJsonObject().get("id").getAsString();
+               return new JsonParser().parse(text2).getAsJsonObject().get("id").getAsString();
             } catch (Exception exception) {
                novoline.sendChatMessage("Unable to fetch player profile for " + string + ": " + exception.getMessage());
                return null;

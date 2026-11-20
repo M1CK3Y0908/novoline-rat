@@ -48,7 +48,7 @@ public class HypixelApi {
             jsonObject.remove("cached");
             jsonObject.remove("success");
             jsonObject.remove("_id");
-            String text = jsonObject.keySet().toArray(String[]::new)[0];
+            String text = jsonObject.entrySet().iterator().next().getKey();
             return this.gson.fromJson(jsonObject.get(text), clazz);
          } else {
             return this.gson.fromJson(jsonObject, clazz);
@@ -72,7 +72,7 @@ public class HypixelApi {
          HttpResponse httpResponse = this.httpClient.send(httpRequest, java.net.http.HttpResponse.BodyHandlers.ofString());
 
          try {
-            return JsonParser.parseString((String)httpResponse.body()).getAsJsonObject();
+            return new JsonParser().parse((String)httpResponse.body()).getAsJsonObject();
          } catch (JsonSyntaxException jsonSyntaxException) {
             throw new ApiParseException("Server returned status code " + httpResponse.statusCode());
          }

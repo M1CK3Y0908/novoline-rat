@@ -31,7 +31,7 @@ public class MinecraftProfileRequest extends AuthRequest {
    @Override
    public void onFailedResponse(HttpResponse httpResponse) {
       try {
-      JsonObject asJsonObject = JsonParser.parseString(String.valueOf(httpResponse.body())).getAsJsonObject();
+      JsonObject asJsonObject = new JsonParser().parse(String.valueOf(httpResponse.body())).getAsJsonObject();
       throw new MicrosoftAuthException(asJsonObject.get("errorMessage").getAsString());
    } catch (Throwable sneakyThrowable) {
          throw SneakyThrow.sneak(sneakyThrowable);

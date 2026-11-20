@@ -22,7 +22,7 @@ public final class HttpResponseUtils {
    }
 
    private static JsonObject parseBody(HttpResponse<?> httpResponse) {
-      return JsonParser.parseString(String.valueOf(httpResponse.body())).getAsJsonObject();
+      return new JsonParser().parse(String.valueOf(httpResponse.body())).getAsJsonObject();
    }
 
    private static boolean isJson(HttpResponse httpResponse) {

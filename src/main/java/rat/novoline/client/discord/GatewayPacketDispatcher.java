@@ -39,7 +39,7 @@ public class GatewayPacketDispatcher {
    }
 
    public void dispatch(String text) throws Exception {
-      JsonObject asJsonObject = JsonParser.parseString(text).getAsJsonObject();
+      JsonObject asJsonObject = new JsonParser().parse(text).getAsJsonObject();
       int asInt = asJsonObject.get("op").getAsInt();
       if (this.handlersByOpcode.containsKey(asInt)) {
          this.gson.fromJson(asJsonObject, this.handlersByOpcode.get(asInt)).handle(this.gatewayClient);

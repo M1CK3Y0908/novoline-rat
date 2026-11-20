@@ -41,7 +41,7 @@ public class XboxLiveAuthRequest extends AuthRequest {
    public void onFailedResponse(HttpResponse httpResponse) {
       try {
       if (httpResponse.statusCode() == 401) {
-         JsonObject asJsonObject = JsonParser.parseString(String.valueOf(httpResponse.body())).getAsJsonObject();
+         JsonObject asJsonObject = new JsonParser().parse(String.valueOf(httpResponse.body())).getAsJsonObject();
          if (asJsonObject.has("XErr")) {
             long asLong = asJsonObject.get("XErr").getAsLong();
             throw new XboxAuthException(asLong);
