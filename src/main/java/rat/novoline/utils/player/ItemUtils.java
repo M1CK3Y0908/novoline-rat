@@ -10,9 +10,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemHoe;
+import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemPotion;
+import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.item.ItemTool;
@@ -52,31 +56,53 @@ public class ItemUtils {
       }
    }
 
-   public static int getToolScore(ItemStack itemStack) {
-      Item item2 = itemStack.getItem();
-      int i = 0;
-      if (item2 instanceof ItemSword itemSword) {
-         i = 0 + getMaterialScore(itemSword.getToolMaterialName());
-         i = (int)(i + itemSword.attackDamage);
-      } else if (item2 instanceof ItemTool itemTool) {
-         i = 0 + getMaterialScore(itemTool.getToolMaterialName());
-      } else if (item2 instanceof ItemHoe itemHoe) {
-         i = 0 + getMaterialScore(itemHoe.getMaterialName());
-      }
+   public static int getToolType(ItemStack stack) {
+      if (stack == null) return -1;
+      Item item = stack.getItem();
+      if (item instanceof ItemPickaxe) return 0;
+      if (item instanceof ItemAxe) return 1;
+      if (item instanceof ItemSpade) return 2;
+      return -1;
+   }
 
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.sharpness.effectId, itemStack) * 4;
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.fireAspect.effectId, itemStack) * 2;
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.knockback.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.smite.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.silkTouch.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.efficiency.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.fortune.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.infinity.effectId, itemStack);
-      i += EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, itemStack);
-      return i + EnchantmentHelper.getEnchantmentLevel(Enchantment.featherFalling.effectId, itemStack);
+   public static double getToolScore(ItemStack stack) {
+      if (stack == null || !(stack.getItem() instanceof ItemTool)) {
+         return 0.0;
+      }
+      ItemTool tool = (ItemTool) stack.getItem();
+      String mat = tool.getToolMaterialName();
+      double base;
+      switch (mat) {
+         case "EMERALD":
+         case "DIAMOND":
+            base = 80.0;
+            break;
+         case "IRON":
+            base = 60.0;
+            break;
+         case "STONE":
+            base = 40.0;
+            break;
+         case "GOLD":
+            base = 20.0;
+            break;
+         case "WOOD":
+         default:
+            base = 10.0;
+            break;
+      }
+      int eff = EnchantmentHelper.getEnchantmentLevel(Enchantment.efficiency.effectId, stack);
+      base += eff * 5.0;
+      int unb = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack);
+      base += unb * 1.0;
+      int fortune = EnchantmentHelper.getEnchantmentLevel(Enchantment.fortune.effectId, stack);
+      base += fortune * 2.0;
+      int silk = EnchantmentHelper.getEnchantmentLevel(Enchantment.silkTouch.effectId, stack);
+      base += silk * 2.0;
+      if (tool instanceof ItemAxe) {
+         base += attackDamage(stack);
+      }
+      return base;
    }
 
    // --- Raven XD Compatibility & Exact Logic ---
@@ -142,7 +168,8 @@ public class ItemUtils {
    }
 
    public static boolean isPlaceable(Block block) {
-      return block == Blocks.glass || (block.isFullBlock() && block != Blocks.gravel && block != Blocks.sand && block != Blocks.soul_sand
+      return block == Blocks.glass || block == Blocks.stained_glass
+            || (block.isFullBlock() && block != Blocks.gravel && block != Blocks.sand && block != Blocks.soul_sand
             && block != Blocks.tnt && block != Blocks.crafting_table && block != Blocks.furnace && block != Blocks.dispenser
             && block != Blocks.dropper && block != Blocks.noteblock && block != Blocks.command_block);
    }
@@ -174,15 +201,86 @@ public class ItemUtils {
    }
 
    public static boolean isBadPotion(ItemStack stack) {
-      List<PotionEffect> list;
-      if (stack != null && stack.getItem() == Items.potionitem && (list = ((ItemPotion) stack.getItem()).getEffects(stack)) != null) {
-         for (PotionEffect e : list) {
-            String s = e.toString();
-            if (s.contains("poison") || s.contains("moveSlowdown")) {
-               return true;
-            }
+      if (stack == null || stack.getItem() != Items.potionitem) {
+         return false;
+      }
+      List<PotionEffect> list = ((ItemPotion) stack.getItem()).getEffects(stack);
+      if (list == null || list.isEmpty()) {
+         return true;
+      }
+      for (PotionEffect e : list) {
+         int id = e.getPotionID();
+         if (id == 19 || id == 2 || id == 18 || id == 7 || id == 9 || id == 15 || id == 17) {
+            return true;
+         }
+         String s = e.toString().toLowerCase();
+         if (s.contains("poison") || s.contains("moveslowdown") || s.contains("weakness") || s.contains("harm") || s.contains("blind") || s.contains("hunger")) {
+            return true;
          }
       }
+      return false;
+   }
+
+   public static boolean isGoodPotion(ItemStack stack) {
+      return stack != null && stack.getItem() == Items.potionitem && !isBadPotion(stack);
+   }
+
+   public static boolean isGoodFood(ItemStack stack) {
+      if (stack == null || !(stack.getItem() instanceof ItemFood)) {
+         return false;
+      }
+      Item item = stack.getItem();
+      if (item == Items.rotten_flesh || item == Items.spider_eye || item == Items.poisonous_potato) {
+         return false;
+      }
+      if (item == Items.beef || item == Items.chicken || item == Items.porkchop || item == Items.mutton || item == Items.rabbit || item == Items.fish) {
+         return false;
+      }
+      return true;
+   }
+
+   public static boolean isUsefulItem(ItemStack stack) {
+      if (stack == null) {
+         return false;
+      }
+      Item item = stack.getItem();
+      if (item == null) {
+         return false;
+      }
+
+      if (isSword(stack) || isBow(stack) || isArmor(stack) || (item instanceof ItemTool && !(item instanceof ItemHoe))) {
+         return durable(stack);
+      }
+
+      if (isBlock(item) || isUtilityBlock(item) || item == Item.getItemFromBlock(Blocks.tnt) || item == Item.getItemFromBlock(Blocks.web)) {
+         return true;
+      }
+
+      if (item == Items.golden_apple || isGoodFood(stack)) {
+         return true;
+      }
+
+      if (item == Items.potionitem && isGoodPotion(stack)) {
+         return true;
+      }
+
+      if (item == Items.ender_pearl || item == Items.snowball || item == Items.egg || item == Items.arrow) {
+         return true;
+      }
+
+      if (item == Items.water_bucket || item == Items.lava_bucket || item == Items.milk_bucket) {
+         return true;
+      }
+
+      if (item == Items.fishing_rod || item == Items.flint_and_steel || item == Items.shears) {
+         return durable(stack);
+      }
+
+      if (item == Items.diamond || item == Items.emerald || item == Items.gold_ingot || item == Items.iron_ingot
+            || item == Items.experience_bottle || item == Items.enchanted_book) {
+         return true;
+      }
+
       return false;
    }
 

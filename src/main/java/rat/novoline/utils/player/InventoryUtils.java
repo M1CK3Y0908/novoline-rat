@@ -71,12 +71,12 @@ public class InventoryUtils {
 
    public static int findBestItemSlot(Class clazz) {
       int i = -1;
-      int i2 = -1;
+      double i2 = -1.0;
 
       for (int i3 = 0; i3 < minecraft.thePlayer.inventory.getSizeInventory(); i3++) {
          ItemStack stackInSlot = minecraft.thePlayer.inventory.getStackInSlot(i3);
          if (stackInSlot != null && stackInSlot.getItem() != null && stackInSlot.getItem().getClass().equals(clazz)) {
-            int toolScore = ItemUtils.getToolScore(stackInSlot);
+            double toolScore = ItemUtils.getToolScore(stackInSlot);
             if (toolScore > i2) {
                i2 = toolScore;
                i = i3;

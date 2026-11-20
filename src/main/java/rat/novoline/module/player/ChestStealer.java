@@ -9,7 +9,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemHoe;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemTool;
 import rat.novoline.event.PreUpdateEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
@@ -22,6 +24,7 @@ public class ChestStealer extends Module {
       new NumberSetting(this, "Delay", 1, 0, 20, " ticks")
    );
    public final CheckboxSetting closeChest = settingManager.register(new CheckboxSetting(this, "Close chest", false));
+   public final CheckboxSetting ignoreJunk = settingManager.register(new CheckboxSetting(this, "Ignore junk", true));
    public final CheckboxSetting stealFromCustomChests = settingManager.register(new CheckboxSetting(this, "Steal from custom chests", false));
    public final CheckboxSetting disableInLobby = settingManager.register(new CheckboxSetting(this, "Disable in lobby", true));
 
@@ -92,11 +95,14 @@ public class ChestStealer extends Module {
          updateArmor();
          Scan c = new Scan(chest, false);
          Scan p = new Scan(minecraft.thePlayer.inventory, true);
-         c.dropWorse(p);
+
+         if (this.ignoreJunk.isEnabled()) {
+            c.dropWorse(p);
+         }
 
          if (p.size != p.filled) {
             for (int n = 0; n < c.armor[0].length; ++n) {
-               if (c.armor[1][n] == -1.0 || !(c.armor[1][n] > armor[n].value) || !click((int) c.armor[0][n], 0, 1, stealDelay)) {
+               if (c.armor[1][n] == -1.0 || !click((int) c.armor[0][n], 0, 1, stealDelay)) {
                   continue;
                }
                return;
@@ -107,17 +113,32 @@ public class ChestStealer extends Module {
             if (c.bow[1] != -1.0 && click((int) c.bow[0], 0, 1, stealDelay)) {
                return;
             }
+            for (int t = 0; t < 3; ++t) {
+               if (c.tools[1][t] != -1.0 && click((int) c.tools[0][t], 0, 1, stealDelay)) {
+                  return;
+               }
+            }
             for (int n = 0; n < c.size; ++n) {
                ItemStack stack = c.inv.getStackInSlot(n);
-               if (stack == null || ItemUtils.isSword(stack) || ItemUtils.isBow(stack) || ItemUtils.isArmor(stack)) {
+               if (stack == null) {
                   continue;
                }
-               Item item = stack.getItem();
-               if (item instanceof ItemBlock && !ItemUtils.isBlock(item) && !ItemUtils.isUtilityBlock(item)) {
-                  continue;
-               }
-               if (item == Items.potionitem && ItemUtils.isBadPotion(stack)) {
-                  continue;
+               if (this.ignoreJunk.isEnabled()) {
+                  if (!ItemUtils.isUsefulItem(stack)) {
+                     continue;
+                  }
+                  if (ItemUtils.isSword(stack) || ItemUtils.isBow(stack) || ItemUtils.isArmor(stack) || stack.getItem() instanceof ItemTool) {
+                     continue;
+                  }
+                  if (stack.getItem() == Items.fishing_rod && p.hasFishingRod) {
+                     continue;
+                  }
+                  if (stack.getItem() == Items.flint_and_steel && p.hasFlintAndSteel) {
+                     continue;
+                  }
+                  if (stack.getItem() == Items.shears && p.hasShears) {
+                     continue;
+                  }
                }
                if (!click(n, 0, 1, stealDelay)) continue;
                return;
@@ -126,12 +147,8 @@ public class ChestStealer extends Module {
             for (int i = 0; i < c.size; ++i) {
                ItemStack stack = c.inv.getStackInSlot(i);
                if (stack == null) continue;
+               if (this.ignoreJunk.isEnabled() && !ItemUtils.isUsefulItem(stack)) continue;
                Item item = stack.getItem();
-               if (!ItemUtils.isBlock(item) && item != Items.golden_apple && item != Items.snowball && item != Items.egg
-                     && item != Items.ender_pearl && item != Items.arrow && item != Items.clock && item != Items.diamond
-                     && item != Items.emerald && item != Items.gold_ingot && item != Items.iron_ingot && !ItemUtils.isUtilityBlock(item)) {
-                  continue;
-               }
                for (int j = 0; j < p.size; ++j) {
                   ItemStack own = p.inv.getStackInSlot(j);
                   if (own == null || item != own.getItem() || own.stackSize >= own.getMaxStackSize()) continue;
@@ -174,7 +191,11 @@ public class ChestStealer extends Module {
       final double[] sword = {-1.0, -1.0};
       final double[] bow = {-1.0, -1.0};
       final double[][] armor = {{-1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0}};
+      final double[][] tools = {{-1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0}};
       int filled;
+      boolean hasFishingRod;
+      boolean hasFlintAndSteel;
+      boolean hasShears;
 
       Scan(IInventory inv, boolean player) {
          this.inv = inv;
@@ -183,6 +204,14 @@ public class ChestStealer extends Module {
             ItemStack stack = inv.getStackInSlot(i);
             if (stack != null) {
                ++this.filled;
+               Item item = stack.getItem();
+               if (item == Items.fishing_rod) {
+                  this.hasFishingRod = true;
+               } else if (item == Items.flint_and_steel) {
+                  this.hasFlintAndSteel = true;
+               } else if (item == Items.shears) {
+                  this.hasShears = true;
+               }
             }
             if (stack == null || !ItemUtils.durable(stack)) continue;
             if (ItemUtils.isSword(stack)) {
@@ -204,20 +233,35 @@ public class ChestStealer extends Module {
                   this.armor[1][type] = d;
                   this.armor[0][type] = i;
                }
+            } else if (stack.getItem() instanceof ItemTool && !(stack.getItem() instanceof ItemHoe)) {
+               int toolType = ItemUtils.getToolType(stack);
+               if (toolType >= 0 && toolType < 3) {
+                  double d = ItemUtils.getToolScore(stack);
+                  if (d > this.tools[1][toolType]) {
+                     this.tools[1][toolType] = d;
+                     this.tools[0][toolType] = i;
+                  }
+               }
             }
          }
       }
 
       void dropWorse(Scan player) {
-         if (player.sword[1] > this.sword[1]) {
+         if (player.sword[1] >= this.sword[1]) {
             this.sword[1] = -1.0;
          }
-         if (player.bow[1] > this.bow[1]) {
+         if (player.bow[1] >= this.bow[1]) {
             this.bow[1] = -1.0;
          }
          for (int i = 0; i < this.armor[0].length; ++i) {
-            if (player.armor[1][i] > this.armor[1][i]) {
+            double playerArmorVal = Math.max(ChestStealer.armor[i].value, player.armor[1][i]);
+            if (playerArmorVal >= this.armor[1][i]) {
                this.armor[1][i] = -1.0;
+            }
+         }
+         for (int t = 0; t < 3; ++t) {
+            if (player.tools[1][t] >= this.tools[1][t]) {
+               this.tools[1][t] = -1.0;
             }
          }
       }
