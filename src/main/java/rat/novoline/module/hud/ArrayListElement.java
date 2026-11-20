@@ -187,7 +187,8 @@ public class ArrayListElement extends HudElement {
    }
 
    public static void renderArrayListEffects(boolean bloom, ScaledResolution sr) {
-      renderArrayListEffects(bloom, false, sr);
+      boolean glow = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isGlowEnabled();
+      renderArrayListEffects(bloom, glow, sr);
    }
 
    public static void renderArrayListEffects(boolean bloom, boolean glow, ScaledResolution sr) {
@@ -195,10 +196,14 @@ public class ArrayListElement extends HudElement {
          return;
       }
       ArrayList arrayList2 = ModuleManager.arrayList;
-      if (!bloom && !arrayList2.background.isEnabled()) {
-         return;
-      }
-      if (bloom && (!arrayList2.background.isEnabled() || !arrayList2.backgroundShadow.isEnabled())) {
+      boolean bg = arrayList2.background.isEnabled();
+      boolean drawTop = arrayList2.outline.isSelected("Top");
+      boolean drawBottom = arrayList2.outline.isSelected("Bottom");
+      boolean drawLeft = arrayList2.outline.isSelected("Left");
+      boolean drawRight = arrayList2.outline.isSelected("Right");
+      boolean hasOutline = drawTop || drawBottom || drawLeft || drawRight;
+
+      if (!bg && !hasOutline) {
          return;
       }
       if (entryCount == 0) {
@@ -206,6 +211,7 @@ public class ArrayListElement extends HudElement {
       }
 
       float rowHeight = cachedRowHeight;
+      float lineWidth = cachedLineWidth;
       Tessellator tessellator = Tessellator.getInstance();
       WorldRenderer wr = tessellator.getWorldRenderer();
 
@@ -213,30 +219,105 @@ public class ArrayListElement extends HudElement {
       GlStateManager.enableBlend();
       RenderUtils.applyBlendFunc();
 
-      if (!bloom || !glow) {
-         RenderUtils.setColor(-16777216);
-         wr.begin(7, DefaultVertexFormats.POSITION);
-         for (int i = 0; i < entryCount; i++) {
-            Entry e = ENTRIES[i];
-            wr.pos(e.x, e.y + rowHeight, 0.0).endVertex();
-            wr.pos(e.x + e.width, e.y + rowHeight, 0.0).endVertex();
-            wr.pos(e.x + e.width, e.y, 0.0).endVertex();
-            wr.pos(e.x, e.y, 0.0).endVertex();
+      if (bg) {
+         if (!bloom || !glow) {
+            RenderUtils.setColor(-16777216);
+            wr.begin(7, DefaultVertexFormats.POSITION);
+            for (int i = 0; i < entryCount; i++) {
+               Entry e = ENTRIES[i];
+               wr.pos(e.x, e.y + rowHeight, 0.0).endVertex();
+               wr.pos(e.x + e.width, e.y + rowHeight, 0.0).endVertex();
+               wr.pos(e.x + e.width, e.y, 0.0).endVertex();
+               wr.pos(e.x, e.y, 0.0).endVertex();
+            }
+            tessellator.draw();
+         } else {
+            wr.begin(7, DefaultVertexFormats.POSITION_COLOR);
+            for (int i = 0; i < entryCount; i++) {
+               Entry e = ENTRIES[i];
+               int col = e.nameColor;
+               float r = (col >> 16 & 0xFF) / 255.0F;
+               float g = (col >> 8 & 0xFF) / 255.0F;
+               float b = (col & 0xFF) / 255.0F;
+               wr.pos(e.x, e.y + rowHeight, 0.0).color(r, g, b, 1.0F).endVertex();
+               wr.pos(e.x + e.width, e.y + rowHeight, 0.0).color(r, g, b, 1.0F).endVertex();
+               wr.pos(e.x + e.width, e.y, 0.0).color(r, g, b, 1.0F).endVertex();
+               wr.pos(e.x, e.y, 0.0).color(r, g, b, 1.0F).endVertex();
+            }
+            tessellator.draw();
          }
-         tessellator.draw();
-      } else {
+      }
+
+      if (hasOutline) {
          wr.begin(7, DefaultVertexFormats.POSITION_COLOR);
-         for (int i = 0; i < entryCount; i++) {
-            Entry e = ENTRIES[i];
-            int col = e.nameColor;
-            float r = (col >> 16 & 0xFF) / 255.0F;
-            float g = (col >> 8 & 0xFF) / 255.0F;
-            float b = (col & 0xFF) / 255.0F;
-            wr.pos(e.x, e.y + rowHeight, 0.0).color(r, g, b, 1.0F).endVertex();
-            wr.pos(e.x + e.width, e.y + rowHeight, 0.0).color(r, g, b, 1.0F).endVertex();
-            wr.pos(e.x + e.width, e.y, 0.0).color(r, g, b, 1.0F).endVertex();
-            wr.pos(e.x, e.y, 0.0).color(r, g, b, 1.0F).endVertex();
+         int defaultColor = -16777216;
+
+         if (drawTop) {
+            Entry e0 = ENTRIES[0];
+            int col = (!bloom || !glow) ? defaultColor : e0.nameColor;
+            float x1 = e0.x - (drawLeft ? lineWidth : 0.0F);
+            float x2 = e0.x + e0.width + (drawRight ? lineWidth : 0.0F);
+            float y1 = e0.y - lineWidth;
+            float y2 = e0.y;
+            drawSolidQuad(wr, x1, y1, x2, y2, col);
          }
+
+         if (drawBottom) {
+            Entry eLast = ENTRIES[entryCount - 1];
+            int col = (!bloom || !glow) ? defaultColor : eLast.nameColor;
+            float x1 = eLast.x - (drawLeft ? lineWidth : 0.0F);
+            float x2 = eLast.x + eLast.width + (drawRight ? lineWidth : 0.0F);
+            float y1 = eLast.y + rowHeight;
+            float y2 = eLast.y + rowHeight + lineWidth;
+            drawSolidQuad(wr, x1, y1, x2, y2, col);
+         }
+
+         if (drawLeft) {
+            for (int i = 0; i < entryCount; i++) {
+               Entry e = ENTRIES[i];
+               int col = (!bloom || !glow) ? defaultColor : e.nameColor;
+               float x1 = e.x - lineWidth;
+               float x2 = e.x;
+               float y1 = e.y;
+               float y2 = e.y + rowHeight;
+               drawSolidQuad(wr, x1, y1, x2, y2, col);
+
+               if (i < entryCount - 1) {
+                  Entry next = ENTRIES[i + 1];
+                  int nextCol = (!bloom || !glow) ? defaultColor : next.nameColor;
+                  if (e.x < next.x) {
+                     drawSolidQuad(wr, e.x - lineWidth, e.y + rowHeight, next.x - lineWidth, e.y + rowHeight + lineWidth, col);
+                  } else if (e.x > next.x) {
+                     drawSolidQuad(wr, next.x - lineWidth, e.y + rowHeight - lineWidth, e.x - lineWidth, e.y + rowHeight, nextCol);
+                  }
+               }
+            }
+         }
+
+         if (drawRight) {
+            for (int i = 0; i < entryCount; i++) {
+               Entry e = ENTRIES[i];
+               int col = (!bloom || !glow) ? defaultColor : e.nameColor;
+               float x1 = e.x + e.width;
+               float x2 = e.x + e.width + lineWidth;
+               float y1 = e.y;
+               float y2 = e.y + rowHeight;
+               drawSolidQuad(wr, x1, y1, x2, y2, col);
+
+               if (i < entryCount - 1) {
+                  Entry next = ENTRIES[i + 1];
+                  int nextCol = (!bloom || !glow) ? defaultColor : next.nameColor;
+                  float rCurr = e.x + e.width;
+                  float rNext = next.x + next.width;
+                  if (rCurr > rNext) {
+                     drawSolidQuad(wr, rNext + lineWidth, e.y + rowHeight, rCurr + lineWidth, e.y + rowHeight + lineWidth, col);
+                  } else if (rCurr < rNext) {
+                     drawSolidQuad(wr, rCurr + lineWidth, e.y + rowHeight - lineWidth, rNext + lineWidth, e.y + rowHeight, nextCol);
+                  }
+               }
+            }
+         }
+
          tessellator.draw();
       }
 

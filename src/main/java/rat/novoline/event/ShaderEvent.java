@@ -1,28 +1,16 @@
 package rat.novoline.event;
 
-import rat.novoline.setting.MultiComboSetting;
-
 public class ShaderEvent extends Event {
    private final boolean bloom;
    private final boolean glow;
-   private final MultiComboSetting bloomOptions;
 
    public ShaderEvent(boolean bloom) {
-      this(bloom, false, null);
+      this(bloom, bloom);
    }
 
    public ShaderEvent(boolean bloom, boolean glow) {
-      this(bloom, glow, null);
-   }
-
-   public ShaderEvent(boolean bloom, MultiComboSetting bloomOptions) {
-      this(bloom, false, bloomOptions);
-   }
-
-   public ShaderEvent(boolean bloom, boolean glow, MultiComboSetting bloomOptions) {
       this.bloom = bloom;
       this.glow = glow;
-      this.bloomOptions = bloomOptions;
    }
 
    public boolean isBloom() {
@@ -34,10 +22,6 @@ public class ShaderEvent extends Event {
    }
 
    public boolean isGlow(String target) {
-      return this.bloom && this.bloomOptions != null && this.bloomOptions.isSelected(target);
-   }
-
-   public MultiComboSetting getBloomOptions() {
-      return this.bloomOptions;
+      return this.glow;
    }
 }

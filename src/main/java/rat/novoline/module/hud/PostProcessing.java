@@ -12,15 +12,12 @@ import rat.novoline.module.Category;
 import rat.novoline.module.Module;
 import rat.novoline.module.ModuleManager;
 import rat.novoline.setting.CheckboxSetting;
-import rat.novoline.setting.MultiComboSetting;
 import rat.novoline.setting.NumberSetting;
 import rat.novoline.utils.render.RenderUtils;
 import rat.novoline.utils.render.blur.KawaseBloom;
 import rat.novoline.utils.render.blur.KawaseBlur;
 
 public class PostProcessing extends Module {
-   public static MultiComboSetting glowOptions;
-
    public final CheckboxSetting blur = this.settingManager.register(new CheckboxSetting(this, "Blur", true));
    public final NumberSetting iterations = this.settingManager.register(new NumberSetting(this, "Blur Iterations", 2, 1, 8) {
       @Override
@@ -35,41 +32,38 @@ public class PostProcessing extends Module {
       }
    });
 
-   public final CheckboxSetting bloom = this.settingManager.register(new CheckboxSetting(this, "Bloom", true));
-   public final MultiComboSetting glowOptionsSetting = this.settingManager.register(
-      glowOptions = new MultiComboSetting(this, "Glow Options") {
-         @Override
-         public boolean shouldShow() {
-            return PostProcessing.this.bloom.isEnabled();
-         }
-      }
-      .add("Arraylist", true)
-      .add("ClickGui", false)
-      .add("Watermark", true)
-      .add("Statistics", true)
-      .add("Radar", true)
-      .add("TargetHud", true)
-      .add("Spotify", true)
-      .add("Notifications", false)
-      .add("Keystrokes", false)
-   );
-   public final NumberSetting shadowRadius = this.settingManager.register(new NumberSetting(this, "Bloom Iterations", 3, 1, 8) {
+   public final CheckboxSetting shadow = this.settingManager.register(new CheckboxSetting(this, "Shadow", true));
+   public final NumberSetting shadowRadius = this.settingManager.register(new NumberSetting(this, "Shadow Iterations", 3, 1, 8) {
       @Override
       public boolean shouldShow() {
-         return PostProcessing.this.bloom.isEnabled();
+         return PostProcessing.this.shadow.isEnabled();
       }
    });
-   public final NumberSetting shadowOffset = this.settingManager.register(new NumberSetting(this, "Bloom Offset", 1, 1, 10) {
+   public final NumberSetting shadowOffset = this.settingManager.register(new NumberSetting(this, "Shadow Offset", 1, 1, 10) {
       @Override
       public boolean shouldShow() {
-         return PostProcessing.this.bloom.isEnabled();
+         return PostProcessing.this.shadow.isEnabled();
+      }
+   });
+
+   public final CheckboxSetting glow = this.settingManager.register(new CheckboxSetting(this, "Glow", true));
+   public final NumberSetting glowRadius = this.settingManager.register(new NumberSetting(this, "Glow Iterations", 3, 1, 8) {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.glow.isEnabled();
+      }
+   });
+   public final NumberSetting glowOffset = this.settingManager.register(new NumberSetting(this, "Glow Offset", 1, 1, 10) {
+      @Override
+      public boolean shouldShow() {
+         return PostProcessing.this.glow.isEnabled();
       }
    });
 
    private static Framebuffer stencilFramebuffer = new Framebuffer(1, 1, false);
 
    public PostProcessing() {
-      super(Category.CLIENT, "PostProcessing", "blurs shit");
+      super(Category.CLIENT, "PostProcessing", "Tenacity Kawase blur, shadow, and dynamic glow post-processing");
       this.setEnabled(true);
    }
 
@@ -81,8 +75,12 @@ public class PostProcessing extends Module {
       return this.isBlurEnabled();
    }
 
+   public boolean isShadowEnabled() {
+      return this.isEnabled() && this.shadow.isEnabled();
+   }
+
    public boolean isBloomEnabled() {
-      return this.isEnabled() && this.bloom.isEnabled();
+      return this.isShadowEnabled() || this.isGlowEnabled();
    }
 
    public boolean isBloomEnabled(String target) {
@@ -90,15 +88,11 @@ public class PostProcessing extends Module {
    }
 
    public boolean isGlowEnabled() {
-      return this.isBloomEnabled();
+      return this.isEnabled() && this.glow.isEnabled();
    }
 
    public boolean isGlowEnabled(String target) {
-      return this.isBloomEnabled() && this.glowOptionsSetting != null && this.glowOptionsSetting.isSelected(target);
-   }
-
-   public MultiComboSetting getGlowOptions() {
-      return this.glowOptionsSetting;
+      return this.isGlowEnabled();
    }
 
    public static void runBloom(Runnable runnable, boolean blur, boolean bloom, int bloomRadius) {
@@ -112,7 +106,7 @@ public class PostProcessing extends Module {
       }
    }
 
-   public void stuffToBlur(boolean bloom, ScaledResolution sr) {
+   public void stuffToBlur(boolean bloom, boolean glow, ScaledResolution sr) {
       Minecraft mc = Minecraft.getMinecraft();
       float scaleFactor = sr.getScaleFactor();
 
@@ -123,30 +117,24 @@ public class PostProcessing extends Module {
       GlStateManager.pushMatrix();
       GlStateManager.scale(2.0F / scaleFactor, 2.0F / scaleFactor, 2.0F / scaleFactor);
 
-      boolean arraylistGlow = this.glowOptionsSetting.isSelected("Arraylist");
-      boolean targetHudGlow = this.glowOptionsSetting.isSelected("TargetHud");
-      boolean watermarkGlow = this.glowOptionsSetting.isSelected("Watermark");
-      boolean notifGlow = this.glowOptionsSetting.isSelected("Notifications");
-      boolean clickGuiGlow = this.glowOptionsSetting.isSelected("ClickGui");
-
       if (ModuleManager.targetHUD != null && ModuleManager.targetHUD.isEnabled()) {
-         TargetHudElement.renderTargetHudEffects(bloom, targetHudGlow, sr);
+         TargetHudElement.renderTargetHudEffects(bloom, glow, sr);
       }
 
       if (ModuleManager.arrayList != null && ModuleManager.arrayList.isEnabled()) {
-         ArrayListElement.renderArrayListEffects(bloom, arraylistGlow, sr);
+         ArrayListElement.renderArrayListEffects(bloom, glow, sr);
       }
 
       if (ModuleManager.watermark != null && ModuleManager.watermark.isEnabled()) {
-         WatermarkElement.renderWatermarkEffects(bloom, watermarkGlow);
+         WatermarkElement.renderWatermarkEffects(bloom, glow);
       }
 
       if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
-         Novoline.getNovoline().getNotificationManager().renderEffects(bloom, notifGlow, sr);
+         Novoline.getNovoline().getNotificationManager().renderEffects(bloom, glow, sr);
       }
 
       if (Novoline.getNovoline().getMenuClickGuiScreen() != null) {
-         Novoline.getNovoline().getMenuClickGuiScreen().renderEffects(bloom, clickGuiGlow, sr);
+         Novoline.getNovoline().getMenuClickGuiScreen().renderEffects(bloom, glow, sr);
       }
 
       GlStateManager.popMatrix();
@@ -161,28 +149,44 @@ public class PostProcessing extends Module {
 
       ScaledResolution sr = new ScaledResolution(mc);
 
+      // Pass 1: Blur
       if (this.blur.isEnabled()) {
          stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
          stencilFramebuffer.framebufferClear();
          stencilFramebuffer.bindFramebuffer(false);
-         Novoline.getNovoline().getBus().post(new ShaderEvent(false, this.glowOptionsSetting));
-         this.stuffToBlur(false, sr);
+         Novoline.getNovoline().getBus().post(new ShaderEvent(false, false));
+         this.stuffToBlur(false, false, sr);
          stencilFramebuffer.unbindFramebuffer();
 
          KawaseBlur.renderBlur(stencilFramebuffer.framebufferTexture, (int)this.iterations.getCurrentValue(), (int)this.offset.getCurrentValue());
       }
 
-      if (this.bloom.isEnabled()) {
+      // Pass 2: Shadow (Dark shadow bloom)
+      if (this.shadow.isEnabled()) {
          stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
          stencilFramebuffer.framebufferClear();
          stencilFramebuffer.bindFramebuffer(false);
 
-         Novoline.getNovoline().getBus().post(new ShaderEvent(true, this.glowOptionsSetting));
-         this.stuffToBlur(true, sr);
+         Novoline.getNovoline().getBus().post(new ShaderEvent(true, false));
+         this.stuffToBlur(true, false, sr);
 
          stencilFramebuffer.unbindFramebuffer();
 
          KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int)this.shadowRadius.getCurrentValue(), (int)this.shadowOffset.getCurrentValue());
+      }
+
+      // Pass 3: Glow (Dynamic colored neon bloom)
+      if (this.glow.isEnabled()) {
+         stencilFramebuffer = KawaseBlur.createFrameBuffer(stencilFramebuffer);
+         stencilFramebuffer.framebufferClear();
+         stencilFramebuffer.bindFramebuffer(false);
+
+         Novoline.getNovoline().getBus().post(new ShaderEvent(true, true));
+         this.stuffToBlur(true, true, sr);
+
+         stencilFramebuffer.unbindFramebuffer();
+
+         KawaseBloom.renderBlur(stencilFramebuffer.framebufferTexture, (int)this.glowRadius.getCurrentValue(), (int)this.glowOffset.getCurrentValue());
       }
    }
 }
