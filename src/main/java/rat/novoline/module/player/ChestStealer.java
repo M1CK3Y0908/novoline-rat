@@ -35,70 +35,70 @@ public class ChestStealer extends Module {
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting bow = settingManager.register(new NumberSetting(this, "Bow", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting armorSetting = settingManager.register(new NumberSetting(this, "Armor", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting tools = settingManager.register(new NumberSetting(this, "Tools", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting waterBucket = settingManager.register(new NumberSetting(this, "Water bucket", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting lavaBucket = settingManager.register(new NumberSetting(this, "Lava bucket", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting potions = settingManager.register(new NumberSetting(this, "Potions", 4, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting fishingRod = settingManager.register(new NumberSetting(this, "Fishing rod", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting flintAndSteel = settingManager.register(new NumberSetting(this, "Flint and steel", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting shears = settingManager.register(new NumberSetting(this, "Shears", 1, 0, 16) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    // Stackable items (0 - 512)
    public final NumberSetting blocks = settingManager.register(new NumberSetting(this, "Blocks", 128, 0, 512) {
@@ -106,35 +106,35 @@ public class ChestStealer extends Module {
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting goldenApple = settingManager.register(new NumberSetting(this, "Golden apple", 32, 0, 512) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting enderPearl = settingManager.register(new NumberSetting(this, "Ender pearl", 16, 0, 512) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting projectile = settingManager.register(new NumberSetting(this, "Projectiles", 32, 0, 512) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    public final NumberSetting arrows = settingManager.register(new NumberSetting(this, "Arrows", 64, 0, 512) {
       @Override
       public boolean shouldShow() {
          return ChestStealer.this.ignoreTrash.isEnabled();
       }
-   }.addLabel(0.0f, "§cDisabled"));
+   });
 
    enum ArmorSlot {
       BOOTS(0, 8), LEGGINGS(1, 7), CHESTPLATE(2, 6), HELMET(3, 5);
