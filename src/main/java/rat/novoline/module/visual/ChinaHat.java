@@ -56,7 +56,7 @@ public class ChinaHat extends Module {
             GlStateManager.shadeModel(7425);
             GlStateManager.alphaFunc(516, 0.003921569F);
             GL11.glBegin(6);
-            int i = RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(0), 0.8F);
+            int i = RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(0.0), 0.8F);
             RenderUtils.setColor(i);
             GL11.glVertex3d(d, d2, d3);
 
@@ -72,7 +72,7 @@ public class ChinaHat extends Module {
             GL11.glBegin(3);
 
             for (int i3 = 0; i3 <= 360; i3++) {
-               int i4 = RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(i3), 0.9F);
+               int i4 = RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor((double)i3), 0.9F);
                RenderUtils.setColor(i4);
                GL11.glVertex3d(d + Math.sin(i3 * Math.PI / 180.0) * f, d2 - 0.35, d3 + Math.cos(i3 * Math.PI / 180.0) * f);
             }

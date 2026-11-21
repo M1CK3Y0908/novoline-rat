@@ -10,13 +10,14 @@ import rat.novoline.utils.render.RenderUtils;
 
 public class ThemeColor extends Module {
    public final ComboSetting mode = settingManager.register(
-      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
+      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo", "Dynamic")
    );
    public final ComboSetting animationMode = settingManager.register(
       new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing") {
          @Override
          public boolean shouldShow() {
-            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color");
+            String m = ThemeColor.this.mode.getCurrentElementAsString();
+            return !m.equals("Single Color") && !m.equals("Dynamic");
          }
       }
    );
@@ -25,12 +26,12 @@ public class ThemeColor extends Module {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
-            return m.equals("Single Color") || m.equals("Double Color") || m.equals("Triple Color");
+            return m.equals("Single Color") || m.equals("Double Color") || m.equals("Triple Color") || m.equals("Dynamic");
          }
       }
    );
    public final ColorSetting secondColor = settingManager.register(
-      new ColorSetting(this, "Second Color", 0xFF8A8AFF) {
+      new ColorSetting(this, "Second Color", 0xFFC7C3E5) {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
@@ -50,7 +51,9 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Gradient Speed", 3.0F, 0.5F, 10.0F) {
          @Override
          public boolean shouldShow() {
-            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+            String m = ThemeColor.this.mode.getCurrentElementAsString();
+            if (m.equals("Dynamic")) return true;
+            return !m.equals("Single Color")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
@@ -59,7 +62,9 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Gradient Length", 50, 0, 100, "%") {
          @Override
          public boolean shouldShow() {
-            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+            String m = ThemeColor.this.mode.getCurrentElementAsString();
+            if (m.equals("Dynamic")) return true;
+            return !m.equals("Single Color")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
@@ -68,7 +73,9 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Angle", 0.0F, 0.0F, 360.0F) {
          @Override
          public boolean shouldShow() {
-            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+            String m = ThemeColor.this.mode.getCurrentElementAsString();
+            if (m.equals("Dynamic")) return true;
+            return !m.equals("Single Color")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
@@ -77,7 +84,8 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Breathing Speed", 1.5F, 0.2F, 5.0F) {
          @Override
          public boolean shouldShow() {
-            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
+            String m = ThemeColor.this.mode.getCurrentElementAsString();
+            return !m.equals("Single Color") && !m.equals("Dynamic")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Breathing");
          }
       }
@@ -125,11 +133,11 @@ public class ThemeColor extends Module {
    }
 
    public int getColor() {
-      return this.getColor(0.0, 0.0);
+      return this.getColor(0.0, 0.0, -1);
    }
 
    public int getColor(int index) {
-      return this.getColor(0.0, index * 14.0, index);
+      return this.getColor(0.0, 0.0, index);
    }
 
    public int getColor(long timeOffset) {
@@ -138,7 +146,7 @@ public class ThemeColor extends Module {
 
    public int getColor(double offset) {
       double rad = Math.toRadians(this.angle.getCurrentValue());
-      return this.getColor(offset * Math.cos(rad), offset * Math.sin(rad));
+      return this.getColor(offset * Math.cos(rad), offset * Math.sin(rad), -1);
    }
 
    public int getColor(double x, double y) {
@@ -153,10 +161,10 @@ public class ThemeColor extends Module {
 
       String animMode = this.animationMode.getCurrentElementAsString();
 
-      if (animMode.equals("Breathing")) {
+      if (animMode.equals("Breathing") && !m.equals("Dynamic")) {
          long breathMs = Math.max(200L, (long)(4000.0F / Math.max(0.1F, this.breathingSpeed.getCurrentValue())));
-         double timeProgress = (double)(System.currentTimeMillis() % (breathMs * 3600000L)) / (double)breathMs;
-         float factor = (float)((Math.cos(timeProgress * 2.0 * Math.PI) + 1.0) / 2.0);
+         double timeProgress = (double)(System.currentTimeMillis() % breathMs) / (double)breathMs;
+         float factor = (float)((1.0 - Math.cos(timeProgress * 2.0 * Math.PI)) / 2.0);
 
          return switch (m) {
             case "Double Color" -> {
@@ -165,53 +173,58 @@ public class ThemeColor extends Module {
                yield RenderUtils.lerpColor(c1, c2, factor);
             }
             case "Triple Color" -> {
-               double p = timeProgress % 1.0;
-               if (p < 0.0) p += 1.0;
+               double p = timeProgress * 3.0;
                int c1 = this.firstColor.getColor();
                int c2 = this.secondColor.getColor();
                int c3 = this.thirdColor.getColor();
-               if (p < 1.0 / 3.0) {
-                  float u = (float)(p * 3.0);
-                  float f = (float)((1.0 - Math.cos(u * Math.PI)) / 2.0);
+               if (p < 1.0) {
+                  float f = (float)((1.0 - Math.cos(p * Math.PI)) / 2.0);
                   yield RenderUtils.lerpColor(c1, c2, f);
-               } else if (p < 2.0 / 3.0) {
-                  float u = (float)((p - 1.0 / 3.0) * 3.0);
-                  float f = (float)((1.0 - Math.cos(u * Math.PI)) / 2.0);
+               } else if (p < 2.0) {
+                  float f = (float)((1.0 - Math.cos((p - 1.0) * Math.PI)) / 2.0);
                   yield RenderUtils.lerpColor(c2, c3, f);
                } else {
-                  float u = (float)((p - 2.0 / 3.0) * 3.0);
-                  float f = (float)((1.0 - Math.cos(u * Math.PI)) / 2.0);
+                  float f = (float)((1.0 - Math.cos((p - 2.0) * Math.PI)) / 2.0);
                   yield RenderUtils.lerpColor(c3, c1, f);
                }
             }
             case "Rainbow" -> {
-               double p = timeProgress % 1.0;
-               if (p < 0.0) p += 1.0;
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
-               yield Color.HSBtoRGB((float)p, sat, bri);
+               yield Color.HSBtoRGB((float)timeProgress, sat, bri);
             }
             case "Astolfo" -> {
+               float hue = (float)(timeProgress < 0.5 ? 1.0 - timeProgress : timeProgress);
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
-               float hue = 0.5F + 0.35F * factor;
                yield Color.HSBtoRGB(hue, sat, bri);
             }
             default -> this.firstColor.getColor();
          };
       } else {
-         double rad = Math.toRadians(this.angle.getCurrentValue());
-         double projected = x * Math.cos(rad) + y * Math.sin(rad);
          float gLen = this.gradientLength.getCurrentValue();
          long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
 
-         // 0%: 一行一个颜色 无渐变
+         // 0%: Discrete mode (one discrete step per row)
          if (gLen <= 0.0F) {
+            double rad = Math.toRadians(this.angle.getCurrentValue());
+            double projected = x * Math.cos(rad) + y * Math.sin(rad);
             int row = index >= 0 ? index : (int) Math.floor(projected / 14.0);
             int timeStep = (int)((System.currentTimeMillis() % (speedMs * 3600000L)) / speedMs);
             int step = row - timeStep;
 
             return switch (m) {
+               case "Dynamic" -> {
+                  float[] hsb = Color.RGBtoHSB(
+                     (this.firstColor.getColor() >> 16) & 0xFF,
+                     (this.firstColor.getColor() >> 8) & 0xFF,
+                     this.firstColor.getColor() & 0xFF,
+                     null
+                  );
+                  int k = (step % 4 + 4) % 4;
+                  float bri = 1.0F - (k / 3.0F) * 0.6F;
+                  yield Color.HSBtoRGB(hsb[0], hsb[1], bri * hsb[2]);
+               }
                case "Double Color" -> {
                   int k = (step % 2 + 2) % 2;
                   yield k == 0 ? this.firstColor.getColor() : this.secondColor.getColor();
@@ -233,7 +246,7 @@ public class ThemeColor extends Module {
                }
                case "Astolfo" -> {
                   int k = (step % 6 + 6) % 6;
-                  float hue = 0.5F + 0.35F * ((float)k / 5.0F);
+                  float hue = 0.5F + 0.5F * ((float)k / 5.0F);
                   float sat = this.saturation.getCurrentValue() / 100.0F;
                   float bri = this.brightness.getCurrentValue() / 100.0F;
                   yield Color.HSBtoRGB(hue, sat, bri);
@@ -242,14 +255,35 @@ public class ThemeColor extends Module {
             };
          }
 
-         // > 0%: 整体/10 (100% now corresponds to previous 10%, i.e. 100px)
-         double length = Math.max(1.0, (double)gLen);
+         // Continuous gradient (classic Novoline logic)
          double timeProgress = (double)(System.currentTimeMillis() % (speedMs * 3600000L)) / (double)speedMs;
-         double progress = projected / length + timeProgress;
+         double progress;
+         if (index >= 0) {
+            // For row-indexed elements (e.g. ArrayList), compute position from row index
+            double step = Math.max(1.0, 20.0 * (gLen / 50.0));
+            progress = (double) index / step + timeProgress;
+         } else {
+            // For spatial coordinates (e.g. Watermark bar, ESP), compute position along angle vector
+            double rad = Math.toRadians(this.angle.getCurrentValue());
+            double projected = x * Math.cos(rad) + y * Math.sin(rad);
+            double waveLength = Math.max(10.0, (double)gLen * 10.0);
+            progress = projected / waveLength + timeProgress;
+         }
 
          return switch (m) {
+            case "Dynamic" -> {
+               float[] hsb = Color.RGBtoHSB(
+                  (this.firstColor.getColor() >> 16) & 0xFF,
+                  (this.firstColor.getColor() >> 8) & 0xFF,
+                  this.firstColor.getColor() & 0xFF,
+                  null
+               );
+               float factor = Math.abs((float)Math.sin(progress * 2.0 * Math.PI));
+               float brightness = 1.0F - factor * 0.6F;
+               yield Color.HSBtoRGB(hsb[0], hsb[1], brightness * hsb[2]);
+            }
             case "Double Color" -> {
-               float factor = (float)((1.0 - Math.cos(progress * Math.PI)) / 2.0);
+               float factor = (float)((1.0 - Math.cos(progress * 2.0 * Math.PI)) / 2.0);
                yield RenderUtils.lerpColor(this.firstColor.getColor(), this.secondColor.getColor(), factor);
             }
             case "Triple Color" -> {
@@ -275,10 +309,10 @@ public class ThemeColor extends Module {
                yield Color.HSBtoRGB((float)p, sat, bri);
             }
             case "Astolfo" -> {
-               float factor = (float)((1.0 - Math.cos(progress * Math.PI)) / 2.0);
+               double p = (progress % 1.0 + 1.0) % 1.0;
+               float hue = (float)(p < 0.5 ? 1.0 - p : p);
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
-               float hue = 0.5F + 0.35F * factor;
                yield Color.HSBtoRGB(hue, sat, bri);
             }
             default -> this.firstColor.getColor();
