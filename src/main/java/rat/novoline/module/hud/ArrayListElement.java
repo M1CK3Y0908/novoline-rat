@@ -397,7 +397,7 @@ public class ArrayListElement extends HudElement {
 
       // Pass 1: Background Rectangles (single batched draw call)
       if (drawBackground) {
-         int bgCol = arrayList2.backgroundColor.getColor();
+         int bgCol = ModuleManager.themeColor.getBackgroundColor();
          RenderUtils.setColor(bgCol);
          GlStateManager.disableTexture2D();
          GlStateManager.enableBlend();

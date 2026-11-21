@@ -20,6 +20,9 @@ public class ThemeColor extends Module {
          }
       }
    );
+   public final ColorSetting backgroundColor = settingManager.register(
+      new ColorSetting(this, "Background Color", 0x32000000)
+   );
    public final ColorSetting firstColor = settingManager.register(
       new ColorSetting(this, "First Color", 0xFF8A8AFF) {
          @Override
@@ -122,6 +125,10 @@ public class ThemeColor extends Module {
    public ThemeColor() {
       super(Category.CLIENT, "ThemeColor", "Controls client theme colors");
       this.setEnabled(true);
+   }
+
+   public int getBackgroundColor() {
+      return this.backgroundColor.getColor();
    }
 
    public int getColor() {

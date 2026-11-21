@@ -370,7 +370,7 @@ public class ScoreboardElement extends HudElement {
 
       // 1. Unified Background (Title and Content together with the same color)
       if (scoreboardMod.background.isEnabled()) {
-         int bgColor = scoreboardMod.backgroundColor.getColor();
+         int bgColor = ModuleManager.themeColor.getBackgroundColor();
          RenderUtils.drawRect(x, y, x + w, y + h, bgColor);
       }
 
@@ -534,7 +534,7 @@ public class ScoreboardElement extends HudElement {
       float h = this.height;
 
       if (scoreboardMod.background.isEnabled()) {
-         int bgColor = scoreboardMod.backgroundColor.getColor();
+         int bgColor = ModuleManager.themeColor.getBackgroundColor();
          RenderUtils.drawRect(x, y, x + w, y + h, bgColor);
       }
 

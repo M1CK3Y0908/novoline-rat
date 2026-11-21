@@ -30,12 +30,6 @@ public class Scoreboard extends Module {
    public final CheckboxSetting avoidArrayList = settingManager.register(new CheckboxSetting(this, "Avoid ArrayList", true));
 
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", true));
-   public final ColorSetting backgroundColor = settingManager.register(new ColorSetting(this, "Background", 0x32000000) {
-      @Override
-      public boolean shouldShow() {
-         return Scoreboard.this.background.isEnabled();
-      }
-   });
 
    public final MultiComboSetting outline = settingManager.register(
       new MultiComboSetting(this, "Outline")
