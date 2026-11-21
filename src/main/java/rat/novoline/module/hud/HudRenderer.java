@@ -51,6 +51,12 @@ public class HudRenderer {
          if (ModuleManager.hotbar != null && ModuleManager.hotbar.isEnabled()) {
             HotbarElement.updateHotbar(scaledResolution);
          }
+         if (ModuleManager.potionHUD != null && ModuleManager.potionHUD.isEnabled()) {
+            PotionHudElement.updatePotionHud(scaledResolution);
+         }
+         if (ModuleManager.information != null && ModuleManager.information.isEnabled()) {
+            InformationElement.updateInformation(scaledResolution);
+         }
 
          if (ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled()) {
             ModuleManager.postProcessing.blurScreen();

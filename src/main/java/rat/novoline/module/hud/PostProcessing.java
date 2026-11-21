@@ -142,6 +142,14 @@ public class PostProcessing extends Module {
          HotbarElement.renderHotbarEffects(bloom, glow, sr);
       }
 
+      if (ModuleManager.potionHUD != null && ModuleManager.potionHUD.isEnabled()) {
+         PotionHudElement.renderPotionHudEffects(bloom, glow, sr);
+      }
+
+      if (ModuleManager.information != null && ModuleManager.information.isEnabled()) {
+         InformationElement.renderInformationEffects(bloom, glow, sr);
+      }
+
       if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
          Novoline.getNovoline().getNotificationManager().renderEffects(bloom, glow, sr);
       }

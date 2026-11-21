@@ -33,6 +33,8 @@ public class HudManager {
       this.register(new ScoreboardElement());
       this.register(new ArmorHudElement());
       this.register(new HotbarElement());
+      this.register(new PotionHudElement());
+      this.register(new InformationElement());
    }
 
    public void register(HudElement hudElement) {
