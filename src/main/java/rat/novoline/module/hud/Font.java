@@ -62,6 +62,16 @@ public class Font extends Module {
       return this.fontSize != null ? this.fontSize.getCurrentValue() : 16.0F;
    }
 
+   @Override
+   public boolean canBeToggled() {
+      return false;
+   }
+
+   @Override
+   public void setEnabled(boolean flag) {
+      super.setEnabled(true);
+   }
+
    public Font() {
       super(Category.CLIENT, "Font", "Controls global client font");
       this.setEnabled(true);

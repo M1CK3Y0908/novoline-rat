@@ -1,4 +1,4 @@
-package rat.novoline.module.player;
+package rat.novoline.module.combat;
 
 import io.github.nevalackin.homoBus.Listener;
 import io.github.nevalackin.homoBus.annotations.EventLink;
@@ -87,6 +87,6 @@ public class Velocity extends Module {
    };
 
    public Velocity() {
-      super(Category.PLAYER, "Velocity", "");
+      super(Category.COMBAT, "Velocity", "");
    }
 }

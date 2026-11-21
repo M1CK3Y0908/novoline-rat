@@ -257,7 +257,8 @@ public class ClickGuiScreen extends GuiScreen {
             float f5 = getHeaderHeight() + 10.0F + f2;
             float f6 = 0.0F;
             ArrayList arrayList2 = new ArrayList();
-            boolean flag = module2.getName().toLowerCase(Locale.ROOT).startsWith(text);
+            boolean flag = module2.getName().toLowerCase(Locale.ROOT).startsWith(text)
+               || module2.getAliases().stream().anyMatch(a -> a.toLowerCase(Locale.ROOT).startsWith(text));
             boolean flag2 = !Novoline.getNovoline()
                .getSettingManager()
                .getListByFeature(module2)
