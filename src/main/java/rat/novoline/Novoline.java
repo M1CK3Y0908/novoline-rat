@@ -135,11 +135,54 @@ public class Novoline {
    private CommandManager commandManager;
    private RuRuType ruRuType;
    private SettingManager settingManager;
-   public static String username = null;
+   public static String username = "Player";
    private ClickGuiScreen clickGuiScreen;
    private HypixelApiClient hypixelApiClient;
    private ConfigRegistry configRegistry;
-   public static String userId = null;
+   public static String userId = "User";
+
+   public static String getUserName() {
+      Minecraft mc = Minecraft.getMinecraft();
+      if (mc != null) {
+         if (mc.thePlayer != null) {
+            String name = mc.thePlayer.getName();
+            if (name != null && !name.trim().isEmpty()) {
+               username = name;
+               userId = getUserRole();
+               return username;
+            }
+         }
+         if (mc.getSession() != null) {
+            String sessionName = mc.getSession().getUsername();
+            if (sessionName != null && !sessionName.trim().isEmpty()) {
+               username = sessionName;
+               userId = getUserRole();
+               return username;
+            }
+         }
+      }
+      if (username != null && !username.trim().isEmpty() && !"1".equals(username)) {
+         return username;
+      }
+      return "Player";
+   }
+
+   public static String getUserRole() {
+      String name = null;
+      Minecraft mc = Minecraft.getMinecraft();
+      if (mc != null) {
+         if (mc.thePlayer != null) {
+            name = mc.thePlayer.getName();
+         }
+         if ((name == null || name.trim().isEmpty()) && mc.getSession() != null) {
+            name = mc.getSession().getUsername();
+         }
+      }
+      if (name == null || name.trim().isEmpty()) {
+         name = username;
+      }
+      return "M1CK3Y0908".equalsIgnoreCase(name) ? "Developer" : "User";
+   }
    public static boolean initialized = false;
    private IrcConnection ircConnection;
    private RelationManager relationManager;
@@ -167,8 +210,8 @@ public class Novoline {
 
    public void initialize(String text2) {
       String[] texts = text2.split("\\|<\\|>\\|");
-      username = texts[0];
-      userId = texts[1];
+      username = getUserName();
+      userId = getUserRole();
       this.bus = new EventBus<>();
       this.taskScheduler = new TaskScheduler();
       this.settingManager = new SettingManager();

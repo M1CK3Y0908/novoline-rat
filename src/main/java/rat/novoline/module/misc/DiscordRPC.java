@@ -127,7 +127,7 @@ public class DiscordRPC extends Module {
 
    private void updateActivity(Core core2, ActivityManager activityManager2) {
       try (Activity activity2 = new Activity()) {
-         activity2.setDetails("User ID: " + Novoline.userId);
+         activity2.setDetails(Novoline.getUserRole() + ": " + Novoline.getUserName());
          activity2.setState("Version: " + getVersionText());
          ActivityTimestamps activityTimestamps = activity2.timestamps();
          activityTimestamps.setStart(this.getStartTimestamp());

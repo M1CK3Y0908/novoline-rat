@@ -76,7 +76,7 @@ public class HUD extends Module {
    private final Listener<RenderScreenEvent> onRenderScreen = renderScreenEvent -> {
       this.drawInfoLines(renderScreenEvent);
       this.drawCornerTexts(renderScreenEvent);
-      if (this.hud.isSelected(3)) {
+      if (this.hud.isSelected("Armor Status")) {
          this.drawArmorStatus(renderScreenEvent);
       }
 
@@ -254,9 +254,9 @@ public class HUD extends Module {
    private void drawCornerTexts(RenderScreenEvent renderScreenEvent2) {
       ScaledResolution scaledResolution2 = renderScreenEvent2.scaledResolution;
       int i = 2;
-      if (this.hud.isSelected(5)) {
+      if (this.hud.isSelected("User Info")) {
          i = 2 + (int) this.getFont().getHeight();
-         String text = "UID: " + EnumChatFormatting.GRAY + Novoline.userId;
+         String text = Novoline.getUserRole() + ": " + EnumChatFormatting.GRAY + Novoline.getUserName();
          this.getFont()
             .drawStringWithShadow(
                text, scaledResolution2.getScaledWidth() - 2 - (int) this.getFont().getStringWidth(text), scaledResolution2.getScaledHeight() - i, -1
@@ -264,7 +264,7 @@ public class HUD extends Module {
          i += 7;
       }
 
-      if (this.hud.isSelected(4)) {
+      if (this.hud.isSelected("Potion Effects")) {
          for (PotionEffect potionEffect : minecraft.thePlayer.getActivePotionEffects()) {
             Potion potion2 = Potion.potionTypes[potionEffect.getPotionID()];
             StringBuilder stringBuilder = new StringBuilder();

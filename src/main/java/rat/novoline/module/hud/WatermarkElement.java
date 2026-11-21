@@ -71,7 +71,7 @@ public class WatermarkElement extends HudElement {
                .append(" ")
                .append("3.0")
                .append(" | ")
-               .append(Novoline.username)
+               .append(Novoline.getUserName())
                .append(" | ")
                .append(Minecraft.getDebugFPS())
                .append("fps | ");
@@ -118,7 +118,7 @@ public class WatermarkElement extends HudElement {
             this.width = cFontRenderer.getStringWidth(this.watermarkText) + 5.0F;
             this.height = 13.0F;
          } else if ("NeverLose".equalsIgnoreCase(type)) {
-            StringBuilder stringBuilder2 = new StringBuilder("§8|§r ").append(Novoline.username).append(" §8|§r ").append(Minecraft.getDebugFPS()).append("fps §8|§r ");
+            StringBuilder stringBuilder2 = new StringBuilder("§8|§r ").append(Novoline.getUserName()).append(" §8|§r ").append(Minecraft.getDebugFPS()).append("fps §8|§r ");
             ServerData currentServerData2 = Minecraft.getMinecraft().getCurrentServerData();
             if (currentServerData2 != null && !currentServerData2.isOnLAN()) {
                stringBuilder2.append(currentServerData2.serverIP.split(":")[0]);

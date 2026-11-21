@@ -413,10 +413,9 @@ public class ClickGuiScreen extends GuiScreen {
          this.x, this.y + getHeight() - getFooterHeight(), this.x + CategoryPanel.getTabWidth(), this.y + getHeight() - getFooterHeight(), 1342203824
       );
       RenderUtils.drawTextureWithAlpha(this.x + 5.0F, this.y + getHeight() - getFooterHeight() / 2.0F - 10.0F, 20.0F, 20.0F, 1.0F, PROFILE_PICTURE);
-      Fonts.museoSans700Size14.drawString(Novoline.username, this.x + 30.0F, this.y + getHeight() - 20.0F, -1);
-      Fonts.museoSans900Size12.drawString("User ID:", this.x + 30.0F, this.y + getHeight() - 12.0F, -10720647);
-      Fonts.museoSans900Size12
-         .drawString(Novoline.userId, this.x + 30.0F + Fonts.museoSans900Size12.getStringWidth("User ID: "), this.y + getHeight() - 12.0F, -13981697);
+      Fonts.museoSans700Size14.drawString(Novoline.getUserName(), this.x + 30.0F, this.y + getHeight() - 20.0F, -1);
+      String role = Novoline.getUserRole();
+      Fonts.museoSans900Size12.drawString(role, this.x + 30.0F, this.y + getHeight() - 12.0F, "Developer".equals(role) ? -13981697 : -10720647);
       RenderUtils.drawTextureWithAlpha(
          10.0F, new ScaledResolution(this.mc).getScaledHeight() - 20.0F - 10.0F, 20.0F, 20.0F, 1.0F, new ResourceLocation("novoline", "gui/script.png")
       );

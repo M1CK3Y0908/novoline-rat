@@ -38,6 +38,8 @@ public final class LoginHandler {
    public static void onLoggedIn(Session session2) {
       Novoline.taggedLogger.debug("Logged in: {}", new Object[]{session2.getUsername()});
       Minecraft.getMinecraft().session = session2;
+      Novoline.username = session2.getUsername();
+      Novoline.userId = Novoline.getUserRole();
       showNotification(
          NotificationType.SUCCESS,
          Language.translate("account_manager.login_handling.notification.title"),
