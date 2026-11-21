@@ -38,8 +38,8 @@ public class HotbarElement extends HudElement {
    private float fancyHoverFromOffset = -1.0F;
    private float fancyHoverTargetOffset = -1.0F;
    private long fancyHoverStartTime = 0L;
+   private float fancyAnimDuration = 180.0F;
    private int fancyLastSlot = -1;
-   private static final float FANCY_ANIM_DURATION = 180.0F;
 
    // Animation state for Lol "New" mode: slot zoom scale per slot
    private final float[] slotScales = new float[]{1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F};
@@ -479,32 +479,36 @@ public class HotbarElement extends HudElement {
          this.fancyLastSlot = selectedSlot;
          this.fancyHoverStartTime = now;
       } else if (selectedSlot != this.fancyLastSlot) {
-         if (this.fancyLastSlot != -1 && Math.abs(selectedSlot - this.fancyLastSlot) > 7) {
-            this.fancyHoverOffset = targetOffset;
-            this.fancyHoverFromOffset = targetOffset;
-         } else {
-            this.fancyHoverFromOffset = this.fancyHoverOffset;
-         }
+         this.fancyHoverFromOffset = this.fancyHoverOffset;
          this.fancyHoverTargetOffset = targetOffset;
+         int slotDiff = Math.abs(selectedSlot - this.fancyLastSlot);
+         this.fancyAnimDuration = 160.0F + (float) Math.min(8, slotDiff) * 10.0F;
          this.fancyLastSlot = selectedSlot;
          this.fancyHoverStartTime = now;
       }
 
       long elapsed = now - this.fancyHoverStartTime;
-      float progress = MathHelper.clamp_float((float) elapsed / FANCY_ANIM_DURATION, 0.0F, 1.0F);
+      float progress = MathHelper.clamp_float((float) elapsed / this.fancyAnimDuration, 0.0F, 1.0F);
       float eased = easeOutCubic(progress);
       this.fancyHoverOffset = this.fancyHoverFromOffset + (this.fancyHoverTargetOffset - this.fancyHoverFromOffset) * eased;
 
-      // Draw hover box background (only retain background hover effect)
+      // Draw hover box background (only retain background hover effect, same size as vanilla grid: 20x20)
       float hoverX = x + this.fancyHoverOffset;
-      float hoverY = y;
+      float hoverY = y + 1.0F;
       float hoverW = slotWidth;
-      float hoverH = totalHeight - 1.0F; // 21.0F
+      float hoverH = 20.0F;
       RenderUtils.drawRect(hoverX, hoverY, hoverX + hoverW, hoverY + hoverH, 0x2CFFFFFF);
 
-      // 3. Colored theme gradient line at the very bottom
-      float bottomLineY = y + totalHeight - 1.0F;
-      RenderUtils.drawThemeGradientBar(x, bottomLineY, x + totalWidth, y + totalHeight);
+      // 3. Colored theme gradient lines: moved up by 1 body height (y + 20 to y + 21),
+      // separated per slot, indented by 1 bar width on left and right inside each slot
+      float lineTop = y + totalHeight - 2.0F;
+      float lineBottom = y + totalHeight - 1.0F;
+      for (int i = 0; i < count; i++) {
+         float slotX = x + 1.0F + (float) i * slotWidth;
+         float barLeft = slotX + 1.0F;
+         float barRight = slotX + slotWidth - 1.0F;
+         RenderUtils.drawThemeGradientBar(barLeft, lineTop, barRight, lineBottom);
+      }
 
       RenderItem renderItem = minecraft.getRenderItem();
       FontAdapter font = hotbar.getFont();
@@ -513,7 +517,7 @@ public class HotbarElement extends HudElement {
       for (int i = 0; i < count; i++) {
          float slotX = x + 1.0F + (float) i * slotWidth;
          float itemX = slotX + 2.0F;
-         float itemY = y + 2.5F;
+         float itemY = y + 3.0F;
 
          ItemStack itemStack = (player != null && player.inventory != null) ? player.inventory.mainInventory[i] : null;
          if (itemStack == null && inEditor) {
@@ -639,7 +643,12 @@ public class HotbarElement extends HudElement {
       } else {
          // Bloom pass: render glowing elements into bloom buffer
          if ("Fancy".equalsIgnoreCase(mode) || "ArmorHUD".equalsIgnoreCase(mode)) {
-            RenderUtils.drawThemeGradientBar(x, y + h - 1.0F, x + w, y + h);
+            float lineTop = y + h - 2.0F;
+            float lineBottom = y + h - 1.0F;
+            for (int i = 0; i < 9; i++) {
+               float slotX = x + 1.0F + (float) i * 20.0F;
+               RenderUtils.drawThemeGradientBar(slotX + 1.0F, lineTop, slotX + 19.0F, lineBottom);
+            }
          } else {
             String style = hotbar.lolStyle.getCurrentElementAsString();
             if ("Old".equalsIgnoreCase(style) || "Classic".equalsIgnoreCase(style)) {
