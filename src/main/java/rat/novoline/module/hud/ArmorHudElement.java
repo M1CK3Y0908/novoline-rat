@@ -7,12 +7,10 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import rat.novoline.module.ModuleManager;
 import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.utils.render.RenderUtils;
@@ -21,8 +19,8 @@ public class ArmorHudElement extends HudElement {
    public static ArmorHudElement instance;
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    private boolean hasUserMoved = false;
-   private float width = 104.0F;
-   private float height = 30.0F;
+   private float width = 94.0F;
+   private float height = 32.0F;
 
    public ArmorHudElement() {
       super("armor-hud", 0.0F, 0.0F, true);
@@ -88,9 +86,9 @@ public class ArmorHudElement extends HudElement {
       }
 
       int count = armorStacks.size();
-      float slotWidth = 20.0F;
-      float totalWidth = count * slotWidth + 4.0F;
-      float totalHeight = 30.0F;
+      float slotWidth = 22.0F;
+      float totalWidth = count * slotWidth + 6.0F;
+      float totalHeight = 32.0F;
       this.width = totalWidth;
       this.height = totalHeight;
 
@@ -108,42 +106,65 @@ public class ArmorHudElement extends HudElement {
 
       FontAdapter font = armorHUD.getFont();
       RenderItem renderItem = minecraft.getRenderItem();
+      boolean isPercentage = "Percentage".equalsIgnoreCase(armorHUD.durabilityFormat.getCurrentElementAsString());
+      boolean isTheme = "Theme".equalsIgnoreCase(armorHUD.colorMode.getCurrentElementAsString());
 
-      float startX = x + 2.0F;
+      float startX = x + 3.0F;
       for (int i = 0; i < count; i++) {
          ItemStack itemStack = armorStacks.get(i);
          if (itemStack == null) continue;
 
-         float itemX = startX + i * slotWidth + 2.0F;
-         float itemY = y + 10.0F;
+         float slotX = startX + i * slotWidth;
+         float itemX = slotX + (slotWidth - 16.0F) / 2.0F;
+         float itemY = y + 2.0F;
 
          boolean itemStackDamageable = itemStack.isItemStackDamageable();
-         if (armorHUD.showDamage.isEnabled()) {
-            if (itemStackDamageable || itemStack.getItem().getItemStackLimit() != 1 || itemStack.stackSize != 1) {
-               String text = String.valueOf(itemStackDamageable ? itemStack.getMaxDamage() - itemStack.getItemDamage() : itemStack.stackSize);
-               float textX = itemX + (16.0F - font.getStringWidth(text)) / 2.0F;
-               font.drawStringWithShadow(text, textX, y + 1.5F, -1);
-            }
+         int maxDamage = itemStackDamageable ? itemStack.getMaxDamage() : 1;
+         int currentDamage = itemStackDamageable ? itemStack.getItemDamage() : 0;
+         int remaining = Math.max(0, maxDamage - currentDamage);
+         float fraction = itemStackDamageable ? MathHelper.clamp_float((float)remaining / (float)maxDamage, 0.0F, 1.0F) : 1.0F;
+
+         // 1. Durability text
+         String text;
+         if (isPercentage) {
+            int pct = Math.round(fraction * 100.0F);
+            text = pct + "%";
+         } else {
+            text = String.valueOf(itemStackDamageable ? remaining : itemStack.stackSize);
          }
 
+         // 2. Color (Theme or Durability)
+         float lineY = y + totalHeight - 2.0F; // 1px stroke, 1px from bottom edge
+         int color;
+         if (isTheme) {
+            color = ModuleManager.themeColor.getColor(slotX + slotWidth / 2.0F, lineY);
+         } else {
+            color = TargetHudElement.getHealthColor((float)remaining, (float)maxDamage);
+         }
+
+         // 3. Render item icon (clean icon only, no vanilla damage bar)
          renderItem.zLevel = 100.0F;
          RenderHelper.enableGUIStandardItemLighting();
          renderItem.renderItemAndEffectIntoGUI(itemStack, (int)itemX, (int)itemY);
          RenderHelper.disableStandardItemLighting();
          renderItem.zLevel = 0.0F;
+         GlStateManager.disableLighting();
 
-         if (itemStack.isItemDamaged()) {
-            int i5 = (int)Math.round(13.0 - itemStack.getItemDamage() * 13.0 / itemStack.getMaxDamage());
-            int i6 = (int)Math.round(255.0 - itemStack.getItemDamage() * 255.0 / itemStack.getMaxDamage());
-            GlStateManager.disableDepth();
-            GlStateManager.disableTexture2D();
-            GlStateManager.disableBlend();
-            WorldRenderer worldRenderer = Tessellator.getInstance().getWorldRenderer();
-            drawColoredQuad(worldRenderer, (int)itemX + 2, (int)itemY + 13, 13, 2, 0, 0);
-            drawColoredQuad(worldRenderer, (int)itemX + 2, (int)itemY + 13, 12, 1, (255 - i6) / 4, 64);
-            drawColoredQuad(worldRenderer, (int)itemX + 2, (int)itemY + 13, i5, 1, 255 - i6, i6);
-            GlStateManager.enableTexture2D();
-            GlStateManager.enableDepth();
+         // 4. Render durability number
+         float textX = slotX + (slotWidth - font.getStringWidth(text)) / 2.0F;
+         float textY = y + 19.5F;
+         font.drawStringWithShadow(text, textX, textY, color);
+
+         // 5. Render durability line (width/stroke = 1.0F, margin from edge = 1.0F)
+         float fullLineWidth = slotWidth - 4.0F;
+         float lineX = slotX + 2.0F;
+         float currentLineWidth = fullLineWidth * fraction;
+
+         // Background track
+         RenderUtils.drawRect(lineX, lineY, lineX + fullLineWidth, lineY + 1.0F, 0x40000000);
+         // Durability bar
+         if (currentLineWidth > 0.0F) {
+            RenderUtils.drawRect(lineX, lineY, lineX + currentLineWidth, lineY + 1.0F, color);
          }
       }
    }
@@ -153,6 +174,14 @@ public class ArmorHudElement extends HudElement {
          return;
       }
       if (!ModuleManager.armorHUD.background.isEnabled()) {
+         return;
+      }
+      Minecraft mc = Minecraft.getMinecraft();
+      if (mc.thePlayer == null) {
+         return;
+      }
+      List<ItemStack> armorStacks = getArmorStacks(mc.thePlayer, false);
+      if (armorStacks.isEmpty()) {
          return;
       }
       float x = instance.getX();
@@ -176,27 +205,13 @@ public class ArmorHudElement extends HudElement {
                list.add(itemStack);
             }
          }
-         ItemStack held = player.getCurrentEquippedItem();
-         if (held != null) {
-            list.add(held);
-         }
       }
       if (list.isEmpty() && inEditor) {
          list.add(new ItemStack(Items.diamond_helmet));
          list.add(new ItemStack(Items.diamond_chestplate));
          list.add(new ItemStack(Items.diamond_leggings));
          list.add(new ItemStack(Items.diamond_boots));
-         list.add(new ItemStack(Items.diamond_sword));
       }
       return list;
-   }
-
-   private static void drawColoredQuad(WorldRenderer worldRenderer, int i, int i2, int i3, int i4, int i5, int i6) {
-      worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-      worldRenderer.pos(i, i2, 0.0).color(i5, i6, 0, 255).endVertex();
-      worldRenderer.pos(i, i2 + i4, 0.0).color(i5, i6, 0, 255).endVertex();
-      worldRenderer.pos(i + i3, i2 + i4, 0.0).color(i5, i6, 0, 255).endVertex();
-      worldRenderer.pos(i + i3, i2, 0.0).color(i5, i6, 0, 255).endVertex();
-      Tessellator.getInstance().draw();
    }
 }
