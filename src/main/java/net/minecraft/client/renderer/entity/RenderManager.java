@@ -379,6 +379,15 @@ public class RenderManager {
       }
    }
 
+   public RenderPlayer getVanillaPlayerRenderer(AbstractClientPlayer player) {
+      if (player == null) {
+         return this.playerRenderer;
+      }
+      String text = player.getSkinType();
+      RenderPlayer renderPlayer = this.skinMap.get(text);
+      return renderPlayer != null ? renderPlayer : this.playerRenderer;
+   }
+
    public void setPlayerViewY(float playerViewYIn) {
       this.playerViewY = playerViewYIn;
    }

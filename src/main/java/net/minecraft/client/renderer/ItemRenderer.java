@@ -314,9 +314,8 @@ public class ItemRenderer {
       GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
       GlStateManager.scale(1.0F, 1.0F, 1.0F);
       GlStateManager.translate(5.6F, 0.0F, 0.0F);
-      Render entityRenderObject = this.renderManager.getEntityRenderObject(this.mc.thePlayer);
+      RenderPlayer renderPlayer = this.renderManager.getVanillaPlayerRenderer(this.mc.thePlayer);
       GlStateManager.disableCull();
-      RenderPlayer renderPlayer = (RenderPlayer)entityRenderObject;
       Chams chams2 = ModuleManager.chams;
       if (chams2.isEnabled() && chams2.arm.isEnabled() && chams2.chams.getCurrentElement() == 1) {
          GL11.glPushMatrix();
@@ -537,8 +536,8 @@ public class ItemRenderer {
 
    private void renderPlayerArms(AbstractClientPlayer clientPlayer) {
       this.mc.getTextureManager().bindTexture(clientPlayer.getLocationSkin());
-      RenderPlayer renderPlayer = (RenderPlayer)this.renderManager.<AbstractClientPlayer>getEntityRenderObject(this.mc.thePlayer);
-      if (!clientPlayer.isInvisible()) {
+      RenderPlayer renderPlayer = this.renderManager.getVanillaPlayerRenderer(clientPlayer);
+      if (renderPlayer != null && !clientPlayer.isInvisible()) {
          GlStateManager.disableCull();
          this.renderRightArm(renderPlayer);
          this.renderLeftArm(renderPlayer);
