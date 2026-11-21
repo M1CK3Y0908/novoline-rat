@@ -27,36 +27,49 @@ public class ArmorHudElement extends HudElement {
       instance = this;
    }
 
+   public void checkDefaultPosition(ScaledResolution sr) {
+      if (!this.hasUserMoved || (this.x == 0.0F && this.y == 0.0F)) {
+         this.x = sr.getFloat() / 2.0F + 10.0F;
+         this.y = sr.getFloat2() - 56.0F;
+      }
+   }
+
    @Override
    public HudElement setX(float f) {
       super.setX(f);
-      this.hasUserMoved = true;
+      if (f != 0.0F) {
+         this.hasUserMoved = true;
+      }
       return this;
    }
 
    @Override
    public HudElement setY(float f) {
       super.setY(f);
-      this.hasUserMoved = true;
+      if (f != 0.0F) {
+         this.hasUserMoved = true;
+      }
       return this;
    }
 
    @Override
-   public float getX() {
-      if (!this.hasUserMoved) {
-         ScaledResolution sr = new ScaledResolution(minecraft);
-         return sr.getScaledWidth() / 2.0F + 10.0F;
+   public void updateDragging(ScaledResolution scaledResolution, float f, float f2) {
+      checkDefaultPosition(scaledResolution);
+      super.updateDragging(scaledResolution, f, f2);
+      if (this.isDragging()) {
+         this.hasUserMoved = true;
       }
-      return this.x;
    }
 
    @Override
-   public float getY() {
-      if (!this.hasUserMoved) {
+   public boolean handleMouseClick(float f, float f2, int i) {
+      if (!this.hasUserMoved || (this.x == 0.0F && this.y == 0.0F)) {
          ScaledResolution sr = new ScaledResolution(minecraft);
-         return sr.getScaledHeight() - 56.0F;
+         float scaleFactor = sr.getScaleFactor();
+         this.x = (sr.getScaledWidth() * scaleFactor / 2.0F) / 2.0F + 10.0F;
+         this.y = (sr.getScaledHeight() * scaleFactor / 2.0F) - 56.0F;
       }
-      return this.y;
+      return super.handleMouseClick(f, f2, i);
    }
 
    @Override
@@ -71,6 +84,8 @@ public class ArmorHudElement extends HudElement {
 
    @Override
    public void draw(ScaledResolution scaledResolution, float f, boolean flag) {
+      checkDefaultPosition(scaledResolution);
+
       ArmorHUD armorHUD = ModuleManager.armorHUD;
       if (armorHUD == null || !armorHUD.isEnabled()) {
          return;
@@ -98,22 +113,23 @@ public class ArmorHudElement extends HudElement {
       float topPadding = 2.0F;
       float bottomPadding = lineWidth; // 与底边缘距离
 
-      float itemY = y + topPadding;
+      float itemY = this.y + topPadding;
       float textY = itemY + 16.0F + lineWidth; // 图标距离数字一个耐久条的宽度
       float lineY = textY + fontHeight + lineWidth; // 数字距离耐久条一个耐久条的宽度
-      float totalHeight = lineY + lineWidth + bottomPadding - y;
+      float totalHeight = lineY + lineWidth + bottomPadding - this.y;
+      this.width = totalWidth;
       this.height = totalHeight;
 
       if (armorHUD.background.isEnabled()) {
          boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
          if (!postProcessingActive) {
-            RenderUtils.drawShadow(x, y, x + totalWidth, y + totalHeight, 1.5F, 1610612736);
+            RenderUtils.drawShadow(this.x, this.y, this.x + totalWidth, this.y + totalHeight, 1.5F, 1610612736);
          }
          int bgColor = ModuleManager.themeColor.getBackgroundColor();
-         RenderUtils.drawRect(x, y, x + totalWidth, y + totalHeight, bgColor);
+         RenderUtils.drawRect(this.x, this.y, this.x + totalWidth, this.y + totalHeight, bgColor);
       }
 
-      float startX = x + 3.0F;
+      float startX = this.x + 3.0F;
       for (int i = 0; i < count; i++) {
          ItemStack itemStack = armorStacks.get(i);
          if (itemStack == null) continue;
@@ -185,10 +201,11 @@ public class ArmorHudElement extends HudElement {
       if (armorStacks.isEmpty()) {
          return;
       }
+      instance.checkDefaultPosition(sr);
       float x = instance.getX();
       float y = instance.getY();
-      float w = instance.width;
-      float h = instance.height;
+      float w = instance.width > 0.0F ? instance.width : (armorStacks.size() * 22.0F + 6.0F);
+      float h = instance.height > 0.0F ? instance.height : 32.0F;
       if (w <= 0.0F || h <= 0.0F) {
          return;
       }
