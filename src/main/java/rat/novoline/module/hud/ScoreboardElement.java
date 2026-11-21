@@ -17,6 +17,7 @@ import rat.novoline.module.misc.NameProtect;
 import rat.novoline.utils.math.SmoothingUtils;
 import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.utils.render.RenderUtils;
+import rat.novoline.utils.time.Stopwatch;
 
 public class ScoreboardElement extends HudElement {
    public static ScoreboardElement instance;
@@ -26,6 +27,9 @@ public class ScoreboardElement extends HudElement {
    private boolean hasUserMoved = false;
    private float width = 120.0F;
    private float height = 80.0F;
+
+   private final Stopwatch avoidTimer = new Stopwatch();
+   private boolean wasAvoiding = false;
 
    // Cached render state for draw and post-processing
    private static float cachedX = 0.0F;
@@ -74,6 +78,7 @@ public class ScoreboardElement extends HudElement {
       if (this.isDragging()) {
          this.hasUserMoved = true;
          this.animatedY = this.y;
+         this.wasAvoiding = false;
       }
    }
 
@@ -103,12 +108,15 @@ public class ScoreboardElement extends HudElement {
    private float calculateTargetY(ScaledResolution sr) {
       Scoreboard scoreboardMod = ModuleManager.scoreboard;
       if (scoreboardMod == null || !scoreboardMod.avoidArrayList.isEnabled()) {
+         this.wasAvoiding = false;
          return this.y;
       }
       if (ModuleManager.arrayList == null || !ModuleManager.arrayList.isEnabled() || ArrayListElement.instance == null) {
+         this.wasAvoiding = false;
          return this.y;
       }
       if (ArrayListElement.getEntryCount() <= 0) {
+         this.wasAvoiding = false;
          return this.y;
       }
 
@@ -124,21 +132,40 @@ public class ScoreboardElement extends HudElement {
       // Check horizontal overlap between Scoreboard and ArrayList
       if (sbX < alRight && sbRight > alX) {
          boolean isAlBottom = sr.getFloat2() / 2.0F < alY;
+         float safeY = this.y;
+         boolean needsAvoid = false;
+
          if (isAlBottom) {
             // ArrayList at bottom growing upwards: avoid by moving above ArrayList
-            float safeY = alY - this.height - 8.0F;
-            if (safeY < this.y) {
-               return Math.max(4.0F, safeY);
+            float candidateY = alY - this.height - 8.0F;
+            if (candidateY < this.y) {
+               safeY = Math.max(4.0F, candidateY);
+               needsAvoid = true;
             }
          } else {
             // ArrayList at top growing downwards: avoid by moving below ArrayList
-            float safeY = alBottom + 8.0F;
-            if (safeY > this.y) {
+            float candidateY = alBottom + 8.0F;
+            if (candidateY > this.y) {
                float maxY = sr.getFloat2() - this.height - 4.0F;
-               return Math.min(safeY, maxY);
+               safeY = Math.min(candidateY, maxY);
+               needsAvoid = true;
             }
          }
+
+         if (needsAvoid) {
+            if (!this.wasAvoiding) {
+               this.wasAvoiding = true;
+               this.avoidTimer.reset();
+            }
+            // 0.3s (300ms) delay before starting to avoid
+            if (!this.avoidTimer.hasElapsed(300L)) {
+               return this.y;
+            }
+            return safeY;
+         }
       }
+
+      this.wasAvoiding = false;
       return this.y;
    }
 
@@ -277,18 +304,13 @@ public class ScoreboardElement extends HudElement {
       float h = this.height;
       float padX = 6.0F;
 
-      // 1. Background
+      // 1. Unified Background (Title and Content together with the same color)
       if (scoreboardMod.background.isEnabled()) {
          int bgColor = scoreboardMod.backgroundColor.getColor();
          RenderUtils.drawRect(x, y, x + w, y + h, bgColor);
-
-         // Header bar (slightly darker tint)
-         int headerBg = (bgColor & 0x00FFFFFF) | (Math.min(255, ((bgColor >>> 24) * 3) / 2) << 24);
-         RenderUtils.drawRect(x, y, x + w, y + headerHeight, headerBg);
-         RenderUtils.drawRect(x, y + headerHeight - 1.0F, x + w, y + headerHeight, 0x1FFFFFFF);
       }
 
-      // 2. Custom Outline (Identical to ArrayList)
+      // 2. Custom Outer Outline (Outside bounds to avoid obstructing text)
       if (scoreboardMod.hasOutline()) {
          float lw = scoreboardMod.lineWidth.getCurrentValue();
          boolean drawTop = scoreboardMod.outline.isSelected("Top");
@@ -298,17 +320,20 @@ public class ScoreboardElement extends HudElement {
 
          int outlineColor = ModuleManager.themeColor.getColor(x, y);
 
+         float topX1 = x - (drawLeft ? lw : 0.0F);
+         float topX2 = x + w + (drawRight ? lw : 0.0F);
+
          if (drawTop) {
-            RenderUtils.drawRect(x, y, x + w, y + lw, outlineColor);
+            RenderUtils.drawRect(topX1, y - lw, topX2, y, outlineColor);
          }
          if (drawBottom) {
-            RenderUtils.drawRect(x, y + h - lw, x + w, y + h, outlineColor);
+            RenderUtils.drawRect(topX1, y + h, topX2, y + h + lw, outlineColor);
          }
          if (drawLeft) {
-            RenderUtils.drawRect(x, y, x + lw, y + h, outlineColor);
+            RenderUtils.drawRect(x - lw, y, x, y + h, outlineColor);
          }
          if (drawRight) {
-            RenderUtils.drawRect(x + w - lw, y, x + w, y + h, outlineColor);
+            RenderUtils.drawRect(x + w, y, x + w + lw, y + h, outlineColor);
          }
       }
 
@@ -377,17 +402,20 @@ public class ScoreboardElement extends HudElement {
 
       if (hasOutline) {
          int outlineColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor(x, y);
+         float topX1 = x - (drawLeft ? lw : 0.0F);
+         float topX2 = x + w + (drawRight ? lw : 0.0F);
+
          if (drawTop) {
-            RenderUtils.drawRect(x, y, x + w, y + lw, outlineColor);
+            RenderUtils.drawRect(topX1, y - lw, topX2, y, outlineColor);
          }
          if (drawBottom) {
-            RenderUtils.drawRect(x, y + h - lw, x + w, y + h, outlineColor);
+            RenderUtils.drawRect(topX1, y + h, topX2, y + h + lw, outlineColor);
          }
          if (drawLeft) {
-            RenderUtils.drawRect(x, y, x + lw, y + h, outlineColor);
+            RenderUtils.drawRect(x - lw, y, x, y + h, outlineColor);
          }
          if (drawRight) {
-            RenderUtils.drawRect(x + w - lw, y, x + w, y + h, outlineColor);
+            RenderUtils.drawRect(x + w, y, x + w + lw, y + h, outlineColor);
          }
       }
    }
@@ -444,9 +472,6 @@ public class ScoreboardElement extends HudElement {
       if (scoreboardMod.background.isEnabled()) {
          int bgColor = scoreboardMod.backgroundColor.getColor();
          RenderUtils.drawRect(x, y, x + w, y + h, bgColor);
-         int headerBg = (bgColor & 0x00FFFFFF) | (Math.min(255, ((bgColor >>> 24) * 3) / 2) << 24);
-         RenderUtils.drawRect(x, y, x + w, y + headerHeight, headerBg);
-         RenderUtils.drawRect(x, y + headerHeight - 1.0F, x + w, y + headerHeight, 0x1FFFFFFF);
       }
 
       if (scoreboardMod.hasOutline()) {
@@ -456,10 +481,21 @@ public class ScoreboardElement extends HudElement {
          boolean drawLeft = scoreboardMod.outline.isSelected("Left");
          boolean drawRight = scoreboardMod.outline.isSelected("Right");
          int outlineColor = ModuleManager.themeColor.getColor(x, y);
-         if (drawTop) RenderUtils.drawRect(x, y, x + w, y + lw, outlineColor);
-         if (drawBottom) RenderUtils.drawRect(x, y + h - lw, x + w, y + h, outlineColor);
-         if (drawLeft) RenderUtils.drawRect(x, y, x + lw, y + h, outlineColor);
-         if (drawRight) RenderUtils.drawRect(x + w - lw, y, x + w, y + h, outlineColor);
+         float topX1 = x - (drawLeft ? lw : 0.0F);
+         float topX2 = x + w + (drawRight ? lw : 0.0F);
+
+         if (drawTop) {
+            RenderUtils.drawRect(topX1, y - lw, topX2, y, outlineColor);
+         }
+         if (drawBottom) {
+            RenderUtils.drawRect(topX1, y + h, topX2, y + h + lw, outlineColor);
+         }
+         if (drawLeft) {
+            RenderUtils.drawRect(x - lw, y, x, y + h, outlineColor);
+         }
+         if (drawRight) {
+            RenderUtils.drawRect(x + w, y, x + w + lw, y + h, outlineColor);
+         }
       }
 
       float titleX = x + (w - titleFont.getStringWidth(sampleTitle)) / 2.0F;
