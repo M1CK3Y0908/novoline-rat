@@ -68,8 +68,6 @@ public class WatermarkElement extends HudElement {
             this.height = (float) font.getHeight() + 2.0F;
          } else if ("OneTap".equalsIgnoreCase(type)) {
             StringBuilder stringBuilder = new StringBuilder("Novoline")
-               .append(" ")
-               .append("3.0")
                .append(" | ")
                .append(Novoline.getUserName())
                .append(" | ")
