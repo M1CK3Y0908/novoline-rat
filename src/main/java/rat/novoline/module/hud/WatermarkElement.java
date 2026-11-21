@@ -51,7 +51,7 @@ public class WatermarkElement extends HudElement {
 
             for (int i = 0; i < name.length(); i++) {
                String ch = String.valueOf(name.charAt(i));
-               int color = ModuleManager.themeColor.getColor(curX, curY, i);
+               int color = ModuleManager.themeColor.getColor(curX, curY, i, name.length());
                font.drawStringWithShadow(ch, curX, curY, color);
                curX += (float) font.getStringWidth(ch);
             }
@@ -181,7 +181,7 @@ public class WatermarkElement extends HudElement {
 
             for (int i = 0; i < name.length(); i++) {
                String ch = String.valueOf(name.charAt(i));
-               int color = ModuleManager.themeColor.getColor(curX, curY, i);
+               int color = ModuleManager.themeColor.getColor(curX, curY, i, name.length());
                font.drawString(ch, curX, curY, color);
                curX += (float) font.getStringWidth(ch);
             }

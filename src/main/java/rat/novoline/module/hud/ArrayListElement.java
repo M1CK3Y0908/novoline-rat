@@ -184,7 +184,7 @@ public class ArrayListElement extends HudElement {
             e.y = rowY;
             e.width = totalEntryWidth;
             e.nameWidth = nameWidth;
-            e.nameColor = ModuleManager.themeColor.getColor(rowX, rowY, rowIndex);
+            e.nameColor = ModuleManager.themeColor.getColor(rowX, rowY, rowIndex, Math.max(1, entryCount));
             e.suffixColor = arrayList2.status.getColor();
             boolean isAnimatingX = !isEnabled || Math.abs(offsetX - totalEntryWidth) > 1.0F;
             boolean isAnimatingY = isEnabled && Math.abs(module.getArrayListOffsetY() - (targetOffsetY - rowHeight)) > 1.0F;

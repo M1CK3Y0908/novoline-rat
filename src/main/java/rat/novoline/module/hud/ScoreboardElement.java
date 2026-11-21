@@ -331,9 +331,10 @@ public class ScoreboardElement extends HudElement {
 
    private static void drawWatermarkText(FontAdapter font, String text, float startX, float textY) {
       float curCharX = startX;
+      int len = Math.max(1, text.length());
       for (int ci = 0; ci < text.length(); ci++) {
          String ch = String.valueOf(text.charAt(ci));
-         int charColor = ModuleManager.themeColor.getColor(curCharX, textY, ci);
+         int charColor = ModuleManager.themeColor.getColor(curCharX, textY, ci, len);
          font.drawStringWithShadow(ch, curCharX, textY, charColor);
          curCharX += (float) font.getStringWidth(ch);
       }

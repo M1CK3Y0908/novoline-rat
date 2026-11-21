@@ -132,11 +132,15 @@ public class ThemeColor extends Module {
    }
 
    public int getColor() {
-      return this.getColor(0.0, 0.0, -1);
+      return this.getColor(0.0, 0.0, -1, 0);
    }
 
    public int getColor(int index) {
-      return this.getColor(0.0, 0.0, index);
+      return this.getColor(0.0, 0.0, index, 0);
+   }
+
+   public int getColor(int index, int totalLength) {
+      return this.getColor(0.0, 0.0, index, totalLength);
    }
 
    public int getColor(long timeOffset) {
@@ -145,14 +149,18 @@ public class ThemeColor extends Module {
 
    public int getColor(double offset) {
       double rad = Math.toRadians(this.angle.getCurrentValue());
-      return this.getColor(offset * Math.cos(rad), offset * Math.sin(rad), -1);
+      return this.getColor(offset * Math.cos(rad), offset * Math.sin(rad), -1, 0);
    }
 
    public int getColor(double x, double y) {
-      return this.getColor(x, y, -1);
+      return this.getColor(x, y, -1, 0);
    }
 
    public int getColor(double x, double y, int index) {
+      return this.getColor(x, y, index, 0);
+   }
+
+   public int getColor(double x, double y, int index, int totalLength) {
       String m = this.mode.getCurrentElementAsString();
       if (m.equals("Single Color")) {
          return this.firstColor.getColor();
@@ -203,65 +211,36 @@ public class ThemeColor extends Module {
       } else {
          float gLen = this.gradientLength.getCurrentValue();
          long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
-
-         // 0%: Discrete mode (one discrete step per row)
-         if (gLen <= 0.0F) {
-            double rad = Math.toRadians(this.angle.getCurrentValue());
-            double projected = x * Math.cos(rad) + y * Math.sin(rad);
-            int row = index >= 0 ? index : (int) Math.floor(projected / 14.0);
-            int timeStep = (int)((System.currentTimeMillis() % (speedMs * 3600000L)) / speedMs);
-            int step = row - timeStep;
-
-            return switch (m) {
-               case "Double Color" -> {
-                  int k = (step % 2 + 2) % 2;
-                  yield k == 0 ? this.firstColor.getColor() : this.secondColor.getColor();
-               }
-               case "Triple Color" -> {
-                  int k = (step % 3 + 3) % 3;
-                  yield switch (k) {
-                     case 0 -> this.firstColor.getColor();
-                     case 1 -> this.secondColor.getColor();
-                     default -> this.thirdColor.getColor();
-                  };
-               }
-               case "Rainbow" -> {
-                  int k = (step % 12 + 12) % 12;
-                  float hue = (float)k / 12.0F;
-                  float sat = this.saturation.getCurrentValue() / 100.0F;
-                  float bri = this.brightness.getCurrentValue() / 100.0F;
-                  yield Color.HSBtoRGB(hue, sat, bri);
-               }
-               case "Astolfo" -> {
-                  int k = (step % 6 + 6) % 6;
-                  float hue = 0.5F + 0.5F * ((float)k / 5.0F);
-                  float sat = this.saturation.getCurrentValue() / 100.0F;
-                  float bri = this.brightness.getCurrentValue() / 100.0F;
-                  yield Color.HSBtoRGB(hue, sat, bri);
-               }
-               default -> this.firstColor.getColor();
-            };
-         }
-
-         // Continuous gradient (classic Novoline logic)
          double timeProgress = (double)(System.currentTimeMillis() % (speedMs * 3600000L)) / (double)speedMs;
-         double progress;
-         if (index >= 0) {
-            // For row-indexed elements (e.g. ArrayList), compute position from row index
-            double step = Math.max(1.0, 20.0 * (gLen / 50.0));
-            progress = (double) index / step + timeProgress;
-         } else {
-            // For spatial coordinates (e.g. Watermark bar, ESP), compute position along angle vector
-            double rad = Math.toRadians(this.angle.getCurrentValue());
-            double projected = x * Math.cos(rad) + y * Math.sin(rad);
-            double waveLength = Math.max(10.0, (double)gLen * 10.0);
-            progress = projected / waveLength + timeProgress;
+
+         double spatialProgress = 0.0;
+         if (gLen > 0.0F) {
+            double fraction = gLen / 100.0;
+            if (index >= 0) {
+               double len = totalLength > 0 ? (double) totalLength : 10.0;
+               spatialProgress = (index / len) / fraction;
+            } else {
+               double rad = Math.toRadians(this.angle.getCurrentValue());
+               double projected = x * Math.cos(rad) + y * Math.sin(rad);
+               double len = totalLength > 0 ? (double) totalLength : 100.0;
+               spatialProgress = (projected / len) / fraction;
+            }
          }
+
+         double progress = timeProgress + spatialProgress;
 
          return switch (m) {
             case "Double Color" -> {
-               float factor = (float)((1.0 - Math.cos(progress * 2.0 * Math.PI)) / 2.0);
-               yield RenderUtils.lerpColor(this.firstColor.getColor(), this.secondColor.getColor(), factor);
+               double p = (progress % 2.0 + 2.0) % 2.0;
+               int c1 = this.firstColor.getColor();
+               int c2 = this.secondColor.getColor();
+               if (p < 1.0) {
+                  float factor = (float)((1.0 - Math.cos(p * Math.PI)) / 2.0);
+                  yield RenderUtils.lerpColor(c1, c2, factor);
+               } else {
+                  float factor = (float)((1.0 - Math.cos((p - 1.0) * Math.PI)) / 2.0);
+                  yield RenderUtils.lerpColor(c2, c1, factor);
+               }
             }
             case "Triple Color" -> {
                double p = (progress % 3.0 + 3.0) % 3.0;
@@ -280,14 +259,15 @@ public class ThemeColor extends Module {
                }
             }
             case "Rainbow" -> {
-               double p = (progress % 1.0 + 1.0) % 1.0;
+               double p = ((progress / 6.0) % 1.0 + 1.0) % 1.0;
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
                yield Color.HSBtoRGB((float)p, sat, bri);
             }
             case "Astolfo" -> {
-               double p = (progress % 1.0 + 1.0) % 1.0;
-               float hue = (float)(p < 0.5 ? 1.0 - p : p);
+               double p = (progress % 2.0 + 2.0) % 2.0;
+               float factor = (float)((1.0 - Math.cos(p * Math.PI)) / 2.0);
+               float hue = 0.5F + 0.5F * factor;
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
                yield Color.HSBtoRGB(hue, sat, bri);
