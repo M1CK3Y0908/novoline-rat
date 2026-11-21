@@ -16,6 +16,14 @@ public abstract class Event {
       this.cancelled = true;
    }
 
+   public void setCancelled(boolean cancelled) {
+      if (cancelled) {
+         this.cancel();
+      } else {
+         this.cancelled = false;
+      }
+   }
+
    public Event() {
       this.cancellable = false;
    }

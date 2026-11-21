@@ -9,4 +9,12 @@ public class PacketSendEvent extends Event {
       super(23992540611656L, true);
       this.packet = packet2;
    }
+
+   public Packet<?> getPacket() {
+      return this.packet;
+   }
+
+   public void setPacket(Packet<?> packet) {
+      this.packet = packet;
+   }
 }

@@ -46,6 +46,7 @@ import rat.novoline.module.misc.NameProtect;
 import rat.novoline.module.misc.NoCloseGui;
 import rat.novoline.module.misc.PingSpoof;
 import rat.novoline.module.misc.Spammer;
+import rat.novoline.module.movement.Flight;
 import rat.novoline.module.movement.Fly;
 import rat.novoline.module.movement.Jesus;
 import rat.novoline.module.movement.LongJump;
@@ -154,6 +155,7 @@ public class ModuleManager {
    public static final Sprint sprint = new Sprint();
    public static final Speed speed = new Speed();
    public static final Fly fly = new Fly();
+   public static final Flight flight = new Flight();
    public static final LongJump longJump = new LongJump();
    public static final Phase phase = new Phase();
    public static final Step step = new Step();

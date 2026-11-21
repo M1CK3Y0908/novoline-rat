@@ -56,4 +56,8 @@ public class PlayerCapabilities {
    public void setPlayerWalkSpeed(float speed) {
       this.walkSpeed = speed;
    }
+
+   public boolean isCreative() {
+      return this.isCreativeMode;
+   }
 }

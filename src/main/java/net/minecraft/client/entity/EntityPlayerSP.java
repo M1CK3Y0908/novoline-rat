@@ -85,7 +85,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
    private double lastReportedPosZ;
    public int sprintingTicksLeft;
    private String clientBrand;
-   private double lastReportedPosY;
+   public double lastReportedPosY;
    public float prevRenderArmYaw;
    private boolean serverSprintState;
    private final StatFileWriter statWriter;
@@ -696,5 +696,10 @@ public class EntityPlayerSP extends AbstractClientPlayer {
 
    protected boolean isCurrentViewEntity() {
       return this.mc.getRenderViewEntity() == this;
+   }
+
+   @Override
+   public void jump() {
+      super.jump();
    }
 }

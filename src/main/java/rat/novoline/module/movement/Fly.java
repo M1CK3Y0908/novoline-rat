@@ -109,7 +109,7 @@ public class Fly extends Module {
 
    @Override
    protected void onInitialized() {
-      this.addAutoDisableTargets(ModuleManager.speed, ModuleManager.scaffold, ModuleManager.antiVoid);
+      this.addAutoDisableTargets(ModuleManager.speed, ModuleManager.scaffold, ModuleManager.antiVoid, ModuleManager.flight);
    }
 
    public Fly() {

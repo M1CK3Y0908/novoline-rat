@@ -23,4 +23,17 @@ public class PreUpdateEvent extends Event {
       this.rotationPitch = f2;
       this.onGround = flag;
    }
+
+   public double getX() { return this.posX; }
+   public void setX(double x) { this.posX = x; }
+   public double getY() { return this.posY; }
+   public void setY(double y) { this.posY = y; }
+   public double getZ() { return this.posZ; }
+   public void setZ(double z) { this.posZ = z; }
+   public float getYaw() { return this.rotationYaw; }
+   public void setYaw(float yaw) { this.rotationYaw = yaw; }
+   public float getPitch() { return this.rotationPitch; }
+   public void setPitch(float pitch) { this.rotationPitch = pitch; }
+   public boolean isOnGround() { return this.onGround; }
+   public void setOnGround(boolean onGround) { this.onGround = onGround; }
 }

@@ -220,6 +220,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
       }
    }
 
+   public void sendPacketNoEvent(Packet packetIn) {
+      this.sendUnregisteredPacket(packetIn);
+   }
+
    public void setCompressionTreshold(int treshold) {
       if (treshold >= 0) {
          if (this.channel.pipeline().get("decompress") instanceof NettyCompressionDecoder) {

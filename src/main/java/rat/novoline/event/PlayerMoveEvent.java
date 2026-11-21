@@ -17,6 +17,13 @@ public class PlayerMoveEvent extends Event {
       this.z = d3;
    }
 
+   public double getX() { return this.x; }
+   public void setX(double x) { this.x = x; }
+   public double getY() { return this.y; }
+   public void setY(double y) { this.y = y; }
+   public double getZ() { return this.z; }
+   public void setZ(double z) { this.z = z; }
+
    public void setMotionFromInput(double d, float f, float f2) {
       EntityPlayerSP thePlayer2 = Minecraft.getMinecraft().thePlayer;
       MovementInput movementInput2 = thePlayer2.movementInput;
