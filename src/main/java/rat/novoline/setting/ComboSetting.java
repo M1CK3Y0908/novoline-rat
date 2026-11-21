@@ -41,8 +41,11 @@ public class ComboSetting extends ModuleSetting {
    }
 
    public void setCurrentElementByName(String text) {
+      if ("ArmorHUD".equalsIgnoreCase(text)) {
+         text = "Fancy";
+      }
       for (int i = 0; i < this.elements.length; i++) {
-         if (this.elements[i].equals(text)) {
+         if (this.elements[i].equalsIgnoreCase(text)) {
             this.currentElement = i;
             break;
          }

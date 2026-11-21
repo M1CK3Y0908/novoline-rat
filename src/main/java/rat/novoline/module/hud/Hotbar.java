@@ -10,7 +10,7 @@ import rat.novoline.utils.render.FontAdapter;
 
 public class Hotbar extends Module {
    public final ComboSetting mode = settingManager.register(
-      new ComboSetting(this, "Mode", 0, "Lol", "ArmorHUD")
+      new ComboSetting(this, "Mode", 0, "Fancy", "Lol")
    );
    public final ComboSetting lolStyle = settingManager.register(
       new ComboSetting(this, "Lol Style", 0, "New", "Old")

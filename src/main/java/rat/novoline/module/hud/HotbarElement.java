@@ -11,7 +11,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.src.Config;
 import net.minecraft.util.MathHelper;
+import net.optifine.CustomColors;
 import org.lwjgl.opengl.GL11;
 import rat.novoline.module.ModuleManager;
 import rat.novoline.utils.render.FontAdapter;
@@ -21,15 +23,23 @@ public class HotbarElement extends HudElement {
    public static HotbarElement instance;
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    private boolean hasUserMoved = false;
-   private float width = 286.0F;
-   private float height = 26.0F;
+   private float width = 182.0F;
+   private float height = 22.0F;
 
    private static float cachedX = 0.0F;
    private static float cachedY = 0.0F;
-   private static float cachedWidth = 286.0F;
-   private static float cachedHeight = 26.0F;
+   private static float cachedWidth = 182.0F;
+   private static float cachedHeight = 22.0F;
    private static int cachedSelectedSlot = 0;
    private static float cachedSelectedBarWidth = 22.0F;
+
+   // Animation state for Fancy mode: smoothly sliding hover box with non-linear transition
+   private float fancyHoverOffset = -1.0F;
+   private float fancyHoverFromOffset = -1.0F;
+   private float fancyHoverTargetOffset = -1.0F;
+   private long fancyHoverStartTime = 0L;
+   private int fancyLastSlot = -1;
+   private static final float FANCY_ANIM_DURATION = 180.0F;
 
    // Animation state for Lol "New" mode: slot zoom scale per slot
    private final float[] slotScales = new float[]{1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F};
@@ -53,8 +63,8 @@ public class HotbarElement extends HudElement {
          return;
       }
       String mode = ModuleManager.hotbar.mode.getCurrentElementAsString();
-      if ("ArmorHUD".equalsIgnoreCase(mode)) {
-         this.width = 208.0F;
+      if ("Fancy".equalsIgnoreCase(mode) || "ArmorHUD".equalsIgnoreCase(mode)) {
+         this.width = 182.0F;
          this.height = 22.0F;
       } else {
          String style = ModuleManager.hotbar.lolStyle.getCurrentElementAsString();
@@ -163,8 +173,8 @@ public class HotbarElement extends HudElement {
       }
 
       String mode = hotbar.mode.getCurrentElementAsString();
-      if ("ArmorHUD".equalsIgnoreCase(mode)) {
-         drawArmorHudHotbar(hotbar, player, partialTicks, inEditor);
+      if ("Fancy".equalsIgnoreCase(mode) || "ArmorHUD".equalsIgnoreCase(mode)) {
+         drawFancyHotbar(hotbar, player, partialTicks, inEditor);
       } else {
          String style = hotbar.lolStyle.getCurrentElementAsString();
          if ("Old".equalsIgnoreCase(style) || "Classic".equalsIgnoreCase(style)) {
@@ -420,16 +430,22 @@ public class HotbarElement extends HudElement {
       }
    }
 
+   private float easeOutCubic(float t) {
+      float f = 1.0F - t;
+      return 1.0F - f * f * f;
+   }
+
    /**
-    * ArmorHUD style hotbar layout:
-    * 208px uniform bar with 22px slots, subtle selected highlight,
-    * glowing theme gradient bottom bar, and bottom-left custom font count.
+    * Fancy style hotbar layout:
+    * 182x22px uniform bar matching vanilla Minecraft hotbar dimensions,
+    * smoothly sliding hover highlight box with non-linear transition animation,
+    * dynamic theme gradient colored line across the very bottom,
+    * standard item durability bar, and bottom-left white custom font stack count.
     */
-   private void drawArmorHudHotbar(Hotbar hotbar, EntityPlayerSP player, float partialTicks, boolean inEditor) {
+   private void drawFancyHotbar(Hotbar hotbar, EntityPlayerSP player, float partialTicks, boolean inEditor) {
       int count = 9;
-      float barWidth = 22.0F;
-      float lineWidth = 1.0F;
-      float totalWidth = (float) count * (barWidth + lineWidth) + lineWidth; // 208.0F
+      float slotWidth = 20.0F;
+      float totalWidth = 182.0F;
       float totalHeight = 22.0F;
 
       this.width = totalWidth;
@@ -444,81 +460,66 @@ public class HotbarElement extends HudElement {
          if (!postProcessingActive) {
             RenderUtils.drawShadow(x, y, x + totalWidth, y + totalHeight, 1.5F, 1610612736);
          }
-         int bgColor = ModuleManager.themeColor.getBackgroundColor();
+         int alpha = (int) hotbar.alpha.getCurrentValue();
+         int bgColor = RenderUtils.withAlpha(ModuleManager.themeColor.getBackgroundColor(), alpha);
          RenderUtils.drawRect(x, y, x + totalWidth, y + totalHeight, bgColor);
       }
 
       int selectedSlot = (player != null && player.inventory != null) ? player.inventory.currentItem : 0;
       cachedSelectedSlot = selectedSlot;
 
+      // 2. Smoothly sliding hover box with non-linear transition animation
+      float targetOffset = 1.0F + (float) selectedSlot * slotWidth;
+      long now = System.currentTimeMillis();
+
+      if (this.fancyHoverOffset < 0.0F) {
+         this.fancyHoverOffset = targetOffset;
+         this.fancyHoverFromOffset = targetOffset;
+         this.fancyHoverTargetOffset = targetOffset;
+         this.fancyLastSlot = selectedSlot;
+         this.fancyHoverStartTime = now;
+      } else if (selectedSlot != this.fancyLastSlot) {
+         if (this.fancyLastSlot != -1 && Math.abs(selectedSlot - this.fancyLastSlot) > 7) {
+            this.fancyHoverOffset = targetOffset;
+            this.fancyHoverFromOffset = targetOffset;
+         } else {
+            this.fancyHoverFromOffset = this.fancyHoverOffset;
+         }
+         this.fancyHoverTargetOffset = targetOffset;
+         this.fancyLastSlot = selectedSlot;
+         this.fancyHoverStartTime = now;
+      }
+
+      long elapsed = now - this.fancyHoverStartTime;
+      float progress = MathHelper.clamp_float((float) elapsed / FANCY_ANIM_DURATION, 0.0F, 1.0F);
+      float eased = easeOutCubic(progress);
+      this.fancyHoverOffset = this.fancyHoverFromOffset + (this.fancyHoverTargetOffset - this.fancyHoverFromOffset) * eased;
+
+      // Draw hover box background (only retain background hover effect)
+      float hoverX = x + this.fancyHoverOffset;
+      float hoverY = y;
+      float hoverW = slotWidth;
+      float hoverH = totalHeight - 1.0F; // 21.0F
+      RenderUtils.drawRect(hoverX, hoverY, hoverX + hoverW, hoverY + hoverH, 0x2CFFFFFF);
+
+      // 3. Colored theme gradient line at the very bottom
+      float bottomLineY = y + totalHeight - 1.0F;
+      RenderUtils.drawThemeGradientBar(x, bottomLineY, x + totalWidth, y + totalHeight);
+
       RenderItem renderItem = minecraft.getRenderItem();
       FontAdapter font = hotbar.getFont();
 
-      // 2. Slots
+      // 4. Slots & item icons
       for (int i = 0; i < count; i++) {
-         float barX = x + lineWidth + (float) i * (barWidth + lineWidth);
-         float itemX = barX + (barWidth - 16.0F) / 2.0F;
-         float itemY = y + 2.0F;
-         float lineY = itemY + 16.0F + 1.0F;
-         boolean isSelected = (i == selectedSlot);
-
-         // Selection slot subtle highlight
-         if (isSelected) {
-            RenderUtils.drawRect(barX, y + 1.0F, barX + barWidth, lineY, 0x18FFFFFF);
-         }
+         float slotX = x + 1.0F + (float) i * slotWidth;
+         float itemX = slotX + 2.0F;
+         float itemY = y + 2.5F;
 
          ItemStack itemStack = (player != null && player.inventory != null) ? player.inventory.mainInventory[i] : null;
          if (itemStack == null && inEditor) {
             itemStack = getSampleItem(i);
          }
 
-         // Durability & fraction
-         boolean itemStackDamageable = itemStack != null && itemStack.isItemStackDamageable();
-         int maxDamage = itemStackDamageable ? itemStack.getMaxDamage() : 1;
-         int currentDamage = itemStackDamageable ? itemStack.getItemDamage() : 0;
-         int remaining = Math.max(0, maxDamage - currentDamage);
-         float fraction = itemStackDamageable ? MathHelper.clamp_float((float) remaining / (float) maxDamage, 0.0F, 1.0F) : 1.0F;
-
-         // Bottom track
-         RenderUtils.drawRect(barX, lineY, barX + barWidth, lineY + lineWidth, 0x40000000);
-
-         // Bottom bar width
-         float curBarWidth;
-         if (itemStackDamageable && hotbar.durabilityBar.isEnabled()) {
-            curBarWidth = barWidth * fraction;
-         } else {
-            curBarWidth = (itemStack != null || isSelected) ? barWidth : 0.0F;
-         }
-
-         // Bottom colored bar & glow effect when selected
-         if (curBarWidth > 0.0F) {
-            if (isSelected) {
-               cachedSelectedBarWidth = curBarWidth;
-               int themeCol = ModuleManager.themeColor.getColor(barX + curBarWidth / 2.0F, lineY);
-               // Glow effect: soft luminous halo around the selected bottom bar
-               RenderUtils.drawShadow(
-                  barX - 2.5F,
-                  lineY - 2.5F,
-                  barX + curBarWidth + 2.5F,
-                  lineY + lineWidth + 2.5F,
-                  4.0F,
-                  RenderUtils.withAlphaFraction(themeCol, 0.55F)
-               );
-               RenderUtils.drawShadow(
-                  barX - 1.2F,
-                  lineY - 1.2F,
-                  barX + curBarWidth + 1.2F,
-                  lineY + lineWidth + 1.2F,
-                  2.0F,
-                  RenderUtils.withAlphaFraction(themeCol, 0.9F)
-               );
-               RenderUtils.drawThemeGradientBar(barX, lineY, barX + curBarWidth, lineY + lineWidth);
-            } else {
-               RenderUtils.drawThemeGradientBar(barX, lineY, barX + curBarWidth, lineY + lineWidth, 0.65F);
-            }
-         }
-
-         // 3. Render item icon
          if (itemStack != null) {
             renderItem.zLevel = 100.0F;
             RenderHelper.enableGUIStandardItemLighting();
@@ -542,7 +543,7 @@ public class HotbarElement extends HudElement {
             renderItem.zLevel = 0.0F;
             GlStateManager.disableLighting();
 
-            // 4. White custom font count at bottom-left of the item
+            // White custom font count at bottom-left of the item
             if (itemStack.stackSize > 1) {
                String countStr = String.valueOf(itemStack.stackSize);
                float textX = itemX + 1.0F;
@@ -550,6 +551,50 @@ public class HotbarElement extends HudElement {
                GlStateManager.disableDepth();
                GlStateManager.enableBlend();
                font.drawStringWithShadow(countStr, textX, textY, -1);
+               GlStateManager.enableDepth();
+            }
+
+            // Normal item durability bar display
+            if (itemStack.isItemDamaged() && hotbar.durabilityBar.isEnabled()) {
+               int maxDamage = itemStack.getMaxDamage();
+               int damage = itemStack.getItemDamage();
+               int barLength = (int) Math.round(13.0 - (double) damage * 13.0 / (double) maxDamage);
+               int colorVal = (int) Math.round(255.0 - (double) damage * 255.0 / (double) maxDamage);
+
+               int r = 255 - colorVal;
+               int g = colorVal;
+               int b = 0;
+               if (Config.isCustomColors()) {
+                  int durabilityColor = CustomColors.getDurabilityColor(colorVal);
+                  if (durabilityColor >= 0) {
+                     r = durabilityColor >> 16 & 0xFF;
+                     g = durabilityColor >> 8 & 0xFF;
+                     b = durabilityColor & 0xFF;
+                  }
+               }
+
+               float barX = itemX + 2.0F;
+               float barY = itemY + 13.0F;
+
+               GlStateManager.disableLighting();
+               GlStateManager.disableDepth();
+               GlStateManager.disableTexture2D();
+               GlStateManager.disableAlpha();
+               GlStateManager.disableBlend();
+
+               // Background track
+               RenderUtils.drawRect(barX, barY, barX + 13.0F, barY + 2.0F, 0xFF000000);
+               int trackColor = 0xFF000000 | ((255 - colorVal) / 4 << 16) | (64 << 8);
+               RenderUtils.drawRect(barX, barY, barX + 12.0F, barY + 1.0F, trackColor);
+
+               // Durability color bar
+               int barCol = 0xFF000000 | (r << 16) | (g << 8) | b;
+               RenderUtils.drawRect(barX, barY, barX + (float) barLength, barY + 1.0F, barCol);
+
+               GlStateManager.enableBlend();
+               GlStateManager.enableAlpha();
+               GlStateManager.enableTexture2D();
+               GlStateManager.enableLighting();
                GlStateManager.enableDepth();
             }
          }
@@ -574,7 +619,7 @@ public class HotbarElement extends HudElement {
       if (!bloom || !glow) {
          // Blur pass: mask background
          if (hotbar.background.isEnabled()) {
-            if ("ArmorHUD".equalsIgnoreCase(mode)) {
+            if ("Fancy".equalsIgnoreCase(mode) || "ArmorHUD".equalsIgnoreCase(mode)) {
                RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
             } else {
                String style = hotbar.lolStyle.getCurrentElementAsString();
@@ -593,14 +638,8 @@ public class HotbarElement extends HudElement {
          }
       } else {
          // Bloom pass: render glowing elements into bloom buffer
-         if ("ArmorHUD".equalsIgnoreCase(mode)) {
-            if (cachedSelectedBarWidth > 0.0F && cachedSelectedSlot >= 0 && cachedSelectedSlot < 9) {
-               float barWidth = 22.0F;
-               float lineWidth = 1.0F;
-               float barX = x + lineWidth + (float) cachedSelectedSlot * (barWidth + lineWidth);
-               float lineY = y + 2.0F + 16.0F + 1.0F;
-               RenderUtils.drawThemeGradientBar(barX, lineY, barX + cachedSelectedBarWidth, lineY + lineWidth);
-            }
+         if ("Fancy".equalsIgnoreCase(mode) || "ArmorHUD".equalsIgnoreCase(mode)) {
+            RenderUtils.drawThemeGradientBar(x, y + h - 1.0F, x + w, y + h);
          } else {
             String style = hotbar.lolStyle.getCurrentElementAsString();
             if ("Old".equalsIgnoreCase(style) || "Classic".equalsIgnoreCase(style)) {
@@ -625,13 +664,19 @@ public class HotbarElement extends HudElement {
 
    private static ItemStack getSampleItem(int slot) {
       if (sampleItems == null) {
+         ItemStack sword = new ItemStack(Items.diamond_sword);
+         sword.setItemDamage(250);
+         ItemStack bow = new ItemStack(Items.bow);
+         bow.setItemDamage(120);
+         ItemStack pick = new ItemStack(Items.diamond_pickaxe);
+         pick.setItemDamage(400);
          sampleItems = new ItemStack[]{
-            new ItemStack(Items.diamond_sword),
+            sword,
             new ItemStack(Items.golden_apple, 16),
-            new ItemStack(Items.bow),
+            bow,
             new ItemStack(Items.arrow, 64),
             new ItemStack(Items.ender_pearl, 16),
-            new ItemStack(Items.diamond_pickaxe),
+            pick,
             new ItemStack(Item.getItemFromBlock(Blocks.planks), 64),
             new ItemStack(Items.water_bucket),
             new ItemStack(Items.golden_carrot, 64)
