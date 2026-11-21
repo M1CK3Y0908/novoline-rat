@@ -169,6 +169,31 @@ public class ScoreboardElement extends HudElement {
       return this.y;
    }
 
+   public static boolean isServerIp(String text) {
+      if (text == null || text.trim().isEmpty()) {
+         return false;
+      }
+      String clean = EnumChatFormatting.getTextWithoutFormattingCodes(text).trim().toLowerCase();
+      if (clean.contains("novoline.rat") || clean.contains("hypixel.net") || clean.contains("minemen.club")
+            || clean.contains("blocksmc.com") || clean.contains("loyisa.cn")) {
+         return true;
+      }
+      if (clean.startsWith("www.") || clean.startsWith("play.") || clean.startsWith("mc.") || clean.startsWith("pvp.") || clean.startsWith("store.")) {
+         return true;
+      }
+      String[] tlds = new String[] {
+         ".net", ".com", ".org", ".io", ".club", ".gg", ".cc", ".ru", ".cn",
+         ".de", ".me", ".tv", ".rip", ".top", ".xyz", ".fun", ".games", ".lol",
+         ".vip", ".pro", ".co", ".us", ".uk", ".eu", ".rat"
+      };
+      for (String tld : tlds) {
+         if (clean.contains(tld)) {
+            return true;
+         }
+      }
+      return clean.matches(".*\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}.*");
+   }
+
    public static void updateScoreboard(ScaledResolution sr) {
       if (instance == null) return;
       Scoreboard scoreboardMod = ModuleManager.scoreboard;
@@ -188,22 +213,6 @@ public class ScoreboardElement extends HudElement {
       Collection<Score> collection = scoreboard.getSortedScores(objective);
       List<Score> list = Lists.newArrayList(Iterables.filter(collection, s -> s.getPlayerName() != null && !s.getPlayerName().startsWith("#")));
 
-      String serverIpMode = scoreboardMod.serverIp.getCurrentElementAsString();
-      if (!list.isEmpty() && "Novoline".equalsIgnoreCase(serverIpMode)) {
-         Score score = list.get(0);
-         ScorePlayerTeam playersTeam = scoreboard.getPlayersTeam(score.getPlayerName());
-         String text = ScorePlayerTeam.formatPlayerName(playersTeam, score.getPlayerName());
-         if (!text.contains(".")) {
-            list.add(0, new Score(scoreboard, objective, "www.novoline.rat"));
-            list.add(1, new Score(scoreboard, objective, "§a§l"));
-         }
-      } else if ("None".equalsIgnoreCase(serverIpMode)) {
-         list.removeIf(s -> {
-            String name = s.getPlayerName();
-            return name != null && (name.contains(".net") || name.contains(".com") || name.contains(".org") || name.contains(".io") || name.contains(".rat"));
-         });
-      }
-
       if (list.size() > 15) {
          list = Lists.newArrayList(Iterables.skip(list, list.size() - 15));
       }
@@ -219,11 +228,34 @@ public class ScoreboardElement extends HudElement {
       float maxScoreWidth = 0.0F;
       boolean hideNumbers = scoreboardMod.hideNumbers.isEnabled();
       NameProtect nameProtect = ModuleManager.nameProtect;
+      String serverIpMode = scoreboardMod.serverIp.getCurrentElementAsString();
 
       cachedLines.clear();
       List<Score> displayList = Lists.newArrayList(list);
       Collections.reverse(displayList);
 
+      // Identify server IP line
+      int ipIndex = -1;
+      for (int i = displayList.size() - 1; i >= 0; i--) {
+         Score score = displayList.get(i);
+         ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
+         String raw = ScorePlayerTeam.formatPlayerName(team, score.getPlayerName());
+         if (isServerIp(raw)) {
+            ipIndex = i;
+            break;
+         }
+      }
+      if (ipIndex == -1 && !displayList.isEmpty()) {
+         Score score = displayList.get(displayList.size() - 1);
+         ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
+         String raw = ScorePlayerTeam.formatPlayerName(team, score.getPlayerName());
+         String clean = EnumChatFormatting.getTextWithoutFormattingCodes(raw).trim();
+         if (clean.contains(".")) {
+            ipIndex = displayList.size() - 1;
+         }
+      }
+
+      boolean replacedAny = false;
       for (int i = 0; i < displayList.size(); i++) {
          Score score = displayList.get(i);
          ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
@@ -232,18 +264,40 @@ public class ScoreboardElement extends HudElement {
             text = nameProtect.protectText(text);
          }
 
-         ScoreLine line = new ScoreLine();
-         line.text = text;
-         line.isWatermark = (i == displayList.size() - 1) && text.contains("novoline.rat");
-
-         maxTextWidth = Math.max(maxTextWidth, font.getStringWidth(text));
-         if (!hideNumbers) {
-            line.scoreStr = EnumChatFormatting.RED + String.valueOf(score.getScorePoints());
-            maxScoreWidth = Math.max(maxScoreWidth, font.getStringWidth(line.scoreStr));
-         } else {
-            line.scoreStr = "";
+         boolean isThisIp = (i == ipIndex) || isServerIp(text);
+         if (isThisIp && "None".equalsIgnoreCase(serverIpMode)) {
+            continue;
          }
+
+         ScoreLine line = new ScoreLine();
+         if (isThisIp && "Novoline".equalsIgnoreCase(serverIpMode)) {
+            line.text = "www.novoline.rat";
+            line.isWatermark = true;
+            line.scoreStr = "";
+            replacedAny = true;
+         } else {
+            line.text = text;
+            line.isWatermark = false;
+            if (!hideNumbers) {
+               line.scoreStr = EnumChatFormatting.RED + String.valueOf(score.getScorePoints());
+               maxScoreWidth = Math.max(maxScoreWidth, font.getStringWidth(line.scoreStr));
+            } else {
+               line.scoreStr = "";
+            }
+         }
+
+         maxTextWidth = Math.max(maxTextWidth, font.getStringWidth(line.text));
          cachedLines.add(line);
+      }
+
+      // If "Novoline" mode is selected but no server IP line was replaced, append watermark at bottom
+      if ("Novoline".equalsIgnoreCase(serverIpMode) && !replacedAny) {
+         ScoreLine wm = new ScoreLine();
+         wm.text = "www.novoline.rat";
+         wm.isWatermark = true;
+         wm.scoreStr = "";
+         maxTextWidth = Math.max(maxTextWidth, font.getStringWidth(wm.text));
+         cachedLines.add(wm);
       }
 
       float padX = 6.0F;
@@ -273,6 +327,16 @@ public class ScoreboardElement extends HudElement {
       cachedY = instance.getY();
       cachedWidth = instance.width;
       cachedHeight = instance.height;
+   }
+
+   private static void drawWatermarkText(FontAdapter font, String text, float startX, float textY) {
+      float curCharX = startX;
+      for (int ci = 0; ci < text.length(); ci++) {
+         String ch = String.valueOf(text.charAt(ci));
+         int charColor = ModuleManager.themeColor.getColor(curCharX, textY, ci);
+         font.drawStringWithShadow(ch, curCharX, textY, charColor);
+         curCharX += (float) font.getStringWidth(ch);
+      }
    }
 
    @Override
@@ -350,7 +414,7 @@ public class ScoreboardElement extends HudElement {
       for (ScoreLine line : cachedLines) {
          float textY = lineY + (rowHeight - fontHeight) / 2.0F;
          if (line.isWatermark) {
-            font.drawStringWithShadow(line.text, x + padX, textY, ModuleManager.themeColor.getColor(x + padX, textY));
+            drawWatermarkText(font, line.text, x + padX, textY);
          } else {
             font.drawStringWithShadow(line.text, x + padX, textY, -1);
          }
@@ -430,13 +494,13 @@ public class ScoreboardElement extends HudElement {
 
       String sampleTitle = "§lNovoline";
       String[] sampleLines = new String[] {
-         "www.novoline.rat",
          "Rank: §bUser",
          "Coins: §61,234",
          "Kills: §a12",
-         "Ping: §735ms"
+         "Ping: §735ms",
+         "www.novoline.rat"
       };
-      int[] sampleScores = new int[] { 5, 4, 3, 2, 1 };
+      int[] sampleScores = new int[] { 4, 3, 2, 1, 0 };
 
       float maxTextWidth = titleFont.getStringWidth(sampleTitle);
       float maxScoreWidth = 0.0F;
@@ -444,7 +508,7 @@ public class ScoreboardElement extends HudElement {
 
       for (int i = 0; i < sampleLines.length; i++) {
          maxTextWidth = Math.max(maxTextWidth, font.getStringWidth(sampleLines[i]));
-         if (!hideNumbers) {
+         if (!hideNumbers && i != sampleLines.length - 1) {
             String s = EnumChatFormatting.RED + String.valueOf(sampleScores[i]);
             maxScoreWidth = Math.max(maxScoreWidth, font.getStringWidth(s));
          }
@@ -505,12 +569,12 @@ public class ScoreboardElement extends HudElement {
       float lineY = y + headerHeight + 2.0F;
       for (int i = 0; i < sampleLines.length; i++) {
          float textY = lineY + (rowHeight - fontHeight) / 2.0F;
-         if (i == 0) {
-            font.drawStringWithShadow(sampleLines[i], x + padX, textY, ModuleManager.themeColor.getColor(x + padX, textY));
+         if (i == sampleLines.length - 1) {
+            drawWatermarkText(font, sampleLines[i], x + padX, textY);
          } else {
             font.drawStringWithShadow(sampleLines[i], x + padX, textY, -1);
          }
-         if (!hideNumbers) {
+         if (!hideNumbers && i != sampleLines.length - 1) {
             String s = EnumChatFormatting.RED + String.valueOf(sampleScores[i]);
             float scoreX = x + w - padX - font.getStringWidth(s);
             font.drawStringWithShadow(s, scoreX, textY, -1);

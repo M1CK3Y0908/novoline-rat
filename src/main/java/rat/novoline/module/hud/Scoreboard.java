@@ -51,7 +51,7 @@ public class Scoreboard extends Module {
       }
    });
 
-   public final ComboSetting serverIp = settingManager.register(new ComboSetting(this, "Server IP", 0, "Normal", "Novoline", "None"));
+   public final ComboSetting serverIp = settingManager.register(new ComboSetting(this, "Server IP", 1, "Normal", "Novoline", "None"));
 
    public boolean hasOutline() {
       for (MultiComboSetting.Option option : this.outline.getElements()) {

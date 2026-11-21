@@ -291,85 +291,8 @@ public class GuiIngame extends Gui {
    }
 
    private void renderScoreboard(ScoreObjective objective, ScaledResolution scaledRes) {
-      if (ModuleManager.noRender != null && ModuleManager.noRender.isEnabled() && ModuleManager.noRender.scoreboard.isEnabled()) {
-         return;
-      }
-      if (ModuleManager.scoreboard != null && ModuleManager.scoreboard.isEnabled()) {
-         return;
-      }
-      if (!ModuleManager.noRender.isEnabled() || !ModuleManager.noRender.scoreboard.isEnabled()) {
-         Scoreboard scoreboard2 = objective.getScoreboard();
-         ArrayList arrayList = (ArrayList) (Collection) (scoreboard2.getSortedScores(objective));
-         ArrayList arrayList2 = Lists.newArrayList(Iterables.filter(arrayList, new Predicate<Score>() {
-            public boolean apply(Score arg1) {
-               return arg1.getPlayerName() != null && !arg1.getPlayerName().startsWith("#");
-            }
-         }));
-         if (!arrayList2.isEmpty()) {
-            Score score = (Score)arrayList2.get(0);
-            ScorePlayerTeam playersTeam = scoreboard2.getPlayersTeam(score.getPlayerName());
-            String text = ScorePlayerTeam.formatPlayerName(playersTeam, score.getPlayerName());
-            if (!text.contains(".")) {
-               arrayList2.add(0, this.getScore(scoreboard2, "www.novoline.rat"));
-               arrayList2.add(1, this.getScore(scoreboard2, "§a§l"));
-            }
-         }
-
-         if (arrayList2.size() > 17) {
-            arrayList = Lists.newArrayList(Iterables.skip(arrayList2, arrayList.size() - 15));
-         } else {
-            arrayList = arrayList2;
-         }
-
-         int intValue = this.getFontRenderer().getInt3(objective.getDisplayName());
-
-         for (Score score2 : (Iterable<Score>) arrayList) {
-            String text2 = ScorePlayerTeam.formatPlayerName(scoreboard2.getPlayersTeam(score2.getPlayerName()), this.getString(score2.getPlayerName()))
-               + ": "
-               + EnumChatFormatting.RED
-               + score2.getScorePoints();
-            intValue = Math.max(intValue, this.getFontRenderer().getInt3(text2));
-         }
-
-         int i = arrayList.size() * this.getFontRenderer().FONT_HEIGHT;
-         int i2 = scaledRes.getScaledHeight() / 2 + i / 3;
-         int i3 = scaledRes.getScaledWidth() - intValue - 3;
-         int i4 = 0;
-
-         for (Score score3 : (Iterable<Score>) arrayList) {
-            i4++;
-            String text3 = ScorePlayerTeam.formatPlayerName(scoreboard2.getPlayersTeam(score3.getPlayerName()), score3.getPlayerName());
-            if (i4 == 1) {
-               text3 = this.getString(text3);
-            }
-
-            String text4 = "" + EnumChatFormatting.RED + score3.getScorePoints();
-            int i5 = i2 - i4 * this.getFontRenderer().FONT_HEIGHT;
-            int i6 = scaledRes.getScaledWidth() - 3 + 2;
-            handleInt(i3 - 2, i5, i6, i5 + this.getFontRenderer().FONT_HEIGHT, 1342177280);
-            if (i4 == 1) {
-               this.mc
-                  .fontRendererObj
-                  .drawStringWithShadow(
-                     NameUtils.stripFormatting(text3),
-                     i3,
-                     i5,
-                     ModuleManager.themeColor.getColor(i3, i5)
-                  );
-            } else {
-               this.getFontRenderer().getInt(text3, i3, i5, -1);
-            }
-
-            this.getFontRenderer().getInt(text4, i6 - this.getFontRenderer().getInt3(text4), i5, -1);
-            if (i4 == arrayList.size()) {
-               String displayName = objective.getDisplayName();
-               handleInt(i3 - 2, i5 - this.getFontRenderer().FONT_HEIGHT - 1, i6, i5 - 1, 1610612736);
-               handleInt(i3 - 2, i5 - 1, i6, i5, 1342177280);
-               this.getFontRenderer()
-                  .getInt(displayName, i3 + intValue / 2 - this.getFontRenderer().getInt3(displayName) / 2, i5 - this.getFontRenderer().FONT_HEIGHT, -1);
-            }
-         }
-      }
+      // Scoreboard rendering is handled by ScoreboardElement when enabled.
+      // If scoreboard module is disabled, do not show any scoreboard (including vanilla).
    }
 
    public GuiNewChat getChatGUI() {
