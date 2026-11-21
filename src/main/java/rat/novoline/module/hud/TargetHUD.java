@@ -1,11 +1,6 @@
 package rat.novoline.module.hud;
 
-import io.github.nevalackin.homoBus.Listener;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.play.client.C02PacketUseEntity;
 import rat.novoline.Novoline.Fonts;
-import rat.novoline.event.PacketSendEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
 import rat.novoline.setting.ComboSetting;
@@ -26,17 +21,6 @@ public class TargetHUD extends Module {
    public FontAdapter getInfoFont() {
       return Fonts.getFont(this.font.getCurrentElementAsString(), 14.0F, false);
    }
-
-   public final Listener<PacketSendEvent> onPacketSend = event -> {
-      if (event.packet instanceof C02PacketUseEntity packet && packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
-         if (minecraft.theWorld != null) {
-            Entity entity = minecraft.theWorld.getEntityByID(packet.entityId);
-            if (entity instanceof EntityPlayer player && player != minecraft.thePlayer) {
-               TargetHudElement.onAttackEntity(player);
-            }
-         }
-      }
-   };
 
    public TargetHUD() {
       super(Category.VISUAL, "TargetHUD", "");

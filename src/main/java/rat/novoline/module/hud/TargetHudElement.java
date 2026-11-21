@@ -106,17 +106,10 @@ public class TargetHudElement extends HudElement {
 
    private static final List<TargetEntry> activeTargets = new ArrayList<>();
    private static final List<TargetEntry> exitingTargets = new ArrayList<>();
-   private static EntityPlayer lastAttackedPlayer = null;
-   private static long lastAttackedTime = 0L;
    private static boolean inEditorMode = false;
    private static EntityPlayer previewPlayer2 = null;
 
    public EntityPlayer entityPlayer;
-
-   public static void onAttackEntity(EntityPlayer player) {
-      lastAttackedPlayer = player;
-      lastAttackedTime = System.currentTimeMillis();
-   }
 
    public static void clearTargets() {
       activeTargets.clear();
@@ -248,27 +241,6 @@ public class TargetHudElement extends HudElement {
                }
             }
          }
-      }
-
-      if (ModuleManager.aimBot != null && ModuleManager.aimBot.isEnabled()) {
-         EntityPlayer aimTarget = ModuleManager.aimBot.getEntityPlayer();
-         if (isValidTargetPlayer(aimTarget) && !currentPlayers.contains(aimTarget)) {
-            currentPlayers.add(aimTarget);
-         }
-      }
-
-      if (lastAttackedPlayer != null) {
-         if (isValidTargetPlayer(lastAttackedPlayer) && System.currentTimeMillis() - lastAttackedTime < 5000L && minecraft.thePlayer.getDistanceToEntity(lastAttackedPlayer) <= 15.0F) {
-            if (!currentPlayers.contains(lastAttackedPlayer)) {
-               currentPlayers.add(lastAttackedPlayer);
-            }
-         } else {
-            lastAttackedPlayer = null;
-         }
-      }
-
-      if (minecraft.pointedEntity instanceof EntityPlayer pointed && isValidTargetPlayer(pointed) && !currentPlayers.contains(pointed)) {
-         currentPlayers.add(pointed);
       }
 
       if (currentPlayers.isEmpty() && inEditorMode && minecraft.thePlayer != null) {
