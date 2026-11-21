@@ -130,6 +130,10 @@ public class PostProcessing extends Module {
          WatermarkElement.renderWatermarkEffects(bloom, glow);
       }
 
+      if (ModuleManager.scoreboard != null && ModuleManager.scoreboard.isEnabled()) {
+         ScoreboardElement.renderScoreboardEffects(bloom, glow, sr);
+      }
+
       if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
          Novoline.getNovoline().getNotificationManager().renderEffects(bloom, glow, sr);
       }

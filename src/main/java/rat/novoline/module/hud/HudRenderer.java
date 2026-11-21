@@ -42,6 +42,9 @@ public class HudRenderer {
          if (ModuleManager.targetHUD != null && ModuleManager.targetHUD.isEnabled()) {
             TargetHudElement.updateTarget(scaledResolution);
          }
+         if (ModuleManager.scoreboard != null && ModuleManager.scoreboard.isEnabled()) {
+            ScoreboardElement.updateScoreboard(scaledResolution);
+         }
 
          if (ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled()) {
             ModuleManager.postProcessing.blurScreen();

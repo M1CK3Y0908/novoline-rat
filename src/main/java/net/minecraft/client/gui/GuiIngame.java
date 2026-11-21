@@ -291,6 +291,12 @@ public class GuiIngame extends Gui {
    }
 
    private void renderScoreboard(ScoreObjective objective, ScaledResolution scaledRes) {
+      if (ModuleManager.noRender != null && ModuleManager.noRender.isEnabled() && ModuleManager.noRender.scoreboard.isEnabled()) {
+         return;
+      }
+      if (ModuleManager.scoreboard != null && ModuleManager.scoreboard.isEnabled()) {
+         return;
+      }
       if (!ModuleManager.noRender.isEnabled() || !ModuleManager.noRender.scoreboard.isEnabled()) {
          Scoreboard scoreboard2 = objective.getScoreboard();
          ArrayList arrayList = (ArrayList) (Collection) (scoreboard2.getSortedScores(objective));

@@ -30,6 +30,7 @@ public class HudManager {
       this.register(new TargetHudElement());
       this.register(new HypixelStatsElement());
       this.register(new BlockCounterElement());
+      this.register(new ScoreboardElement());
    }
 
    public void register(HudElement hudElement) {

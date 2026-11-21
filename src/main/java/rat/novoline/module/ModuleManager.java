@@ -27,6 +27,7 @@ import rat.novoline.module.hud.ClickGui;
 import rat.novoline.module.hud.HUD;
 import rat.novoline.module.hud.Notifications;
 import rat.novoline.module.hud.PostProcessing;
+import rat.novoline.module.hud.Scoreboard;
 import rat.novoline.module.hud.TargetESP;
 import rat.novoline.module.hud.TargetHUD;
 import rat.novoline.module.hud.ThemeColor;
@@ -129,6 +130,7 @@ public class ModuleManager {
    public static final ArrayList arrayList = new ArrayList();
    public static final ThemeColor themeColor = new ThemeColor();
    public static final Watermark watermark = new Watermark();
+   public static final Scoreboard scoreboard = new Scoreboard();
    public static final ClickGui clickGui = new ClickGui();
    public static final PostProcessing postProcessing = new PostProcessing();
    public static final Notifications notifications = new Notifications();
