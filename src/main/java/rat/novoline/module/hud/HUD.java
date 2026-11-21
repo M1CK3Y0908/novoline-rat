@@ -49,7 +49,7 @@ import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.utils.time.Stopwatch;
 
 public class HUD extends Module {
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft"));
    public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 22));
 
    public FontAdapter getFont() {

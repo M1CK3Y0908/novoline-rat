@@ -561,7 +561,7 @@ public class Novoline {
       public static CFontRenderer pixelSize8;
       public static final ResourceLocation MONTSERRAT_REGULAR = new ResourceLocation("novoline", "fonts/montserrat-regular.ttf");
       public static final ResourceLocation MONTSERRAT_SEMIBOLD = new ResourceLocation("novoline", "fonts/montserrat-semibold.ttf");
-      public static final String[] FONT_NAMES = new String[]{"Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"};
+      public static final String[] FONT_NAMES = new String[]{"SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft"};
       private static final Map<String, CFontRenderer> DYNAMIC_FONTS = new ConcurrentHashMap<>();
 
       public static FontAdapter getFont(String fontName, float size, boolean bold) {
@@ -578,7 +578,11 @@ public class Novoline {
 
          ResourceLocation res;
          String lower = fontName.toLowerCase(Locale.ROOT);
-         if (lower.contains("montserrat")) {
+         if (lower.contains("sf") || lower.contains("san francisco")) {
+            res = bold ? SF_BOLD : SF_REGULAR;
+         } else if (lower.contains("tahoma") || lower.contains("fixedsys")) {
+            res = bold ? TAHOMA_BOLD : TAHOMA;
+         } else if (lower.contains("montserrat")) {
             res = bold ? MONTSERRAT_SEMIBOLD : MONTSERRAT_REGULAR;
          } else if (lower.contains("museo")) {
             res = bold ? MUSEO_SANS_700 : MUSEO_SANS_500;
@@ -595,7 +599,7 @@ public class Novoline {
             DYNAMIC_FONTS.put(key, created);
             return created;
          } catch (Throwable t) {
-            return rubikRegularSize16 != null ? rubikRegularSize16 : VanillaFontAdapter.INSTANCE;
+            return sfRegularSize18 != null ? sfRegularSize18 : (rubikRegularSize16 != null ? rubikRegularSize16 : VanillaFontAdapter.INSTANCE);
          }
       }
 
@@ -610,6 +614,17 @@ public class Novoline {
       public static final ResourceLocation ROBOTO_REGULAR = new ResourceLocation("novoline", "fonts/roboto-regular.ttf");
       public static CFontRenderer museoSans900Size36;
       public static final ResourceLocation PIXEL = new ResourceLocation("novoline", "fonts/pixel.ttf");
+      public static final ResourceLocation SF_REGULAR = new ResourceLocation("novoline", "fonts/sf.ttf");
+      public static final ResourceLocation SF_BOLD = new ResourceLocation("novoline", "fonts/sf-bold.ttf");
+      public static final ResourceLocation SF_THIN = new ResourceLocation("novoline", "fonts/sf-thin.ttf");
+      public static final ResourceLocation TAHOMA = new ResourceLocation("novoline", "fonts/tahoma.ttf");
+      public static final ResourceLocation TAHOMA_BOLD = new ResourceLocation("novoline", "fonts/tahoma-bold.ttf");
+      public static CFontRenderer sfRegularSize18;
+      public static CFontRenderer sfRegularSize20;
+      public static CFontRenderer sfRegularSize21;
+      public static CFontRenderer sfBoldSize20;
+      public static CFontRenderer tahomaSize16;
+      public static CFontRenderer tahomaBoldSize16;
       public static CFontRenderer rubikRegularSize14;
       public static CFontRenderer museoSans500Size11;
       public static CFontRenderer rubikSemiboldSize16;
@@ -650,6 +665,12 @@ public class Novoline {
          rubikRegularSize14 = createCFontRenderer(RUBIK_REGULAR, 14.0F);
          robotoRegularSize14 = createCFontRenderer(ROBOTO_REGULAR, 14.0F);
          pixelSize8 = createCFontRenderer(PIXEL, 8.0F);
+         sfRegularSize18 = createCFontRenderer(SF_REGULAR, 18.0F);
+         sfRegularSize20 = createCFontRenderer(SF_REGULAR, 20.0F);
+         sfRegularSize21 = createCFontRenderer(SF_REGULAR, 21.0F);
+         sfBoldSize20 = createCFontRenderer(SF_BOLD, 20.0F);
+         tahomaSize16 = createCFontRenderer(TAHOMA, 16.0F);
+         tahomaBoldSize16 = createCFontRenderer(TAHOMA_BOLD, 16.0F);
       }
 
       public static CFontRenderer createCFontRenderer(ResourceLocation resourceLocation3, float f) {

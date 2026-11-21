@@ -9,7 +9,7 @@ import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.setting.MultiComboSetting;
 
 public class Notifications extends Module {
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft"));
 
    public FontAdapter getTitleFont() {
       return Fonts.getFont(this.font.getCurrentElementAsString(), 18.0F, false);

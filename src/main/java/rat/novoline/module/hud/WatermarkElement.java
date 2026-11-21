@@ -1,7 +1,9 @@
 package rat.novoline.module.hud;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
 import java.util.Locale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -16,8 +18,10 @@ import rat.novoline.utils.render.RenderUtils;
 
 public class WatermarkElement extends HudElement {
    public static WatermarkElement instance;
+   private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
    private String watermarkText;
    private float width;
+   private float height = 13.0F;
 
    public WatermarkElement() {
       super("watermark", 5.0F, 5.0F, true, false);
@@ -30,10 +34,39 @@ public class WatermarkElement extends HudElement {
    }
 
    @Override
+   public float getHeight() {
+      return this.height;
+   }
+
+   @Override
    public void draw(ScaledResolution scaledResolution, float f, boolean flag) {
       if (ModuleManager.watermark.isEnabled()) {
-         int currentElement = ModuleManager.watermark.watermark.getCurrentElement();
-         if (currentElement == 0) {
+         String type = ModuleManager.watermark.watermark.getCurrentElementAsString();
+         if ("Classic".equalsIgnoreCase(type)) {
+            FontAdapter customFont = ModuleManager.watermark.getFont(false);
+            FontAdapter font = customFont != null ? customFont : (Fonts.sfRegularSize20 != null ? Fonts.sfRegularSize20 : Fonts.rubikRegularSize18);
+            String name = "Novoline";
+            float curX = this.getX();
+            float curY = this.getY();
+
+            for (int i = 0; i < name.length(); i++) {
+               String ch = String.valueOf(name.charAt(i));
+               int color = ModuleManager.themeColor.getColor(curX, curY, i);
+               font.drawStringWithShadow(ch, curX, curY, color);
+               curX += (float) font.getStringWidth(ch);
+            }
+
+            if (ModuleManager.watermark.showTime.isEnabled()) {
+               curX += 2.0F;
+               String timeStr = TIME_FORMAT.format(new Date());
+               String timeFull = "§7(§f" + timeStr + "§7)";
+               font.drawStringWithShadow(timeFull, curX, curY, ModuleManager.themeColor.getColor(curX, curY, -1));
+               curX += (float) font.getStringWidth(timeFull);
+            }
+
+            this.width = curX - this.getX();
+            this.height = (float) font.getHeight() + 2.0F;
+         } else if ("OneTap".equalsIgnoreCase(type)) {
             StringBuilder stringBuilder = new StringBuilder("Novoline")
                .append(" ")
                .append("3.0")
@@ -82,7 +115,8 @@ public class WatermarkElement extends HudElement {
                -1
             );
             this.width = cFontRenderer.getStringWidth(this.watermarkText) + 5.0F;
-         } else if (currentElement == 1) {
+            this.height = 13.0F;
+         } else if ("NeverLose".equalsIgnoreCase(type)) {
             StringBuilder stringBuilder2 = new StringBuilder("§8|§r ").append(Novoline.username).append(" §8|§r ").append(Minecraft.getDebugFPS()).append("fps §8|§r ");
             ServerData currentServerData2 = Minecraft.getMinecraft().getCurrentServerData();
             if (currentServerData2 != null && !currentServerData2.isOnLAN()) {
@@ -104,6 +138,7 @@ public class WatermarkElement extends HudElement {
             FontAdapter cFontRenderer3 = customNorm != null ? customNorm : Fonts.museoSans700Size14;
             String text3 = "Novoline".toUpperCase(Locale.ROOT);
             this.width = cFontRenderer2.getStringWidth(text3) + cFontRenderer3.getStringWidth(this.watermarkText) + 9.0F;
+            this.height = 14.0F;
             boolean postProcessingActive2 = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
             if (!postProcessingActive2) {
                RenderUtils.drawShadow(
@@ -132,32 +167,49 @@ public class WatermarkElement extends HudElement {
       float y = instance.getY();
       float w = instance.getWidth();
       float h = instance.getHeight();
-      int currentElement = ModuleManager.watermark.watermark.getCurrentElement();
+      String type = ModuleManager.watermark.watermark.getCurrentElementAsString();
 
-      if (!bloom || !glow) {
-         if (currentElement == 0) {
+      if ("Classic".equalsIgnoreCase(type)) {
+         if (glow) {
+            FontAdapter customFont = ModuleManager.watermark.getFont(false);
+            FontAdapter font = customFont != null ? customFont : (Fonts.sfRegularSize20 != null ? Fonts.sfRegularSize20 : Fonts.rubikRegularSize18);
+            String name = "Novoline";
+            float curX = x;
+            float curY = y;
+
+            for (int i = 0; i < name.length(); i++) {
+               String ch = String.valueOf(name.charAt(i));
+               int color = ModuleManager.themeColor.getColor(curX, curY, i);
+               font.drawString(ch, curX, curY, color);
+               curX += (float) font.getStringWidth(ch);
+            }
+
+            if (ModuleManager.watermark.showTime.isEnabled()) {
+               curX += 2.0F;
+               String timeStr = TIME_FORMAT.format(new Date());
+               String timeFull = "§7(§f" + timeStr + "§7)";
+               font.drawString(timeFull, curX, curY, ModuleManager.themeColor.getColor(curX, curY, -1));
+            }
+         }
+      } else if (!bloom || !glow) {
+         if ("OneTap".equalsIgnoreCase(type)) {
             RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
-         } else if (currentElement == 1) {
+         } else if ("NeverLose".equalsIgnoreCase(type)) {
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
             filledPolygonRenderer.putRoundedRect(x, y, w, 14.0F, 1.0F, -16777216);
             filledPolygonRenderer.draw();
          }
       } else {
-         if (currentElement == 0) {
+         if ("OneTap".equalsIgnoreCase(type)) {
             int c1 = ModuleManager.themeColor.getColor(x, y);
             int c2 = ModuleManager.themeColor.getColor(x + w, y);
             RenderUtils.drawGradientLine(x, y, x + w, y, 3.0F, c1, c2, false);
-         } else if (currentElement == 1) {
+         } else if ("NeverLose".equalsIgnoreCase(type)) {
             int cTheme = ModuleManager.themeColor.getColor(x, y);
             FilledPolygonRenderer fpr = new FilledPolygonRenderer();
             fpr.putRoundedRect(x, y, w, 14.0F, 1.0F, cTheme);
             fpr.draw();
          }
       }
-   }
-
-   @Override
-   public float getHeight() {
-      return 13.0F;
    }
 }

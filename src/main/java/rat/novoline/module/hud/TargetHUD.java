@@ -9,7 +9,7 @@ import rat.novoline.utils.render.FontAdapter;
 
 public class TargetHUD extends Module {
    public final ComboSetting targetHUD = settingManager.register(new ComboSetting(this, "Mode", 0, "Type 1", "Type 2", "Type 3", "Classic"));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft"));
 
    public FontAdapter getTitleFont() {
       return Fonts.getFont(this.font.getCurrentElementAsString(), 18.0F, true);

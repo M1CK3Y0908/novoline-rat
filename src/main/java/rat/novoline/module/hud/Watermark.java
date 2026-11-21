@@ -10,9 +10,21 @@ import rat.novoline.Novoline.Fonts;
 import rat.novoline.utils.render.FontAdapter;
 
 public class Watermark extends Module {
-   public final ComboSetting watermark = settingManager.register(new ComboSetting(this, "Type", 0, "OneTap", "NeverLose"));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Default", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24));
+   public final ComboSetting watermark = settingManager.register(new ComboSetting(this, "Type", 0, "Classic", "OneTap", "NeverLose"));
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Default", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft"));
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 20, 10, 24));
+   public final CheckboxSetting showTime = settingManager.register(new CheckboxSetting(this, "Show Time", true) {
+      @Override
+      public boolean shouldShow() {
+         return "Classic".equalsIgnoreCase(watermark.getCurrentElementAsString());
+      }
+   });
+   public final CheckboxSetting showPlayTime = settingManager.register(new CheckboxSetting(this, "Show Play Time", true) {
+      @Override
+      public boolean shouldShow() {
+         return !"Classic".equalsIgnoreCase(watermark.getCurrentElementAsString());
+      }
+   });
 
    public FontAdapter getFont(boolean bold) {
       if ("Default".equals(this.font.getCurrentElementAsString())) {
@@ -20,7 +32,6 @@ public class Watermark extends Module {
       }
       return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), bold);
    }
-   public final CheckboxSetting showPlayTime = settingManager.register(new CheckboxSetting(this, "Show Play Time", true));
 
    public int getColor() {
       return ModuleManager.themeColor.getColor();

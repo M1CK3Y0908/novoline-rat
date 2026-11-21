@@ -12,13 +12,13 @@ import rat.novoline.setting.MultiComboSetting;
 import rat.novoline.setting.NumberSetting;
 
 public class ArrayList extends Module {
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft") {
+   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft") {
       @Override
       public void interactCallback() {
          Novoline.getNovoline().getModuleManager().updateCachedFeatures();
       }
    });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
+   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 18, 10, 24) {
       @Override
       public void interactCallback() {
          Novoline.getNovoline().getModuleManager().updateCachedFeatures();
