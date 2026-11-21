@@ -191,9 +191,7 @@ public class Novoline {
       this.altManagerScreen = new AltManagerScreen();
       this.configRegistry.getConfigManager().loadGlobal();
       this.configRegistry.getConfigManager().load(true, "proxies", ConfigRegistry.proxiesSection);
-      if (this.clientPreferences.getLanguage() != null) {
-         this.ruRuType = this.clientPreferences.getLanguage();
-      }
+      this.ruRuType = RuRuType.EN_US;
 
       try {
          WebViewLauncher.extract();
@@ -216,8 +214,7 @@ public class Novoline {
 
    private void initLanguage() {
       Language.loadAll();
-      String text2 = Locale.getDefault().toLanguageTag();
-      this.ruRuType = RuRuType.createRuRuType(text2);
+      this.ruRuType = RuRuType.EN_US;
    }
 
    public HudManager getHudManager() {
@@ -267,7 +264,7 @@ public class Novoline {
    }
 
    public RuRuType getRuRuType() {
-      return this.ruRuType;
+      return RuRuType.EN_US;
    }
 
    public RelationManager getRelationManager() {
@@ -360,7 +357,7 @@ public class Novoline {
    }
 
    public void setRuRuType(RuRuType ruRuType2) {
-      this.ruRuType = ruRuType2;
+      this.ruRuType = RuRuType.EN_US;
    }
 
    private IrcConnection connectIrc() {

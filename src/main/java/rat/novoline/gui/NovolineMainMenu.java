@@ -16,7 +16,6 @@ import rat.novoline.Novoline;
 import rat.novoline.Novoline.Fonts;
 import rat.novoline.utils.ClientPreferences;
 import rat.novoline.utils.language.Language;
-import rat.novoline.utils.language.Language.RuRuType;
 import rat.novoline.utils.render.BlurRenderer;
 import rat.novoline.utils.render.MenuBackgroundShader;
 import rat.novoline.utils.render.RenderUtils;
@@ -46,22 +45,6 @@ public class NovolineMainMenu extends GuiScreen {
             break;
          case 5:
             Desktop.getDesktop().browse(URI.create("https://docs.novoline.rat"));
-            break;
-         case 6:
-            LanguageButton languageButton = (LanguageButton)guiButton;
-            RuRuType[] ruRuTypes = RuRuType.values();
-
-            for (int i = 0; i < ruRuTypes.length; i++) {
-               if (ruRuTypes[i] == languageButton.getRuRuType()) {
-                  int i2 = i + 1;
-                  i2 = i2 == ruRuTypes.length ? 0 : i2;
-                  RuRuType ruRuType = ruRuTypes[i2];
-                  languageButton.setRuRuType(ruRuType);
-                  Novoline.getNovoline().setRuRuType(ruRuType);
-                  Novoline.getNovoline().getClientPreferences().setLanguage(ruRuType);
-                  return;
-               }
-            }
             break;
          case 7:
             if (++this.shaderIndex == 3) {
@@ -101,9 +84,6 @@ public class NovolineMainMenu extends GuiScreen {
          );
       this.buttonList.add(new ColorButton(5, 5, this.height - 10, Language.translate("main_menu.gui.documentation"), Color.WHITE));
       this.buttonList.add(new ColorButton(7, 62, this.height - 10, Language.translate("main_menu.gui.switch_image"), Color.WHITE));
-      LanguageButton languageButton = new LanguageButton(6, 5, 5);
-      languageButton.setRuRuType(Novoline.getNovoline().getRuRuType());
-      this.buttonList.add(languageButton);
       ClientPreferences clientPreferences = Novoline.getNovoline().getClientPreferences();
       this.menuBackgroundShader = new MenuBackgroundShader(clientPreferences.getShaderId());
    }
