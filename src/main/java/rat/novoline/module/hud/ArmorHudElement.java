@@ -88,12 +88,21 @@ public class ArmorHudElement extends HudElement {
       int count = armorStacks.size();
       float slotWidth = 22.0F;
       float totalWidth = count * slotWidth + 6.0F;
-      float totalHeight = 32.0F;
-      this.width = totalWidth;
-      this.height = totalHeight;
+      FontAdapter font = armorHUD.getFont();
+      RenderItem renderItem = minecraft.getRenderItem();
+      boolean isPercentage = "Percentage".equalsIgnoreCase(armorHUD.durabilityFormat.getCurrentElementAsString());
+      boolean isTheme = "Theme".equalsIgnoreCase(armorHUD.colorMode.getCurrentElementAsString());
 
-      float x = this.getX();
-      float y = this.getY();
+      float fontHeight = (float) font.getHeight();
+      float lineWidth = 1.0F; // 耐久条宽度/粗度
+      float topPadding = 2.0F;
+      float bottomPadding = lineWidth; // 与底边缘距离
+
+      float itemY = y + topPadding;
+      float textY = itemY + 16.0F + lineWidth; // 图标距离数字一个耐久条的宽度
+      float lineY = textY + fontHeight + lineWidth; // 数字距离耐久条一个耐久条的宽度
+      float totalHeight = lineY + lineWidth + bottomPadding - y;
+      this.height = totalHeight;
 
       if (armorHUD.background.isEnabled()) {
          boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
@@ -104,11 +113,6 @@ public class ArmorHudElement extends HudElement {
          RenderUtils.drawRect(x, y, x + totalWidth, y + totalHeight, bgColor);
       }
 
-      FontAdapter font = armorHUD.getFont();
-      RenderItem renderItem = minecraft.getRenderItem();
-      boolean isPercentage = "Percentage".equalsIgnoreCase(armorHUD.durabilityFormat.getCurrentElementAsString());
-      boolean isTheme = "Theme".equalsIgnoreCase(armorHUD.colorMode.getCurrentElementAsString());
-
       float startX = x + 3.0F;
       for (int i = 0; i < count; i++) {
          ItemStack itemStack = armorStacks.get(i);
@@ -116,7 +120,6 @@ public class ArmorHudElement extends HudElement {
 
          float slotX = startX + i * slotWidth;
          float itemX = slotX + (slotWidth - 16.0F) / 2.0F;
-         float itemY = y + 2.0F;
 
          boolean itemStackDamageable = itemStack.isItemStackDamageable();
          int maxDamage = itemStackDamageable ? itemStack.getMaxDamage() : 1;
@@ -134,7 +137,6 @@ public class ArmorHudElement extends HudElement {
          }
 
          // 2. Color (Theme or Durability)
-         float lineY = y + totalHeight - 2.0F; // 1px stroke, 1px from bottom edge
          int color;
          if (isTheme) {
             color = ModuleManager.themeColor.getColor(slotX + slotWidth / 2.0F, lineY);
@@ -152,7 +154,6 @@ public class ArmorHudElement extends HudElement {
 
          // 4. Render durability number
          float textX = slotX + (slotWidth - font.getStringWidth(text)) / 2.0F;
-         float textY = y + 19.5F;
          font.drawStringWithShadow(text, textX, textY, color);
 
          // 5. Render durability line (width/stroke = 1.0F, margin from edge = 1.0F)
@@ -161,10 +162,10 @@ public class ArmorHudElement extends HudElement {
          float currentLineWidth = fullLineWidth * fraction;
 
          // Background track
-         RenderUtils.drawRect(lineX, lineY, lineX + fullLineWidth, lineY + 1.0F, 0x40000000);
+         RenderUtils.drawRect(lineX, lineY, lineX + fullLineWidth, lineY + lineWidth, 0x40000000);
          // Durability bar
          if (currentLineWidth > 0.0F) {
-            RenderUtils.drawRect(lineX, lineY, lineX + currentLineWidth, lineY + 1.0F, color);
+            RenderUtils.drawRect(lineX, lineY, lineX + currentLineWidth, lineY + lineWidth, color);
          }
       }
    }
