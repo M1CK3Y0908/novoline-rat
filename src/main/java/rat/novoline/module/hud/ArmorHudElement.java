@@ -19,8 +19,14 @@ public class ArmorHudElement extends HudElement {
    public static ArmorHudElement instance;
    private static final Minecraft minecraft = Minecraft.getMinecraft();
    private boolean hasUserMoved = false;
-   private float width = 94.0F;
+   private float width = 93.0F;
    private float height = 32.0F;
+
+   private static float cachedX = 0.0F;
+   private static float cachedY = 0.0F;
+   private static float cachedWidth = 0.0F;
+   private static float cachedHeight = 0.0F;
+   private static boolean cachedHasArmor = false;
 
    public ArmorHudElement() {
       super("armor-hud", 0.0F, 0.0F, true);
@@ -31,6 +37,8 @@ public class ArmorHudElement extends HudElement {
       if (!this.hasUserMoved || (this.x == 0.0F && this.y == 0.0F)) {
          this.x = sr.getFloat() / 2.0F + 10.0F;
          this.y = sr.getFloat2() - 56.0F;
+         cachedX = this.x;
+         cachedY = this.y;
       }
    }
 
@@ -39,6 +47,7 @@ public class ArmorHudElement extends HudElement {
       super.setX(f);
       if (f != 0.0F) {
          this.hasUserMoved = true;
+         cachedX = this.x;
       }
       return this;
    }
@@ -48,6 +57,7 @@ public class ArmorHudElement extends HudElement {
       super.setY(f);
       if (f != 0.0F) {
          this.hasUserMoved = true;
+         cachedY = this.y;
       }
       return this;
    }
@@ -58,6 +68,8 @@ public class ArmorHudElement extends HudElement {
       super.updateDragging(scaledResolution, f, f2);
       if (this.isDragging()) {
          this.hasUserMoved = true;
+         cachedX = this.x;
+         cachedY = this.y;
       }
    }
 
@@ -68,6 +80,8 @@ public class ArmorHudElement extends HudElement {
          float scaleFactor = sr.getScaleFactor();
          this.x = (sr.getScaledWidth() * scaleFactor / 2.0F) / 2.0F + 10.0F;
          this.y = (sr.getScaledHeight() * scaleFactor / 2.0F) - 56.0F;
+         cachedX = this.x;
+         cachedY = this.y;
       }
       return super.handleMouseClick(f, f2, i);
    }
@@ -82,9 +96,56 @@ public class ArmorHudElement extends HudElement {
       return this.height;
    }
 
+   public static void updateArmorHud(ScaledResolution sr) {
+      if (instance == null || ModuleManager.armorHUD == null || !ModuleManager.armorHUD.isEnabled()) {
+         cachedHasArmor = false;
+         return;
+      }
+      Minecraft mc = Minecraft.getMinecraft();
+      EntityPlayerSP player = mc.thePlayer;
+      boolean inEditor = mc.currentScreen instanceof net.minecraft.client.gui.GuiChat;
+      if (player == null && !inEditor) {
+         cachedHasArmor = false;
+         return;
+      }
+
+      instance.checkDefaultPosition(sr);
+
+      List<ItemStack> armorStacks = getArmorStacks(player, inEditor);
+      if (armorStacks.isEmpty()) {
+         cachedHasArmor = false;
+         return;
+      }
+
+      int count = armorStacks.size();
+      float barWidth = 22.0F;
+      float lineWidth = 1.0F;
+      float totalWidth = count * (barWidth + lineWidth) + lineWidth;
+
+      ArmorHUD armorHUD = ModuleManager.armorHUD;
+      FontAdapter font = armorHUD.getFont();
+      float fontHeight = (float) font.getHeight();
+      float topPadding = 2.0F;
+      float bottomPadding = lineWidth;
+
+      float itemY = instance.y + topPadding;
+      float textY = itemY + 16.0F + lineWidth;
+      float lineY = textY + fontHeight + lineWidth;
+      float totalHeight = lineY + lineWidth + bottomPadding - instance.y;
+
+      instance.width = totalWidth;
+      instance.height = totalHeight;
+
+      cachedX = instance.getX();
+      cachedY = instance.getY();
+      cachedWidth = totalWidth;
+      cachedHeight = totalHeight;
+      cachedHasArmor = true;
+   }
+
    @Override
    public void draw(ScaledResolution scaledResolution, float f, boolean flag) {
-      checkDefaultPosition(scaledResolution);
+      updateArmorHud(scaledResolution);
 
       ArmorHUD armorHUD = ModuleManager.armorHUD;
       if (armorHUD == null || !armorHUD.isEnabled()) {
@@ -101,41 +162,40 @@ public class ArmorHudElement extends HudElement {
       }
 
       int count = armorStacks.size();
-      float slotWidth = 22.0F;
-      float totalWidth = count * slotWidth + 6.0F;
+      float barWidth = 22.0F;
+      float lineWidth = 1.0F; // 耐久条宽度/粗度
+      float totalWidth = cachedWidth > 0.0F ? cachedWidth : (count * (barWidth + lineWidth) + lineWidth);
+      float totalHeight = cachedHeight > 0.0F ? cachedHeight : 32.0F;
+      float x = cachedX;
+      float y = cachedY;
+
       FontAdapter font = armorHUD.getFont();
       RenderItem renderItem = minecraft.getRenderItem();
       boolean isPercentage = "Percentage".equalsIgnoreCase(armorHUD.durabilityFormat.getCurrentElementAsString());
       boolean isTheme = "Theme".equalsIgnoreCase(armorHUD.colorMode.getCurrentElementAsString());
 
       float fontHeight = (float) font.getHeight();
-      float lineWidth = 1.0F; // 耐久条宽度/粗度
       float topPadding = 2.0F;
-      float bottomPadding = lineWidth; // 与底边缘距离
-
-      float itemY = this.y + topPadding;
+      float itemY = y + topPadding;
       float textY = itemY + 16.0F + lineWidth; // 图标距离数字一个耐久条的宽度
       float lineY = textY + fontHeight + lineWidth; // 数字距离耐久条一个耐久条的宽度
-      float totalHeight = lineY + lineWidth + bottomPadding - this.y;
-      this.width = totalWidth;
-      this.height = totalHeight;
 
       if (armorHUD.background.isEnabled()) {
          boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
          if (!postProcessingActive) {
-            RenderUtils.drawShadow(this.x, this.y, this.x + totalWidth, this.y + totalHeight, 1.5F, 1610612736);
+            RenderUtils.drawShadow(x, y, x + totalWidth, y + totalHeight, 1.5F, 1610612736);
          }
          int bgColor = ModuleManager.themeColor.getBackgroundColor();
-         RenderUtils.drawRect(this.x, this.y, this.x + totalWidth, this.y + totalHeight, bgColor);
+         RenderUtils.drawRect(x, y, x + totalWidth, y + totalHeight, bgColor);
       }
 
-      float startX = this.x + 3.0F;
       for (int i = 0; i < count; i++) {
          ItemStack itemStack = armorStacks.get(i);
          if (itemStack == null) continue;
 
-         float slotX = startX + i * slotWidth;
-         float itemX = slotX + (slotWidth - 16.0F) / 2.0F;
+         // 每个耐久条宽度为 barWidth，两个物品耐久条之间的距离以及耐久条到左右边缘的距离均为 lineWidth (1.0F)
+         float barX = x + lineWidth + i * (barWidth + lineWidth);
+         float itemX = barX + (barWidth - 16.0F) / 2.0F;
 
          boolean itemStackDamageable = itemStack.isItemStackDamageable();
          int maxDamage = itemStackDamageable ? itemStack.getMaxDamage() : 1;
@@ -155,7 +215,7 @@ public class ArmorHudElement extends HudElement {
          // 2. Color (Theme or Durability)
          int color;
          if (isTheme) {
-            color = ModuleManager.themeColor.getColor(slotX + slotWidth / 2.0F, lineY);
+            color = ModuleManager.themeColor.getColor(barX + barWidth / 2.0F, lineY);
          } else {
             color = TargetHudElement.getHealthColor((float)remaining, (float)maxDamage);
          }
@@ -169,19 +229,17 @@ public class ArmorHudElement extends HudElement {
          GlStateManager.disableLighting();
 
          // 4. Render durability number
-         float textX = slotX + (slotWidth - font.getStringWidth(text)) / 2.0F;
+         float textX = barX + (barWidth - font.getStringWidth(text)) / 2.0F;
          font.drawStringWithShadow(text, textX, textY, color);
 
-         // 5. Render durability line (width/stroke = 1.0F, margin from edge = 1.0F)
-         float fullLineWidth = slotWidth - 4.0F;
-         float lineX = slotX + 2.0F;
-         float currentLineWidth = fullLineWidth * fraction;
+         // 5. Render durability line (width/stroke = 1.0F, margin from edge = 1.0F, gap between bars = 1.0F)
+         float currentLineWidth = barWidth * fraction;
 
          // Background track
-         RenderUtils.drawRect(lineX, lineY, lineX + fullLineWidth, lineY + lineWidth, 0x40000000);
+         RenderUtils.drawRect(barX, lineY, barX + barWidth, lineY + lineWidth, 0x40000000);
          // Durability bar
          if (currentLineWidth > 0.0F) {
-            RenderUtils.drawRect(lineX, lineY, lineX + currentLineWidth, lineY + lineWidth, color);
+            RenderUtils.drawRect(barX, lineY, barX + currentLineWidth, lineY + lineWidth, color);
          }
       }
    }
@@ -193,22 +251,15 @@ public class ArmorHudElement extends HudElement {
       if (!ModuleManager.armorHUD.background.isEnabled()) {
          return;
       }
-      Minecraft mc = Minecraft.getMinecraft();
-      if (mc.thePlayer == null) {
+      if (!cachedHasArmor || cachedWidth <= 0.0F || cachedHeight <= 0.0F) {
          return;
       }
-      List<ItemStack> armorStacks = getArmorStacks(mc.thePlayer, false);
-      if (armorStacks.isEmpty()) {
-         return;
-      }
-      instance.checkDefaultPosition(sr);
-      float x = instance.getX();
-      float y = instance.getY();
-      float w = instance.width > 0.0F ? instance.width : (armorStacks.size() * 22.0F + 6.0F);
-      float h = instance.height > 0.0F ? instance.height : 32.0F;
-      if (w <= 0.0F || h <= 0.0F) {
-         return;
-      }
+
+      float x = cachedX;
+      float y = cachedY;
+      float w = cachedWidth;
+      float h = cachedHeight;
+
       if (!bloom || !glow) {
          RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
       }

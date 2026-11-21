@@ -45,6 +45,9 @@ public class HudRenderer {
          if (ModuleManager.scoreboard != null && ModuleManager.scoreboard.isEnabled()) {
             ScoreboardElement.updateScoreboard(scaledResolution);
          }
+         if (ModuleManager.armorHUD != null && ModuleManager.armorHUD.isEnabled()) {
+            ArmorHudElement.updateArmorHud(scaledResolution);
+         }
 
          if (ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled()) {
             ModuleManager.postProcessing.blurScreen();
