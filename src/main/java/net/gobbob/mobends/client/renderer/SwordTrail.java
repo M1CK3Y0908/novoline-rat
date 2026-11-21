@@ -45,7 +45,13 @@ public class SwordTrail {
             float alpha = part.ticksExisted / 5.0f;
             alpha = GUtil.max(alpha, 1.0f);
             alpha = 1.0f - alpha;
-            GL11.glColor4f((float)1.0f, (float)1.0f, (float)1.0f, (float)alpha);
+            int themeRgb = rat.novoline.module.ModuleManager.themeColor != null
+                ? rat.novoline.module.ModuleManager.themeColor.getColor(i * 100)
+                : 0xFFFFFF;
+            float r = ((themeRgb >> 16) & 0xFF) / 255.0f;
+            float g = ((themeRgb >> 8) & 0xFF) / 255.0f;
+            float b = (themeRgb & 0xFF) / 255.0f;
+            GL11.glColor4f(r, g, b, alpha);
             Vector3f[] point = new Vector3f[]{new Vector3f(0.0f, 0.0f, -8.0f + 8.0f * alpha), new Vector3f(0.0f, 0.0f, -8.0f - 8.0f * alpha)};
             GUtil.rotateX(point, part.itemRotation.getX());
             GUtil.rotateY(point, part.itemRotation.getY());

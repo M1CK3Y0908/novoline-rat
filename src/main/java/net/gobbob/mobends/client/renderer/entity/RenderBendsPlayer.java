@@ -1,5 +1,6 @@
 package net.gobbob.mobends.client.renderer.entity;
 
+import net.gobbob.mobends.client.model.ModelRendererBends;
 import net.gobbob.mobends.client.model.entity.ModelBendsPlayer;
 import net.gobbob.mobends.client.renderer.entity.layers.LayerBendsCape;
 import net.gobbob.mobends.client.renderer.entity.layers.LayerBendsCustomHead;
@@ -7,6 +8,7 @@ import net.gobbob.mobends.client.renderer.entity.layers.LayerBendsPlayerArmor;
 import net.gobbob.mobends.data.Data_Player;
 import net.gobbob.mobends.settings.SettingsBoolean;
 import net.gobbob.mobends.settings.SettingsNode;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -16,6 +18,7 @@ import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -65,6 +68,10 @@ public class RenderBendsPlayer extends RenderPlayer {
             modelplayer.bipedRightLegwear.showModel = p_177137_1_.isWearing(EnumPlayerModelParts.RIGHT_PANTS_LEG);
             modelplayer.bipedLeftArmwear.showModel = p_177137_1_.isWearing(EnumPlayerModelParts.LEFT_SLEEVE);
             modelplayer.bipedRightArmwear.showModel = p_177137_1_.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE);
+            modelplayer.bipedLeftForeArmwear.showModel = p_177137_1_.isWearing(EnumPlayerModelParts.LEFT_SLEEVE);
+            modelplayer.bipedRightForeArmwear.showModel = p_177137_1_.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE);
+            modelplayer.bipedLeftForeLegwear.showModel = p_177137_1_.isWearing(EnumPlayerModelParts.LEFT_PANTS_LEG);
+            modelplayer.bipedRightForeLegwear.showModel = p_177137_1_.isWearing(EnumPlayerModelParts.RIGHT_PANTS_LEG);
             modelplayer.heldItemLeft = 0;
             modelplayer.aimedBow = false;
             modelplayer.isSneak = p_177137_1_.isSneaking();
@@ -120,8 +127,68 @@ public class RenderBendsPlayer extends RenderPlayer {
         this.setModelVisibilities(p_177138_1_);
         modelplayer.swingProgress = 0.0f;
         modelplayer.isSneak = false;
-        modelplayer.setRotationAngles(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, p_177138_1_);
+
+        ModelRendererBends rightArm = (ModelRendererBends)modelplayer.bipedRightArm;
+
+        float origY = rightArm.rotationPointY;
+        float origX = rightArm.rotationPointX;
+        float origZ = rightArm.rotationPointZ;
+        float origRotX = rightArm.rotateAngleX;
+        float origRotY = rightArm.rotateAngleY;
+        float origRotZ = rightArm.rotateAngleZ;
+        float origPreX = rightArm.pre_rotation.getX();
+        float origPreY = rightArm.pre_rotation.getY();
+        float origPreZ = rightArm.pre_rotation.getZ();
+
+        float origForeY = modelplayer.bipedRightForeArm.rotationPointY;
+        float origForeX = modelplayer.bipedRightForeArm.rotationPointX;
+        float origForeZ = modelplayer.bipedRightForeArm.rotationPointZ;
+        float origForeRotX = modelplayer.bipedRightForeArm.rotateAngleX;
+        float origForeRotY = modelplayer.bipedRightForeArm.rotateAngleY;
+        float origForeRotZ = modelplayer.bipedRightForeArm.rotateAngleZ;
+        float origForePreX = modelplayer.bipedRightForeArm.pre_rotation.getX();
+        float origForePreY = modelplayer.bipedRightForeArm.pre_rotation.getY();
+        float origForePreZ = modelplayer.bipedRightForeArm.pre_rotation.getZ();
+
+        rightArm.rotationPointX = -5.0f;
+        rightArm.rotationPointY = 2.0f;
+        rightArm.rotationPointZ = 0.0f;
+        rightArm.rotateAngleX = 0.0f;
+        rightArm.rotateAngleY = 0.0f;
+        rightArm.rotateAngleZ = 0.0f;
+        rightArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+
+        float partialTicks = Minecraft.getMinecraft().timer != null ? Minecraft.getMinecraft().timer.renderPartialTicks : 1.0f;
+        float swing = p_177138_1_.getSwingProgress(partialTicks);
+        float swingSin = MathHelper.sin(MathHelper.sqrt_float(swing) * (float)Math.PI);
+
+        modelplayer.bipedRightForeArm.rotationPointX = 0.0f;
+        modelplayer.bipedRightForeArm.rotationPointY = 4.0f;
+        modelplayer.bipedRightForeArm.rotationPointZ = 2.0f;
+        modelplayer.bipedRightForeArm.rotateAngleX = (float)Math.toRadians(-12.0f - swingSin * 35.0f);
+        modelplayer.bipedRightForeArm.rotateAngleY = (float)Math.toRadians(-swingSin * 8.0f);
+        modelplayer.bipedRightForeArm.rotateAngleZ = (float)Math.toRadians(swingSin * 4.0f);
+        modelplayer.bipedRightForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+
+        GlStateManager.pushMatrix();
         modelplayer.renderRightArm();
+        GlStateManager.popMatrix();
+
+        rightArm.rotationPointX = origX;
+        rightArm.rotationPointY = origY;
+        rightArm.rotationPointZ = origZ;
+        rightArm.rotateAngleX = origRotX;
+        rightArm.rotateAngleY = origRotY;
+        rightArm.rotateAngleZ = origRotZ;
+        rightArm.pre_rotation.set(origPreX, origPreY, origPreZ);
+
+        modelplayer.bipedRightForeArm.rotationPointX = origForeX;
+        modelplayer.bipedRightForeArm.rotationPointY = origForeY;
+        modelplayer.bipedRightForeArm.rotationPointZ = origForeZ;
+        modelplayer.bipedRightForeArm.rotateAngleX = origForeRotX;
+        modelplayer.bipedRightForeArm.rotateAngleY = origForeRotY;
+        modelplayer.bipedRightForeArm.rotateAngleZ = origForeRotZ;
+        modelplayer.bipedRightForeArm.pre_rotation.set(origForePreX, origForePreY, origForePreZ);
     }
 
     @Override
@@ -132,8 +199,64 @@ public class RenderBendsPlayer extends RenderPlayer {
         this.setModelVisibilities(p_177139_1_);
         modelplayer.isSneak = false;
         modelplayer.swingProgress = 0.0f;
-        modelplayer.setRotationAngles(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, p_177139_1_);
+
+        ModelRendererBends leftArm = (ModelRendererBends)modelplayer.bipedLeftArm;
+
+        float origY = leftArm.rotationPointY;
+        float origX = leftArm.rotationPointX;
+        float origZ = leftArm.rotationPointZ;
+        float origRotX = leftArm.rotateAngleX;
+        float origRotY = leftArm.rotateAngleY;
+        float origRotZ = leftArm.rotateAngleZ;
+        float origPreX = leftArm.pre_rotation.getX();
+        float origPreY = leftArm.pre_rotation.getY();
+        float origPreZ = leftArm.pre_rotation.getZ();
+
+        float origForeY = modelplayer.bipedLeftForeArm.rotationPointY;
+        float origForeX = modelplayer.bipedLeftForeArm.rotationPointX;
+        float origForeZ = modelplayer.bipedLeftForeArm.rotationPointZ;
+        float origForeRotX = modelplayer.bipedLeftForeArm.rotateAngleX;
+        float origForeRotY = modelplayer.bipedLeftForeArm.rotateAngleY;
+        float origForeRotZ = modelplayer.bipedLeftForeArm.rotateAngleZ;
+        float origForePreX = modelplayer.bipedLeftForeArm.pre_rotation.getX();
+        float origForePreY = modelplayer.bipedLeftForeArm.pre_rotation.getY();
+        float origForePreZ = modelplayer.bipedLeftForeArm.pre_rotation.getZ();
+
+        leftArm.rotationPointX = 5.0f;
+        leftArm.rotationPointY = 2.0f;
+        leftArm.rotationPointZ = 0.0f;
+        leftArm.rotateAngleX = 0.0f;
+        leftArm.rotateAngleY = 0.0f;
+        leftArm.rotateAngleZ = 0.0f;
+        leftArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+
+        modelplayer.bipedLeftForeArm.rotationPointX = 0.0f;
+        modelplayer.bipedLeftForeArm.rotationPointY = 4.0f;
+        modelplayer.bipedLeftForeArm.rotationPointZ = 2.0f;
+        modelplayer.bipedLeftForeArm.rotateAngleX = (float)Math.toRadians(-12.0f);
+        modelplayer.bipedLeftForeArm.rotateAngleY = 0.0f;
+        modelplayer.bipedLeftForeArm.rotateAngleZ = 0.0f;
+        modelplayer.bipedLeftForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+
+        GlStateManager.pushMatrix();
         modelplayer.renderLeftArm();
+        GlStateManager.popMatrix();
+
+        leftArm.rotationPointX = origX;
+        leftArm.rotationPointY = origY;
+        leftArm.rotationPointZ = origZ;
+        leftArm.rotateAngleX = origRotX;
+        leftArm.rotateAngleY = origRotY;
+        leftArm.rotateAngleZ = origRotZ;
+        leftArm.pre_rotation.set(origPreX, origPreY, origPreZ);
+
+        modelplayer.bipedLeftForeArm.rotationPointX = origForeX;
+        modelplayer.bipedLeftForeArm.rotationPointY = origForeY;
+        modelplayer.bipedLeftForeArm.rotationPointZ = origForeZ;
+        modelplayer.bipedLeftForeArm.rotateAngleX = origForeRotX;
+        modelplayer.bipedLeftForeArm.rotateAngleY = origForeRotY;
+        modelplayer.bipedLeftForeArm.rotateAngleZ = origForeRotZ;
+        modelplayer.bipedLeftForeArm.pre_rotation.set(origForePreX, origForePreY, origForePreZ);
     }
 
     @Override

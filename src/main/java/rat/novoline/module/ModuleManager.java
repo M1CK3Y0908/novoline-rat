@@ -69,6 +69,7 @@ import rat.novoline.module.visual.Animations;
 import rat.novoline.module.visual.CameraClip;
 import rat.novoline.module.visual.Chams;
 import rat.novoline.module.visual.ChinaHat;
+import rat.novoline.module.visual.ChineseKungfu;
 import rat.novoline.module.visual.Crosshair;
 import rat.novoline.module.visual.CustomModel;
 import rat.novoline.module.visual.DamageParticles;
@@ -175,6 +176,7 @@ public class ModuleManager {
    public static final Trails trails = new Trails();
    public static final CustomModel customModel = new CustomModel();
    public static final MoBends moBends = new MoBends();
+   public static final ChineseKungfu chineseKungfu = new ChineseKungfu();
    public static final NightVision nightVision = new NightVision();
    public static final NoHurtCam noHurtCam = new NoHurtCam();
    public static final SeeInvisibles seeInvisibles = new SeeInvisibles();

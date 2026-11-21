@@ -30,6 +30,12 @@ public class LayerBendsCustomHead implements LayerRenderer<EntityLivingBase> {
 
     @Override
     public void doRenderLayer(EntityLivingBase p_177141_1_, float p_177141_2_, float p_177141_3_, float p_177141_4_, float p_177141_5_, float p_177141_6_, float p_177141_7_, float p_177141_8_) {
+        if (rat.novoline.module.ModuleManager.chineseKungfu != null
+            && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+            && rat.novoline.module.ModuleManager.chineseKungfu.hideArmor.isEnabled()
+            && p_177141_1_ == Minecraft.getMinecraft().thePlayer) {
+            return;
+        }
         ItemStack itemstack = p_177141_1_.getCurrentArmor(3);
         if (itemstack != null && itemstack.getItem() != null) {
             float f7;

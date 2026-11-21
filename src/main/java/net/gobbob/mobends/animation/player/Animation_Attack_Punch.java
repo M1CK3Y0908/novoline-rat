@@ -13,6 +13,12 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class Animation_Attack_Punch {
     public static void animate(EntityPlayer player, ModelBendsPlayer model, Data_Player data) {
+        if (data.ticksAfterPunch < 0.5f) {
+            model.swordTrail.reset();
+        }
+        if (data.ticksAfterPunch < 4.0f) {
+            model.swordTrail.add(model);
+        }
         if (data.motion.x == 0.0f & data.motion.z == 0.0f) {
             model.renderRotation.setSmoothY(20.0f);
             model.renderOffset.setSmoothY(-2.0f);

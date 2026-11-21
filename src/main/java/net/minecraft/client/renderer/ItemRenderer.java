@@ -88,7 +88,10 @@ public class ItemRenderer {
          this.rotateWithPlayerRotations(thePlayer2, partialTicks);
          GlStateManager.enableRescaleNormal();
          GlStateManager.pushMatrix();
-         if (this.itemToRender == null) {
+         boolean kungfu = ModuleManager.chineseKungfu != null
+             && ModuleManager.chineseKungfu.isEnabled()
+             && ModuleManager.chineseKungfu.hideHeldItem.isEnabled();
+         if (this.itemToRender == null || kungfu) {
             if (!thePlayer2.isInvisible()) {
                this.renderPlayerArm(thePlayer2, f2, swingProgress2);
             }
@@ -135,9 +138,13 @@ public class ItemRenderer {
             }
 
             this.renderItem(thePlayer2, this.itemToRender, net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIRST_PERSON);
+            if (swingProgress2 > 0.0F) {
+               net.gobbob.mobends.client.renderer.FirstPersonTrail.recordFist(1.2F);
+            }
          }
 
          GlStateManager.popMatrix();
+         net.gobbob.mobends.client.renderer.FirstPersonTrail.render();
          GlStateManager.disableRescaleNormal();
          RenderHelper.disableStandardItemLighting();
       }
@@ -297,6 +304,9 @@ public class ItemRenderer {
       }
 
       renderPlayer.renderRightArm(this.mc.thePlayer);
+      if (swingProgress > 0.0F) {
+         net.gobbob.mobends.client.renderer.FirstPersonTrail.recordFist(0.6F);
+      }
       if (chams2.isEnabled() && chams2.arm.isEnabled() && chams2.chams.getCurrentElement() == 1) {
          float[] fArray2 = RenderUtils.unpackColorNormalized(chams2.getColor());
          if (fArray2[3] < 0.1F) {

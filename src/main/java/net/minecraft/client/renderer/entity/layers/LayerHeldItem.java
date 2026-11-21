@@ -28,6 +28,12 @@ public class LayerHeldItem implements LayerRenderer<EntityLivingBase> {
    public void doRenderLayer(
       EntityLivingBase entitylivingbaseIn, float f, float f2, float partialTicks, float f3, float f4, float f5, float scale
    ) {
+      if (rat.novoline.module.ModuleManager.chineseKungfu != null
+          && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+          && rat.novoline.module.ModuleManager.chineseKungfu.hideHeldItem.isEnabled()
+          && entitylivingbaseIn == Minecraft.getMinecraft().thePlayer) {
+         return;
+      }
       ItemStack heldItem = entitylivingbaseIn.getHeldItem();
       if (heldItem != null) {
          GlStateManager.pushMatrix();

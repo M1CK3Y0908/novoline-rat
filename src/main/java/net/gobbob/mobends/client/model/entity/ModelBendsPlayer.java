@@ -397,4 +397,14 @@ extends ModelPlayer {
             this.renderItemRotation.set(data.renderItemRotation);
         }
     }
+
+    @Override
+    public void renderRightArm() {
+        this.bipedRightArm.render(0.0625F);
+    }
+
+    @Override
+    public void renderLeftArm() {
+        this.bipedLeftArm.render(0.0625F);
+    }
 }

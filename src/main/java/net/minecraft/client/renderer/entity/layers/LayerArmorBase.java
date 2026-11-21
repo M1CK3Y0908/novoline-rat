@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
@@ -213,6 +214,12 @@ public abstract class LayerArmorBase<T extends ModelBase> implements LayerRender
    public void doRenderLayer(
       EntityLivingBase entitylivingbaseIn, float f, float f2, float partialTicks, float f3, float f4, float f5, float scale
    ) {
+      if (rat.novoline.module.ModuleManager.chineseKungfu != null
+          && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+          && rat.novoline.module.ModuleManager.chineseKungfu.hideArmor.isEnabled()
+          && entitylivingbaseIn == Minecraft.getMinecraft().thePlayer) {
+         return;
+      }
       this.renderLayer(entitylivingbaseIn, f, f2, partialTicks, f3, f4, f5, scale, 4);
       this.renderLayer(entitylivingbaseIn, f, f2, partialTicks, f3, f4, f5, scale, 3);
       this.renderLayer(entitylivingbaseIn, f, f2, partialTicks, f3, f4, f5, scale, 2);

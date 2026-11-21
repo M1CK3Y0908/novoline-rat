@@ -147,6 +147,12 @@ public class SmoothVector3f {
         this.vSmooth = argV.vSmooth;
     }
 
+    public void set(float argX, float argY, float argZ) {
+        this.setX(argX);
+        this.setY(argY);
+        this.setZ(argZ);
+    }
+
     public float getX() {
         return this.vSmooth.x;
     }
