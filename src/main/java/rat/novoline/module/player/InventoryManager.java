@@ -3,6 +3,7 @@ package rat.novoline.module.player;
 import io.github.nevalackin.homoBus.Listener;
 import io.github.nevalackin.homoBus.annotations.EventLink;
 import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -113,6 +114,84 @@ public class InventoryManager extends Module {
    public final NumberSetting inventoryCleaner = settingManager.register(
       new NumberSetting(this, "Inventory cleaner", -1, -1, 20, " ticks").addLabel(-1.0f, "§cDisabled")
    );
+
+   // --- Inventory Cleaner Quantity Limits ---
+   public final NumberSetting maxBlocks = settingManager.register(new NumberSetting(this, "Max blocks", 128, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxGoldenApples = settingManager.register(new NumberSetting(this, "Max golden apples", 32, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxEnderPearls = settingManager.register(new NumberSetting(this, "Max ender pearls", 16, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxProjectiles = settingManager.register(new NumberSetting(this, "Max projectiles", 32, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxArrows = settingManager.register(new NumberSetting(this, "Max arrows", 64, 0, 512) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxPotions = settingManager.register(new NumberSetting(this, "Max potions", 4, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxWaterBuckets = settingManager.register(new NumberSetting(this, "Max water buckets", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxLavaBuckets = settingManager.register(new NumberSetting(this, "Max lava buckets", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxFishingRods = settingManager.register(new NumberSetting(this, "Max fishing rods", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxFlintAndSteel = settingManager.register(new NumberSetting(this, "Max flint and steel", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
+
+   public final NumberSetting maxShears = settingManager.register(new NumberSetting(this, "Max shears", 1, 0, 16) {
+      @Override
+      public boolean shouldShow() {
+         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+      }
+   });
 
    enum Action {
       SORT, CLEANER;
@@ -318,50 +397,52 @@ public class InventoryManager extends Module {
       }
 
       // 5. Utility tools
-      int bestRodIndex = -1;
+      int rodLimit = Math.round(this.maxFishingRods.getCurrentValue());
+      List<Integer> rodIndices = new ArrayList<>();
       for (int i = 0; i < 36; ++i) {
          ItemStack stack = inv.getStackInSlot(i);
          if (stack != null && stack.getItem() == Items.fishing_rod && ItemUtils.durable(stack)) {
-            if (bestRodIndex == -1) {
-               bestRodIndex = i;
-            } else {
-               ItemStack cur = inv.getStackInSlot(bestRodIndex);
-               if (!preferredRod(cur) && preferredRod(stack)) {
-                  bestRodIndex = i;
-               } else if (preferredRod(cur) == preferredRod(stack) && stack.getItemDamage() < cur.getItemDamage()) {
-                  bestRodIndex = i;
-               }
-            }
+            rodIndices.add(i);
          }
       }
-      if (bestRodIndex != -1) {
-         keep[bestRodIndex] = true;
+      rodIndices.sort((a, b) -> {
+         ItemStack sa = inv.getStackInSlot(a);
+         ItemStack sb = inv.getStackInSlot(b);
+         boolean prefA = preferredRod(sa);
+         boolean prefB = preferredRod(sb);
+         if (prefA != prefB) {
+            return prefA ? -1 : 1;
+         }
+         return Integer.compare(sa.getItemDamage(), sb.getItemDamage());
+      });
+      for (int k = 0; k < Math.min(rodLimit, rodIndices.size()); ++k) {
+         keep[rodIndices.get(k)] = true;
       }
 
-      int bestFlintIndex = -1;
+      int flintLimit = Math.round(this.maxFlintAndSteel.getCurrentValue());
+      List<Integer> flintIndices = new ArrayList<>();
       for (int i = 0; i < 36; ++i) {
          ItemStack stack = inv.getStackInSlot(i);
          if (stack != null && stack.getItem() == Items.flint_and_steel && ItemUtils.durable(stack)) {
-            if (bestFlintIndex == -1 || stack.getItemDamage() < inv.getStackInSlot(bestFlintIndex).getItemDamage()) {
-               bestFlintIndex = i;
-            }
+            flintIndices.add(i);
          }
       }
-      if (bestFlintIndex != -1) {
-         keep[bestFlintIndex] = true;
+      flintIndices.sort((a, b) -> Integer.compare(inv.getStackInSlot(a).getItemDamage(), inv.getStackInSlot(b).getItemDamage()));
+      for (int k = 0; k < Math.min(flintLimit, flintIndices.size()); ++k) {
+         keep[flintIndices.get(k)] = true;
       }
 
-      int bestShearsIndex = -1;
+      int shearsLimit = Math.round(this.maxShears.getCurrentValue());
+      List<Integer> shearsIndices = new ArrayList<>();
       for (int i = 0; i < 36; ++i) {
          ItemStack stack = inv.getStackInSlot(i);
          if (stack != null && stack.getItem() == Items.shears && ItemUtils.durable(stack)) {
-            if (bestShearsIndex == -1 || stack.getItemDamage() < inv.getStackInSlot(bestShearsIndex).getItemDamage()) {
-               bestShearsIndex = i;
-            }
+            shearsIndices.add(i);
          }
       }
-      if (bestShearsIndex != -1) {
-         keep[bestShearsIndex] = true;
+      shearsIndices.sort((a, b) -> Integer.compare(inv.getStackInSlot(a).getItemDamage(), inv.getStackInSlot(b).getItemDamage()));
+      for (int k = 0; k < Math.min(shearsLimit, shearsIndices.size()); ++k) {
+         keep[shearsIndices.get(k)] = true;
       }
 
       for (int i = 0; i < 36; ++i) {
@@ -380,17 +461,73 @@ public class InventoryManager extends Module {
          }
       }
 
-      // 6. Whitelisted items
+      // 6. Whitelisted items with limits
+      int keptBlocks = 0;
+      int keptGapples = 0;
+      int keptPearls = 0;
+      int keptProjectiles = 0;
+      int keptArrows = 0;
+      int keptPotions = 0;
+      int keptWaterBuckets = 0;
+      int keptLavaBuckets = 0;
+
+      int blockLimit = Math.round(this.maxBlocks.getCurrentValue());
+      int gappleLimit = Math.round(this.maxGoldenApples.getCurrentValue());
+      int pearlLimit = Math.round(this.maxEnderPearls.getCurrentValue());
+      int projLimit = Math.round(this.maxProjectiles.getCurrentValue());
+      int arrowLimit = Math.round(this.maxArrows.getCurrentValue());
+      int potionLimit = Math.round(this.maxPotions.getCurrentValue());
+      int waterLimit = Math.round(this.maxWaterBuckets.getCurrentValue());
+      int lavaLimit = Math.round(this.maxLavaBuckets.getCurrentValue());
+
       for (int i = 0; i < 36; ++i) {
          ItemStack stack = inv.getStackInSlot(i);
          if (stack == null || keep[i]) continue;
          Item item = stack.getItem();
-         if (ItemUtils.isBlock(item) || ItemUtils.isUtilityBlock(item)
+
+         if (ItemUtils.isBlock(item)) {
+            if (keptBlocks < blockLimit) {
+               keep[i] = true;
+               keptBlocks += stack.stackSize;
+            }
+         } else if (item == Items.golden_apple) {
+            if (keptGapples < gappleLimit) {
+               keep[i] = true;
+               keptGapples += stack.stackSize;
+            }
+         } else if (item == Items.ender_pearl) {
+            if (keptPearls < pearlLimit) {
+               keep[i] = true;
+               keptPearls += stack.stackSize;
+            }
+         } else if (item == Items.snowball || item == Items.egg) {
+            if (keptProjectiles < projLimit) {
+               keep[i] = true;
+               keptProjectiles += stack.stackSize;
+            }
+         } else if (item == Items.arrow) {
+            if (keptArrows < arrowLimit) {
+               keep[i] = true;
+               keptArrows += stack.stackSize;
+            }
+         } else if (item == Items.potionitem && ItemUtils.isGoodPotion(stack)) {
+            if (keptPotions < potionLimit) {
+               keep[i] = true;
+               ++keptPotions;
+            }
+         } else if (item == Items.water_bucket) {
+            if (keptWaterBuckets < waterLimit) {
+               keep[i] = true;
+               ++keptWaterBuckets;
+            }
+         } else if (item == Items.lava_bucket) {
+            if (keptLavaBuckets < lavaLimit) {
+               keep[i] = true;
+               ++keptLavaBuckets;
+            }
+         } else if (ItemUtils.isUtilityBlock(item)
                || item == Item.getItemFromBlock(Blocks.tnt) || item == Item.getItemFromBlock(Blocks.web)
-               || item == Items.golden_apple || ItemUtils.isGoodFood(stack)
-               || (item == Items.potionitem && ItemUtils.isGoodPotion(stack))
-               || item == Items.ender_pearl || item == Items.snowball || item == Items.egg || item == Items.arrow
-               || item == Items.water_bucket || item == Items.lava_bucket || item == Items.milk_bucket
+               || ItemUtils.isGoodFood(stack) || item == Items.milk_bucket
                || item == Items.diamond || item == Items.emerald || item == Items.gold_ingot || item == Items.iron_ingot
                || item == Items.experience_bottle || item == Items.enchanted_book
                || item == Items.spawn_egg) {
