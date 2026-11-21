@@ -32,6 +32,7 @@ public class ArrayListElement extends HudElement {
       public int nameColor;
       public int suffixColor;
       public boolean hasSuffix;
+      public boolean animating;
    }
 
    private static final Entry[] ENTRIES = new Entry[128];
@@ -177,6 +178,9 @@ public class ArrayListElement extends HudElement {
             e.nameWidth = nameWidth;
             e.nameColor = ModuleManager.themeColor.getColor(rowX, rowY, rowIndex);
             e.suffixColor = arrayList2.status.getColor();
+            boolean isAnimatingX = !isEnabled || Math.abs(offsetX - totalEntryWidth) > 1.0F;
+            boolean isAnimatingY = isEnabled && Math.abs(module.getArrayListOffsetY() - (targetOffsetY - rowHeight)) > 1.0F;
+            e.animating = isAnimatingX || isAnimatingY;
          }
       }
 
@@ -282,7 +286,7 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, col);
 
-               if (i < entryCount - 1) {
+               if (!cachedIsLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
                   Entry next = ENTRIES[i + 1];
                   int nextCol = (!bloom || !glow) ? defaultColor : next.nameColor;
                   if (e.x < next.x) {
@@ -304,7 +308,7 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, col);
 
-               if (i < entryCount - 1) {
+               if (cachedIsLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
                   Entry next = ENTRIES[i + 1];
                   int nextCol = (!bloom || !glow) ? defaultColor : next.nameColor;
                   float rCurr = e.x + e.width;
@@ -405,7 +409,7 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, e.nameColor);
 
-               if (i < entryCount - 1) {
+               if (!isLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
                   Entry next = ENTRIES[i + 1];
                   if (e.x < next.x) {
                      // Current row is wider to the left; step is below current row
@@ -436,7 +440,7 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, e.nameColor);
 
-               if (i < entryCount - 1) {
+               if (isLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
                   Entry next = ENTRIES[i + 1];
                   float rCurr = e.x + e.width;
                   float rNext = next.x + next.width;
