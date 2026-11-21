@@ -41,25 +41,33 @@ import rat.novoline.utils.render.RenderUtils;
 public class ItemRenderer {
    private static final ResourceLocation RES_MAP_BACKGROUND = new ResourceLocation("textures/map/map_background.png");
    private static long kungfuPunchStartTime = 0L;
-   private static long kungfuLastAttackTime = 0L;
    private static boolean kungfuCurrentArm = false;
    private static boolean kungfuIsPunching = false;
+   private static int kungfuPendingAttacks = 0;
    private static final long KUNGFU_PUNCH_DURATION = 200L; // 5 CPS = 200ms per punch
 
    public static void onPlayerAttack() {
-      long now = System.currentTimeMillis();
-      kungfuLastAttackTime = now;
       if (!kungfuIsPunching) {
          kungfuIsPunching = true;
-         kungfuPunchStartTime = now;
+         kungfuPunchStartTime = System.currentTimeMillis();
          kungfuCurrentArm = !kungfuCurrentArm;
+         kungfuPendingAttacks = 0;
+         if (Minecraft.getMinecraft().thePlayer != null) {
+            Data_Player data = Data_Player.get(Minecraft.getMinecraft().thePlayer.getEntityId());
+            if (data != null) {
+               data.fistPunchArm = kungfuCurrentArm;
+               data.ticksAfterPunch = 0.0F;
+            }
+         }
+      } else {
+         kungfuPendingAttacks = 1;
       }
    }
 
    public static void resetKungfuAnimation() {
       kungfuIsPunching = false;
       kungfuPunchStartTime = 0L;
-      kungfuLastAttackTime = 0L;
+      kungfuPendingAttacks = 0;
    }
    private float equippedProgress;
    private static final ResourceLocation RES_UNDERWATER_OVERLAY = new ResourceLocation("textures/misc/underwater.png");
@@ -391,13 +399,6 @@ public class ItemRenderer {
       Data_Player data = Data_Player.get(clientPlayer.getEntityId());
       long now = System.currentTimeMillis();
 
-      // Fallback attack detection if swing is active and not currently punching
-      if ((swingProgress > 0.0F || clientPlayer.isSwingInProgress) && !kungfuIsPunching) {
-         if (now - kungfuLastAttackTime > 250L) {
-            onPlayerAttack();
-         }
-      }
-
       float punch = 0.0F;
       boolean rightPunchActive = false;
       boolean leftPunchActive = false;
@@ -405,9 +406,9 @@ public class ItemRenderer {
       if (kungfuIsPunching) {
          long elapsed = now - kungfuPunchStartTime;
          if (elapsed >= KUNGFU_PUNCH_DURATION) {
-            // Check if another attack was requested during or after this punch started
-            if (kungfuLastAttackTime > kungfuPunchStartTime && (now - kungfuLastAttackTime < 300L)) {
-               // Consecutive attack requested: chain directly into next arm's punch (capped at 5 CPS)
+            if (kungfuPendingAttacks > 0) {
+               // Consecutive attack requested (CPS > 5): chain directly into next arm's punch (capped at 5 CPS)
+               kungfuPendingAttacks = 0;
                kungfuCurrentArm = !kungfuCurrentArm;
                kungfuPunchStartTime = now;
                if (data != null) {
@@ -455,11 +456,10 @@ public class ItemRenderer {
       float rightPunchDist = rightPunchActive ? punch * -0.36F : 0.0F;
       float rightPunchInward = rightPunchActive ? punch * -0.10F : 0.0F;
       float rightPunchUp = rightPunchActive ? punch * 0.08F : 0.0F;
-      float rightRecoil = leftPunchActive ? punch * 0.04F : 0.0F;
 
       float rX = 0.32F + rightPunchInward;
       float rY = -0.40F + rightPunchUp + (isBlocking ? 0.08F : 0.0F);
-      float rZ = -0.30F + rightPunchDist + rightRecoil + (isBlocking ? -0.06F : 0.0F);
+      float rZ = -0.30F + rightPunchDist + (isBlocking ? -0.06F : 0.0F);
 
       GlStateManager.translate(rX, rY, rZ);
       GlStateManager.scale(-1.0F, -1.0F, 1.0F);
@@ -482,11 +482,10 @@ public class ItemRenderer {
       float leftPunchDist = leftPunchActive ? punch * -0.36F : 0.0F;
       float leftPunchInward = leftPunchActive ? punch * 0.10F : 0.0F;
       float leftPunchUp = leftPunchActive ? punch * 0.08F : 0.0F;
-      float leftRecoil = rightPunchActive ? punch * 0.04F : 0.0F;
 
       float lX = -0.32F + leftPunchInward;
       float lY = -0.40F + leftPunchUp + (isBlocking ? 0.08F : 0.0F);
-      float lZ = -0.30F + leftPunchDist + leftRecoil + (isBlocking ? -0.06F : 0.0F);
+      float lZ = -0.30F + leftPunchDist + (isBlocking ? -0.06F : 0.0F);
 
       GlStateManager.translate(lX, lY, lZ);
       GlStateManager.scale(-1.0F, -1.0F, 1.0F);
