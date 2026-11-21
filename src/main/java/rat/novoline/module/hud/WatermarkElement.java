@@ -97,7 +97,8 @@ public class WatermarkElement extends HudElement {
             if (!postProcessingActive) {
                RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 1.5F, 1610612736);
             }
-            RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), -14606047);
+            int bgColor = ModuleManager.themeColor.getBackgroundColor();
+            RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), bgColor);
             RenderUtils.drawGradientLine(
                this.getX(),
                this.getY(),
@@ -145,8 +146,9 @@ public class WatermarkElement extends HudElement {
                   this.getX() + 1.0F, this.getY() + 1.0F, this.getX() + this.getWidth() - 1.0F, this.getY() + this.getHeight(), 2.5F, -285212672
                );
             }
+            int bgColor = ModuleManager.themeColor.getBackgroundColor();
             FilledPolygonRenderer filledPolygonRenderer = new FilledPolygonRenderer();
-            filledPolygonRenderer.putRoundedRect(this.getX(), this.getY(), this.width, 14.0F, 1.0F, -15395563);
+            filledPolygonRenderer.putRoundedRect(this.getX(), this.getY(), this.width, 14.0F, 1.0F, bgColor);
             filledPolygonRenderer.draw();
             cFontRenderer2.drawStringWithShadow(text3, this.getX() + 3.0F, this.getY() + 5.0F, -1);
             cFontRenderer3.drawStringWithShadow(this.watermarkText, this.getX() + 3.0F + cFontRenderer2.getStringWidth(text3) + 3.0F, this.getY() + 5.0F + 0.5F, -1);
