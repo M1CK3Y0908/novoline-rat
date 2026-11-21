@@ -206,6 +206,24 @@ public class TargetHudElement extends HudElement {
       return this.y + sr.getScaledHeight() / 2.0F + getSingleCardHeight();
    }
 
+   private static boolean isThemeHealthColor() {
+      if (ModuleManager.targetHUD == null) return false;
+      String mode = ModuleManager.targetHUD.healthColor.getCurrentElementAsString();
+      return "Theme".equalsIgnoreCase(mode) || "Theme Color".equalsIgnoreCase(mode);
+   }
+
+   public static int getHealthColor(float health, float maxHealth) {
+      float fraction = MathHelper.clamp_float(health / Math.max(1.0F, maxHealth), 0.0F, 1.0F);
+      float hue = fraction * 0.3333333F;
+      return Color.HSBtoRGB(hue, 0.85F, 1.0F);
+   }
+
+   public static int getHealthSecondaryColor(float health, float maxHealth) {
+      float fraction = MathHelper.clamp_float(health / Math.max(1.0F, maxHealth), 0.0F, 1.0F);
+      float hue = Math.max(0.0F, fraction * 0.3333333F - 0.04F);
+      return Color.HSBtoRGB(hue, 0.95F, 0.85F);
+   }
+
    private static boolean isValidTargetPlayer(EntityPlayer p) {
       return p != null && p != minecraft.thePlayer && p.isEntityAlive() && !p.isDead && p.getHealth() > 0.0F && p.worldObj == minecraft.theWorld;
    }
@@ -476,8 +494,17 @@ public class TargetHudElement extends HudElement {
             y + 29.0F + 1.5F + 0.5F,
             1342177280
          );
+         int c1;
+         int c2;
+         if (isThemeHealthColor()) {
+            c1 = ModuleManager.themeColor.getColor(x + 2.0F, y + 29.0F);
+            c2 = ModuleManager.themeColor.getColor(x + 2.0F + f4, y + 29.0F);
+         } else {
+            c1 = getHealthColor(entry.animatedHealth, maxHealth);
+            c2 = getHealthSecondaryColor(entry.animatedHealth, maxHealth);
+         }
          RenderUtils.drawHorizontalGradientRect(
-            x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F, -16737215, -7405631
+            x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F, c1, c2
          );
          RenderUtils.drawRect(
             x + 2.0F - 0.5F,
@@ -524,8 +551,17 @@ public class TargetHudElement extends HudElement {
             y + 24.0F + 1.5F + 0.5F,
             1342177280
          );
+         int c1;
+         int c2;
+         if (isThemeHealthColor()) {
+            c1 = ModuleManager.themeColor.getColor(x + 28.0F, y + 21.0F);
+            c2 = ModuleManager.themeColor.getColor(x + 28.0F + f7, y + 21.0F);
+         } else {
+            c1 = getHealthColor(entry.animatedHealth, maxHealth2);
+            c2 = getHealthSecondaryColor(entry.animatedHealth, maxHealth2);
+         }
          RenderUtils.drawHorizontalGradientRect(
-            x + 28.0F, y + 21.0F, x + 28.0F + f7, y + 24.0F + 1.5F, -3527576, -33608
+            x + 28.0F, y + 21.0F, x + 28.0F + f7, y + 24.0F + 1.5F, c1, c2
          );
       } else if (currentElement == 2) {
          float maxHealth3 = player.getMaxHealth();
@@ -556,6 +592,9 @@ public class TargetHudElement extends HudElement {
          float f8 = width - 34.0F - 4.0F;
          float f9 = f8 * MathHelper.clamp_float(entry.animatedHealth / maxHealth3, 0.0F, 1.0F);
          RenderUtils.drawRect(x + 34.0F, y + 24.5F, x + width - 4.0F, y + 26.5F + 1.5F, -1876942816);
+         int barColor = isThemeHealthColor()
+            ? ModuleManager.themeColor.getColor(x + 34.0F, y + 24.5F)
+            : getHealthColor(entry.animatedHealth, maxHealth3);
          if (!postProcessingActive) {
             RenderUtils.drawShadow(
                x + 34.0F,
@@ -563,10 +602,10 @@ public class TargetHudElement extends HudElement {
                x + 34.0F + f9,
                y + 26.5F + 1.5F,
                2.0F,
-               RenderUtils.withAlphaFraction(-14039553, 0.4F)
+               RenderUtils.withAlphaFraction(barColor, 0.4F)
             );
          }
-         RenderUtils.drawRect(x + 34.0F, y + 24.5F, x + 34.0F + f9, y + 26.5F + 1.5F, -14039553);
+         RenderUtils.drawRect(x + 34.0F, y + 24.5F, x + 34.0F + f9, y + 26.5F + 1.5F, barColor);
       } else if (currentElement == 3) {
          float hp = Math.max(0.0F, player.getHealth() + player.getAbsorptionAmount());
          float maxHP = player.getMaxHealth() + player.getAbsorptionAmount() - 0.05F;
@@ -608,11 +647,13 @@ public class TargetHudElement extends HudElement {
             GlStateManager.enableAlpha();
          }
 
-         int hudColor = ModuleManager.themeColor.getColor();
-         int darkerHudColor = new Color(hudColor).darker().getRGB();
          float barStartX = x + 40.0F;
          float barY1 = y + 18.0F;
          float barY2 = y + 28.8F;
+         int hudColor = isThemeHealthColor()
+            ? ModuleManager.themeColor.getColor(barStartX, barY1)
+            : getHealthColor(health, maxHP);
+         int darkerHudColor = new Color(hudColor).darker().getRGB();
 
          RenderUtils.drawRect(barStartX, barY1, barStartX + 100.0F * space, barY2, new Color(0, 0, 0, 50).getRGB());
          RenderUtils.drawRect(barStartX, barY1, barStartX + percent * space, barY2, hudColor);

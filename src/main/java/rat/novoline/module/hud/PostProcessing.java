@@ -134,6 +134,10 @@ public class PostProcessing extends Module {
          ScoreboardElement.renderScoreboardEffects(bloom, glow, sr);
       }
 
+      if (ModuleManager.armorHUD != null && ModuleManager.armorHUD.isEnabled()) {
+         ArmorHudElement.renderArmorHudEffects(bloom, glow, sr);
+      }
+
       if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
          Novoline.getNovoline().getNotificationManager().renderEffects(bloom, glow, sr);
       }

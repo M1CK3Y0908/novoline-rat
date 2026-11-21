@@ -10,6 +10,7 @@ import rat.novoline.utils.render.FontAdapter;
 
 public class TargetHUD extends Module {
    public final ComboSetting targetHUD = settingManager.register(new ComboSetting(this, "Mode", 0, "Type 1", "Type 2", "Type 3", "Classic"));
+   public final ComboSetting healthColor = settingManager.register(new ComboSetting(this, "Health Color", 0, "Health", "Theme"));
    public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft"));
    public final MultiComboSetting addons = settingManager.register(new MultiComboSetting(this, "Addons").add("Shadow", true));
    public final NumberSetting maxPerRow = settingManager.register(new NumberSetting(this, "Max Per Row", 2, 1, 5));

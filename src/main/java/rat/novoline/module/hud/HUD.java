@@ -6,20 +6,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C02PacketUseEntity.Action;
@@ -31,7 +22,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.world.WorldSettings.GameType;
 import rat.novoline.Novoline;
 import rat.novoline.Novoline.Fonts;
 import rat.novoline.event.LoadWorldEvent;
@@ -63,7 +53,6 @@ public class HUD extends Module {
          .add("Speed", false)
          .add("Reach", false)
          .add("Coordinates", true)
-         .add("Armor Status", true)
          .add("Potion Effects", true)
          .add("User Info", true)
    );
@@ -76,9 +65,6 @@ public class HUD extends Module {
    private final Listener<RenderScreenEvent> onRenderScreen = renderScreenEvent -> {
       this.drawInfoLines(renderScreenEvent);
       this.drawCornerTexts(renderScreenEvent);
-      if (this.hud.isSelected("Armor Status")) {
-         this.drawArmorStatus(renderScreenEvent);
-      }
 
       if (this.reach > 0.0 && this.reachDecayTimer.hasElapsed(500L) && this.reachDecayStepTimer.hasElapsed(100L)) {
          this.reach = Math.max(0.0, this.reach / 2.0);
@@ -156,95 +142,8 @@ public class HUD extends Module {
       );
    }
 
-   private static Collection getArmorStacks(EntityPlayerSP entityPlayerSP) {
-      java.util.ArrayList arrayList = new java.util.ArrayList();
-
-      for (int i = 3; i >= 0; i--) {
-         ItemStack itemStack = entityPlayerSP.inventory.armorInventory[i];
-         if (itemStack != null) {
-            arrayList.add(itemStack);
-         }
-      }
-
-      ItemStack currentEquippedItem = entityPlayerSP.getCurrentEquippedItem();
-      if (currentEquippedItem != null) {
-         arrayList.add(currentEquippedItem);
-      }
-
-      return arrayList;
-   }
-
-   private static void drawColoredQuad(WorldRenderer worldRenderer, int i, int i2, int i3, int i4, int i5, int i6) {
-      worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-      worldRenderer.pos(i, i2, 0.0).color(i5, i6, 0, 255).endVertex();
-      worldRenderer.pos(i, i2 + i4, 0.0).color(i5, i6, 0, 255).endVertex();
-      worldRenderer.pos(i + i3, i2 + i4, 0.0).color(i5, i6, 0, 255).endVertex();
-      worldRenderer.pos(i + i3, i2, 0.0).color(i5, i6, 0, 255).endVertex();
-      Tessellator.getInstance().draw();
-   }
-
    public HUD() {
       super(Category.CLIENT, "HUD", "Various useful elements");
-   }
-
-   private void drawArmorStatus(RenderScreenEvent renderScreenEvent2) {
-      EntityPlayerSP thePlayer2 = minecraft.thePlayer;
-      Collection armorStacks = getArmorStacks(thePlayer2);
-      float scaledWidth = renderScreenEvent2.scaledResolution.getScaledWidth();
-      float scaledHeight = renderScreenEvent2.scaledResolution.getScaledHeight();
-      int i = 0;
-      boolean flag = thePlayer2.isEntityAlive() && thePlayer2.isInsideOfMaterial(Material.water);
-      int i2 = MathHelper.ceiling_float_int((thePlayer2.getMaxHealth() + thePlayer2.getAbsorptionAmount()) / 20.0F);
-      int i3 = (i2 - 1) * Math.max(10 - (i2 - 2), 3);
-      int i4 = flag ? 10 : 0;
-      GameType currentGameType = minecraft.playerController.getCurrentGameType();
-      float f2 = scaledWidth / 2.0F - 91.0F;
-      float f3 = scaledHeight - 39.0F;
-      if (currentGameType == GameType.CREATIVE) {
-         f2 += (182 - armorStacks.size() * 16) / 2.0F;
-      } else {
-         f3 -= i3 + i4;
-      }
-
-      for (ItemStack itemStack : (Iterable<ItemStack>) armorStacks) {
-         float f4;
-         float f5;
-         if (currentGameType == GameType.CREATIVE) {
-            f4 = f2 + i;
-            f5 = f3;
-         } else {
-            f4 = f2 + 101.0F + i;
-            f5 = f3 - 17.0F;
-         }
-
-         boolean itemStackDamageable = itemStack.isItemStackDamageable();
-         if (itemStackDamageable || itemStack.getItem().getItemStackLimit() != 1 || itemStack.stackSize != 1) {
-            String text = String.valueOf(itemStackDamageable ? itemStack.getMaxDamage() - itemStack.getItemDamage() : itemStack.stackSize);
-            drawCenteredText(text, f4, f5);
-         }
-
-         RenderItem renderItem = minecraft.getRenderItem();
-         renderItem.zLevel = 100.0F;
-         RenderHelper.enableGUIStandardItemLighting();
-         renderItem.renderItemAndEffectIntoGUI(itemStack, (int)f4, (int)f5);
-         RenderHelper.disableStandardItemLighting();
-         renderItem.zLevel = 0.0F;
-         if (itemStack.isItemDamaged()) {
-            int i5 = (int)Math.round(13.0 - itemStack.getItemDamage() * 13.0 / itemStack.getMaxDamage());
-            int i6 = (int)Math.round(255.0 - itemStack.getItemDamage() * 255.0 / itemStack.getMaxDamage());
-            GlStateManager.disableDepth();
-            GlStateManager.disableTexture2D();
-            GlStateManager.disableBlend();
-            WorldRenderer worldRenderer = Tessellator.getInstance().getWorldRenderer();
-            drawColoredQuad(worldRenderer, (int)f4 + 2, (int)f5 + 13, 13, 2, 0, 0);
-            drawColoredQuad(worldRenderer, (int)f4 + 2, (int)f5 + 13, 12, 1, (255 - i6) / 4, 64);
-            drawColoredQuad(worldRenderer, (int)f4 + 2, (int)f5 + 13, i5, 1, 255 - i6, i6);
-            GlStateManager.enableTexture2D();
-            GlStateManager.enableDepth();
-         }
-
-         i += 16;
-      }
    }
 
    private static double getSpeedPerTick(Entity entity2) {
@@ -324,10 +223,5 @@ public class HUD extends Module {
       }
 
       return MathHelper.clamp_float(f2 / Math.max(1, this.tpsSamples.size()), 0.0F, 20.0F);
-   }
-
-   private void drawCenteredText(String text, float f2, float f3) {
-      float f4 = f2 + (16 - this.getFont().getStringWidth(text)) / 2.0F;
-      this.getFont().drawStringWithShadow(text, f4, f3 - 4.0F, -1);
    }
 }

@@ -23,6 +23,7 @@ import rat.novoline.module.combat.Reach;
 import rat.novoline.module.combat.TargetStrafe;
 import rat.novoline.module.combat.WTap;
 import rat.novoline.module.hud.ArrayList;
+import rat.novoline.module.hud.ArmorHUD;
 import rat.novoline.module.hud.ClickGui;
 import rat.novoline.module.hud.HUD;
 import rat.novoline.module.hud.Notifications;
@@ -131,6 +132,7 @@ public class ModuleManager {
    public static final ThemeColor themeColor = new ThemeColor();
    public static final Watermark watermark = new Watermark();
    public static final Scoreboard scoreboard = new Scoreboard();
+   public static final ArmorHUD armorHUD = new ArmorHUD();
    public static final ClickGui clickGui = new ClickGui();
    public static final PostProcessing postProcessing = new PostProcessing();
    public static final Notifications notifications = new Notifications();
