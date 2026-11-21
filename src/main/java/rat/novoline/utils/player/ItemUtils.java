@@ -180,7 +180,8 @@ public class ItemUtils {
 
    public static boolean isUtilityBlock(Item item) {
       return item == Item.getItemFromBlock(Blocks.chest) || item == Item.getItemFromBlock(Blocks.crafting_table)
-            || item == Item.getItemFromBlock(Blocks.enchanting_table) || item == Item.getItemFromBlock(Blocks.anvil);
+            || item == Item.getItemFromBlock(Blocks.furnace) || item == Item.getItemFromBlock(Blocks.enchanting_table)
+            || item == Item.getItemFromBlock(Blocks.anvil);
    }
 
    public static boolean isSword(ItemStack stack) {
@@ -278,6 +279,10 @@ public class ItemUtils {
 
       if (item == Items.diamond || item == Items.emerald || item == Items.gold_ingot || item == Items.iron_ingot
             || item == Items.experience_bottle || item == Items.enchanted_book) {
+         return true;
+      }
+
+      if (item == Items.compass || item == Items.clock || item == Items.spawn_egg) {
          return true;
       }
 
