@@ -35,7 +35,10 @@ extends Animation {
         ModelBendsPlayer model = (ModelBendsPlayer)argModel;
         Data_Player data = (Data_Player)argData;
         EntityPlayer player = (EntityPlayer)argEntity;
-        if (player.getCurrentEquippedItem() != null) {
+        boolean kungfu = rat.novoline.module.ModuleManager.chineseKungfu != null
+            && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+            && player == net.minecraft.client.Minecraft.getMinecraft().thePlayer;
+        if (player.getCurrentEquippedItem() != null && !kungfu) {
             if (data.ticksAfterPunch < 10.0f) {
                 if (data.currentAttack == 1) {
                     Animation_Attack_Combo0.animate((EntityPlayer)argEntity, model, data);

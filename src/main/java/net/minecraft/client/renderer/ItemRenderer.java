@@ -1,6 +1,9 @@
 package net.minecraft.client.renderer;
 
 import java.util.function.Consumer;
+import net.gobbob.mobends.AnimatedEntity;
+import net.gobbob.mobends.client.renderer.entity.RenderBendsPlayer;
+import net.gobbob.mobends.data.Data_Player;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -59,7 +62,8 @@ public class ItemRenderer {
             }
          } else {
             Animations animations2 = ModuleManager.animations;
-            if (animations2.isEnabled()) {
+            boolean kungfu = ModuleManager.chineseKungfu != null && ModuleManager.chineseKungfu.isEnabled();
+            if (animations2.isEnabled() && !kungfu) {
                double d = 1.0F - animations2.getDownscale().getCurrentValue();
                GlStateManager.scale(d, d, d);
             }
@@ -76,7 +80,8 @@ public class ItemRenderer {
 
    public void renderItemInFirstPerson(float partialTicks) {
       if (!Config.isShaders() || !Shaders.isSkipRenderHand()) {
-         float f2 = (ModuleManager.animations.isEnabled() ? 0.8F + ModuleManager.animations.getAnimatedHeight() / 100.0F : 1.0F)
+         boolean kungfu = ModuleManager.chineseKungfu != null && ModuleManager.chineseKungfu.isEnabled();
+         float f2 = (ModuleManager.animations.isEnabled() && !kungfu ? 0.8F + ModuleManager.animations.getAnimatedHeight() / 100.0F : 1.0F)
             - (this.prevEquippedProgress + (this.equippedProgress - this.prevEquippedProgress) * partialTicks);
          EntityPlayerSP thePlayer2 = this.mc.thePlayer;
          float swingProgress2 = thePlayer2.getSwingProgress(partialTicks);
@@ -88,12 +93,13 @@ public class ItemRenderer {
          this.rotateWithPlayerRotations(thePlayer2, partialTicks);
          GlStateManager.enableRescaleNormal();
          GlStateManager.pushMatrix();
-         boolean kungfu = ModuleManager.chineseKungfu != null
-             && ModuleManager.chineseKungfu.isEnabled()
-             && ModuleManager.chineseKungfu.hideHeldItem.isEnabled();
          if (this.itemToRender == null || kungfu) {
             if (!thePlayer2.isInvisible()) {
-               this.renderPlayerArm(thePlayer2, f2, swingProgress2);
+               if (kungfu) {
+                  this.renderKungfuArms(thePlayer2, f2, swingProgress2, partialTicks);
+               } else {
+                  this.renderPlayerArm(thePlayer2, f2, swingProgress2);
+               }
             }
          } else {
             if (this.itemToRender.getItem() instanceof ItemMap) {
@@ -108,7 +114,7 @@ public class ItemRenderer {
                }
 
                Animations animations2 = ModuleManager.animations;
-               if (animations2.isEnabled() && itemUseAction != EnumAction.NONE) {
+               if (animations2.isEnabled() && !kungfu && itemUseAction != EnumAction.NONE) {
                   Consumer<Float> consumer = switch (itemUseAction) {
                      case EAT, DRINK -> f -> this.performDrinking(thePlayer2, partialTicks);
                      case BOW -> f -> this.doBowTransformations(partialTicks, thePlayer2);
@@ -138,13 +144,9 @@ public class ItemRenderer {
             }
 
             this.renderItem(thePlayer2, this.itemToRender, net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIRST_PERSON);
-            if (swingProgress2 > 0.0F) {
-               net.gobbob.mobends.client.renderer.FirstPersonTrail.recordFist(1.2F);
-            }
          }
 
          GlStateManager.popMatrix();
-         net.gobbob.mobends.client.renderer.FirstPersonTrail.render();
          GlStateManager.disableRescaleNormal();
          RenderHelper.disableStandardItemLighting();
       }
@@ -304,9 +306,6 @@ public class ItemRenderer {
       }
 
       renderPlayer.renderRightArm(this.mc.thePlayer);
-      if (swingProgress > 0.0F) {
-         net.gobbob.mobends.client.renderer.FirstPersonTrail.recordFist(0.6F);
-      }
       if (chams2.isEnabled() && chams2.arm.isEnabled() && chams2.chams.getCurrentElement() == 1) {
          float[] fArray2 = RenderUtils.unpackColorNormalized(chams2.getColor());
          if (fArray2[3] < 0.1F) {
@@ -323,6 +322,119 @@ public class ItemRenderer {
          GL11.glColor4d(1.0, 1.0, 1.0, 1.0);
          GL11.glPopMatrix();
       }
+
+      GlStateManager.enableCull();
+   }
+
+   private void setupArmChams(Chams chams2) {
+      GL11.glPushMatrix();
+      GlStateManager.disableTexture2D();
+      float[] fArray = RenderUtils.unpackColorNormalized(chams2.getColor());
+      if (chams2.wireframe.isEnabled()) {
+         GL11.glPolygonMode(1032, 6913);
+      }
+      GlStateManager.disableLighting();
+      OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 61680.0F, 0.0F);
+      GL11.glColor4d(fArray[0], fArray[1], fArray[2], fArray[3]);
+      if (fArray[3] < 0.1F) {
+         GlStateManager.alphaFunc(516, 0.003921569F);
+      }
+   }
+
+   private void cleanupArmChams(Chams chams2, AbstractClientPlayer clientPlayer) {
+      float[] fArray2 = RenderUtils.unpackColorNormalized(chams2.getColor());
+      if (fArray2[3] < 0.1F) {
+         GlStateManager.alphaFunc(516, 0.1F);
+      }
+      RenderUtils.applyEntityLighting(clientPlayer);
+      if (chams2.wireframe.isEnabled()) {
+         GL11.glPolygonMode(1032, 6914);
+      }
+      GlStateManager.enableLighting();
+      GlStateManager.enableTexture2D();
+      GL11.glColor4d(1.0, 1.0, 1.0, 1.0);
+      GL11.glPopMatrix();
+   }
+
+   private void renderKungfuArms(AbstractClientPlayer clientPlayer, float equipProgress, float swingProgress, float partialTicks) {
+      Render entityRenderObject = this.renderManager.getEntityRenderObject(clientPlayer);
+      if (!(entityRenderObject instanceof RenderBendsPlayer)) {
+         entityRenderObject = AnimatedEntity.getPlayerRenderer(clientPlayer);
+      }
+      if (!(entityRenderObject instanceof RenderBendsPlayer)) {
+         this.renderPlayerArm(clientPlayer, equipProgress, swingProgress);
+         return;
+      }
+      RenderBendsPlayer renderBendsPlayer = (RenderBendsPlayer) entityRenderObject;
+
+      Data_Player data = Data_Player.get(clientPlayer.getEntityId());
+      if (swingProgress > 0.0F && !data.alreadyPunched) {
+         data.onPunch();
+         data.alreadyPunched = true;
+      }
+      boolean isRightPunch = data.fistPunchArm;
+      boolean isBlocking = clientPlayer.isBlocking();
+      float punch = swingProgress > 0.0F ? MathHelper.sin(MathHelper.sqrt_float(swingProgress) * (float) Math.PI) : 0.0F;
+
+      this.mc.getTextureManager().bindTexture(clientPlayer.getLocationSkin());
+      GlStateManager.disableCull();
+
+      Chams chams2 = ModuleManager.chams;
+      boolean applyChams = chams2 != null && chams2.isEnabled() && chams2.arm.isEnabled() && chams2.chams.getCurrentElement() == 1;
+
+      // Render Right Arm
+      GlStateManager.pushMatrix();
+      if (applyChams) {
+         this.setupArmChams(chams2);
+      }
+
+      float rightPunchDist = (isRightPunch && swingProgress > 0.0F) ? punch * -0.28F : 0.0F;
+      float rightPunchInward = (isRightPunch && swingProgress > 0.0F) ? punch * -0.08F : 0.0F;
+      float rightPunchUp = (isRightPunch && swingProgress > 0.0F) ? punch * 0.04F : 0.0F;
+      float rightRecoil = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.03F : 0.0F;
+
+      float rX = 0.28F + rightPunchInward;
+      float rY = -0.34F + rightPunchUp + (isBlocking ? 0.06F : 0.0F);
+      float rZ = -0.42F + rightPunchDist + rightRecoil + (isBlocking ? -0.06F : 0.0F);
+
+      GlStateManager.translate(rX, rY, rZ);
+      GlStateManager.scale(-1.0F, -1.0F, 1.0F);
+      GlStateManager.rotate(5.0F, 0.0F, 1.0F, 0.0F);
+      GlStateManager.rotate(10.0F, 0.0F, 0.0F, 1.0F);
+
+      renderBendsPlayer.renderKungfuArm(clientPlayer, true, punch, isRightPunch && swingProgress > 0.0F, isBlocking);
+
+      if (applyChams) {
+         this.cleanupArmChams(chams2, clientPlayer);
+      }
+      GlStateManager.popMatrix();
+
+      // Render Left Arm
+      GlStateManager.pushMatrix();
+      if (applyChams) {
+         this.setupArmChams(chams2);
+      }
+
+      float leftPunchDist = (!isRightPunch && swingProgress > 0.0F) ? punch * -0.28F : 0.0F;
+      float leftPunchInward = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.08F : 0.0F;
+      float leftPunchUp = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.04F : 0.0F;
+      float leftRecoil = (isRightPunch && swingProgress > 0.0F) ? punch * 0.03F : 0.0F;
+
+      float lX = -0.28F + leftPunchInward;
+      float lY = -0.34F + leftPunchUp + (isBlocking ? 0.06F : 0.0F);
+      float lZ = -0.42F + leftPunchDist + leftRecoil + (isBlocking ? -0.06F : 0.0F);
+
+      GlStateManager.translate(lX, lY, lZ);
+      GlStateManager.scale(-1.0F, -1.0F, 1.0F);
+      GlStateManager.rotate(-5.0F, 0.0F, 1.0F, 0.0F);
+      GlStateManager.rotate(-10.0F, 0.0F, 0.0F, 1.0F);
+
+      renderBendsPlayer.renderKungfuArm(clientPlayer, false, punch, !isRightPunch && swingProgress > 0.0F, isBlocking);
+
+      if (applyChams) {
+         this.cleanupArmChams(chams2, clientPlayer);
+      }
+      GlStateManager.popMatrix();
 
       GlStateManager.enableCull();
    }

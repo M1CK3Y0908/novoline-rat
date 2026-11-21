@@ -259,6 +259,181 @@ public class RenderBendsPlayer extends RenderPlayer {
         modelplayer.bipedLeftForeArm.pre_rotation.set(origForePreX, origForePreY, origForePreZ);
     }
 
+    public void renderKungfuArm(AbstractClientPlayer player, boolean isRight, float punch, boolean isPunching, boolean isBlocking) {
+        float f = 1.0f;
+        GlStateManager.color(f, f, f);
+        ModelBendsPlayer modelplayer = (ModelBendsPlayer)this.getMainModel();
+        this.setModelVisibilities(player);
+        modelplayer.swingProgress = 0.0f;
+        modelplayer.isSneak = false;
+
+        if (isRight) {
+            ModelRendererBends rightArm = (ModelRendererBends)modelplayer.bipedRightArm;
+            ModelRendererBends rightForeArm = modelplayer.bipedRightForeArm;
+
+            float origX = rightArm.rotationPointX;
+            float origY = rightArm.rotationPointY;
+            float origZ = rightArm.rotationPointZ;
+            float origRotX = rightArm.rotation.getX();
+            float origRotY = rightArm.rotation.getY();
+            float origRotZ = rightArm.rotation.getZ();
+            float origPreX = rightArm.pre_rotation.getX();
+            float origPreY = rightArm.pre_rotation.getY();
+            float origPreZ = rightArm.pre_rotation.getZ();
+
+            float origForeX = rightForeArm.rotationPointX;
+            float origForeY = rightForeArm.rotationPointY;
+            float origForeZ = rightForeArm.rotationPointZ;
+            float origForeRotX = rightForeArm.rotation.getX();
+            float origForeRotY = rightForeArm.rotation.getY();
+            float origForeRotZ = rightForeArm.rotation.getZ();
+            float origForePreX = rightForeArm.pre_rotation.getX();
+            float origForePreY = rightForeArm.pre_rotation.getY();
+            float origForePreZ = rightForeArm.pre_rotation.getZ();
+
+            rightArm.rotationPointX = 0.0f;
+            rightArm.rotationPointY = 0.0f;
+            rightArm.rotationPointZ = 0.0f;
+
+            rightForeArm.rotationPointX = 0.0f;
+            rightForeArm.rotationPointY = 4.0f;
+            rightForeArm.rotationPointZ = 2.0f;
+
+            if (isPunching) {
+                float elbowBend = -75.0f + punch * 75.0f;
+                rightForeArm.rotation.set(elbowBend, 0.0f, 0.0f);
+                rightForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+
+                float armX = -85.0f - punch * 5.0f;
+                float armY = -12.0f + punch * 12.0f;
+                float armZ = 18.0f - punch * 18.0f;
+                rightArm.rotation.set(armX, armY, armZ);
+                rightArm.pre_rotation.set(0.0f, 0.0f, punch * 30.0f);
+            } else if (isBlocking) {
+                rightForeArm.rotation.set(-85.0f, 0.0f, 0.0f);
+                rightForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+                rightArm.rotation.set(-80.0f, -25.0f, 25.0f);
+                rightArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+            } else {
+                rightForeArm.rotation.set(-75.0f, 0.0f, 0.0f);
+                rightForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+                rightArm.rotation.set(-80.0f, -12.0f, 18.0f);
+                rightArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+            }
+
+            modelplayer.bipedRightArm.showModel = true;
+            modelplayer.bipedRightArm.isHidden = false;
+            rightForeArm.showModel = true;
+            rightForeArm.isHidden = false;
+            if (modelplayer.bipedRightArmwear != null) {
+                modelplayer.bipedRightArmwear.showModel = player.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE);
+                modelplayer.bipedRightArmwear.isHidden = false;
+            }
+            if (modelplayer.bipedRightForeArmwear != null) {
+                modelplayer.bipedRightForeArmwear.showModel = player.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE);
+                modelplayer.bipedRightForeArmwear.isHidden = false;
+            }
+
+            GlStateManager.pushMatrix();
+            modelplayer.renderRightArm();
+            GlStateManager.popMatrix();
+
+            rightArm.rotationPointX = origX;
+            rightArm.rotationPointY = origY;
+            rightArm.rotationPointZ = origZ;
+            rightArm.rotation.set(origRotX, origRotY, origRotZ);
+            rightArm.pre_rotation.set(origPreX, origPreY, origPreZ);
+
+            rightForeArm.rotationPointX = origForeX;
+            rightForeArm.rotationPointY = origForeY;
+            rightForeArm.rotationPointZ = origForeZ;
+            rightForeArm.rotation.set(origForeRotX, origForeRotY, origForeRotZ);
+            rightForeArm.pre_rotation.set(origForePreX, origForePreY, origForePreZ);
+        } else {
+            ModelRendererBends leftArm = (ModelRendererBends)modelplayer.bipedLeftArm;
+            ModelRendererBends leftForeArm = modelplayer.bipedLeftForeArm;
+
+            float origX = leftArm.rotationPointX;
+            float origY = leftArm.rotationPointY;
+            float origZ = leftArm.rotationPointZ;
+            float origRotX = leftArm.rotation.getX();
+            float origRotY = leftArm.rotation.getY();
+            float origRotZ = leftArm.rotation.getZ();
+            float origPreX = leftArm.pre_rotation.getX();
+            float origPreY = leftArm.pre_rotation.getY();
+            float origPreZ = leftArm.pre_rotation.getZ();
+
+            float origForeX = leftForeArm.rotationPointX;
+            float origForeY = leftForeArm.rotationPointY;
+            float origForeZ = leftForeArm.rotationPointZ;
+            float origForeRotX = leftForeArm.rotation.getX();
+            float origForeRotY = leftForeArm.rotation.getY();
+            float origForeRotZ = leftForeArm.rotation.getZ();
+            float origForePreX = leftForeArm.pre_rotation.getX();
+            float origForePreY = leftForeArm.pre_rotation.getY();
+            float origForePreZ = leftForeArm.pre_rotation.getZ();
+
+            leftArm.rotationPointX = 0.0f;
+            leftArm.rotationPointY = 0.0f;
+            leftArm.rotationPointZ = 0.0f;
+
+            leftForeArm.rotationPointX = 0.0f;
+            leftForeArm.rotationPointY = 4.0f;
+            leftForeArm.rotationPointZ = 2.0f;
+
+            if (isPunching) {
+                float elbowBend = -75.0f + punch * 75.0f;
+                leftForeArm.rotation.set(elbowBend, 0.0f, 0.0f);
+                leftForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+
+                float armX = -85.0f - punch * 5.0f;
+                float armY = 12.0f - punch * 12.0f;
+                float armZ = -18.0f + punch * 18.0f;
+                leftArm.rotation.set(armX, armY, armZ);
+                leftArm.pre_rotation.set(0.0f, 0.0f, -punch * 30.0f);
+            } else if (isBlocking) {
+                leftForeArm.rotation.set(-85.0f, 0.0f, 0.0f);
+                leftForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+                leftArm.rotation.set(-80.0f, 25.0f, -25.0f);
+                leftArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+            } else {
+                leftForeArm.rotation.set(-75.0f, 0.0f, 0.0f);
+                leftForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+                leftArm.rotation.set(-80.0f, 12.0f, -18.0f);
+                leftArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
+            }
+
+            modelplayer.bipedLeftArm.showModel = true;
+            modelplayer.bipedLeftArm.isHidden = false;
+            leftForeArm.showModel = true;
+            leftForeArm.isHidden = false;
+            if (modelplayer.bipedLeftArmwear != null) {
+                modelplayer.bipedLeftArmwear.showModel = player.isWearing(EnumPlayerModelParts.LEFT_SLEEVE);
+                modelplayer.bipedLeftArmwear.isHidden = false;
+            }
+            if (modelplayer.bipedLeftForeArmwear != null) {
+                modelplayer.bipedLeftForeArmwear.showModel = player.isWearing(EnumPlayerModelParts.LEFT_SLEEVE);
+                modelplayer.bipedLeftForeArmwear.isHidden = false;
+            }
+
+            GlStateManager.pushMatrix();
+            modelplayer.renderLeftArm();
+            GlStateManager.popMatrix();
+
+            leftArm.rotationPointX = origX;
+            leftArm.rotationPointY = origY;
+            leftArm.rotationPointZ = origZ;
+            leftArm.rotation.set(origRotX, origRotY, origRotZ);
+            leftArm.pre_rotation.set(origPreX, origPreY, origPreZ);
+
+            leftForeArm.rotationPointX = origForeX;
+            leftForeArm.rotationPointY = origForeY;
+            leftForeArm.rotationPointZ = origForeZ;
+            leftForeArm.rotation.set(origForeRotX, origForeRotY, origForeRotZ);
+            leftForeArm.pre_rotation.set(origForePreX, origForePreY, origForePreZ);
+        }
+    }
+
     @Override
     protected void renderLivingAt(AbstractClientPlayer p_77039_1_, double p_77039_2_, double p_77039_4_, double p_77039_6_) {
         super.renderLivingAt(p_77039_1_, p_77039_2_, p_77039_4_, p_77039_6_);
