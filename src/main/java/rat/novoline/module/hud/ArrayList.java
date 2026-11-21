@@ -53,7 +53,7 @@ public class ArrayList extends Module {
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", true));
    public final CheckboxSetting backgroundShadow = settingManager.register(new CheckboxSetting(this, "Background Shadow", true));
    public final ColorSetting status = settingManager.register(new ColorSetting(this, "Status", -1));
-   public final ColorSetting backgroundColor = settingManager.register(new ColorSetting(this, "Background", 0x80000000) {
+   public final ColorSetting backgroundColor = settingManager.register(new ColorSetting(this, "Background", 0x32000000) {
       @Override
       public boolean shouldShow() {
          return ArrayList.this.background.isEnabled();

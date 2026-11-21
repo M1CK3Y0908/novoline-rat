@@ -10,7 +10,7 @@ import rat.novoline.utils.render.RenderUtils;
 
 public class ThemeColor extends Module {
    public final ComboSetting mode = settingManager.register(
-      new ComboSetting(this, "Mode", 1, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
+      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
    );
    public final ComboSetting animationMode = settingManager.register(
       new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing") {
@@ -21,7 +21,7 @@ public class ThemeColor extends Module {
       }
    );
    public final ColorSetting firstColor = settingManager.register(
-      new ColorSetting(this, "First Color", 0xFF35314D) {
+      new ColorSetting(this, "First Color", 0xFF8A8AFF) {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
@@ -30,7 +30,7 @@ public class ThemeColor extends Module {
       }
    );
    public final ColorSetting secondColor = settingManager.register(
-      new ColorSetting(this, "Second Color", 0xFFC7C3E5) {
+      new ColorSetting(this, "Second Color", 0xFF8A8AFF) {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
