@@ -9,7 +9,14 @@ import rat.novoline.setting.NumberSetting;
 import rat.novoline.utils.render.FontAdapter;
 
 public class Hotbar extends Module {
+   public final ComboSetting mode = settingManager.register(
+      new ComboSetting(this, "Mode", 0, "Lol", "ArmorHUD")
+   );
+   public final ComboSetting lolStyle = settingManager.register(
+      new ComboSetting(this, "Lol Style", 0, "New", "Old")
+   );
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", true));
+   public final NumberSetting alpha = settingManager.register(new NumberSetting(this, "Alpha", 100, 0, 255));
    public final ComboSetting font = settingManager.register(
       new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft")
    );
@@ -21,7 +28,7 @@ public class Hotbar extends Module {
    }
 
    public Hotbar() {
-      super(Category.VISUAL, "Hotbar", "Replaces vanilla hotbar with an ArmorHUD-style modern hotbar");
+      super(Category.VISUAL, "Hotbar", "Replaces vanilla hotbar with customizable hotbar styles");
       this.setEnabled(true);
    }
 }

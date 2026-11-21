@@ -842,6 +842,51 @@ public class RenderUtils {
       drawRect(f + 1.0F - f6, f4 - f5, f3, f4, i2);
    }
 
+   public static void drawRoundedRect(float x, float y, float width, float height, float radius, int color) {
+      if (width <= 0.0F || height <= 0.0F) {
+         return;
+      }
+      radius = Math.max(0.0F, Math.min(radius, Math.min(width / 2.0F, height / 2.0F)));
+      if (radius <= 0.5F) {
+         drawRect(x, y, x + width, y + height, color);
+         return;
+      }
+      float a = (color >> 24 & 0xFF) / 255.0F;
+      float r = (color >> 16 & 0xFF) / 255.0F;
+      float g = (color >> 8 & 0xFF) / 255.0F;
+      float b = (color & 0xFF) / 255.0F;
+
+      GlStateManager.enableBlend();
+      GlStateManager.disableTexture2D();
+      applyBlendFunc();
+      GlStateManager.color(r, g, b, a);
+      GL11.glEnable(GL11.GL_LINE_SMOOTH);
+      GL11.glBegin(GL11.GL_POLYGON);
+
+      for (int i = 180; i <= 270; i += 3) {
+         double rad = i * (Math.PI / 180.0);
+         GL11.glVertex2d(x + radius + Math.cos(rad) * radius, y + radius + Math.sin(rad) * radius);
+      }
+      for (int i = 270; i <= 360; i += 3) {
+         double rad = i * (Math.PI / 180.0);
+         GL11.glVertex2d(x + width - radius + Math.cos(rad) * radius, y + radius + Math.sin(rad) * radius);
+      }
+      for (int i = 0; i <= 90; i += 3) {
+         double rad = i * (Math.PI / 180.0);
+         GL11.glVertex2d(x + width - radius + Math.cos(rad) * radius, y + height - radius + Math.sin(rad) * radius);
+      }
+      for (int i = 90; i <= 180; i += 3) {
+         double rad = i * (Math.PI / 180.0);
+         GL11.glVertex2d(x + radius + Math.cos(rad) * radius, y + height - radius + Math.sin(rad) * radius);
+      }
+
+      GL11.glEnd();
+      GL11.glDisable(GL11.GL_LINE_SMOOTH);
+      GlStateManager.enableTexture2D();
+      GlStateManager.disableBlend();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+   }
+
    public static void resetColor() {
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
    }
