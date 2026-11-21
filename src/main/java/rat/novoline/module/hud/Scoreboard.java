@@ -3,6 +3,7 @@ package rat.novoline.module.hud;
 import rat.novoline.Novoline.Fonts;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
+import rat.novoline.module.ModuleManager;
 import rat.novoline.setting.CheckboxSetting;
 import rat.novoline.setting.ColorSetting;
 import rat.novoline.setting.ComboSetting;
@@ -12,20 +13,6 @@ import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.utils.render.VanillaFontAdapter;
 
 public class Scoreboard extends Module {
-   public final CheckboxSetting customFont = settingManager.register(new CheckboxSetting(this, "Custom Font", true));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft") {
-      @Override
-      public boolean shouldShow() {
-         return Scoreboard.this.customFont.isEnabled();
-      }
-   });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 18, 10, 24) {
-      @Override
-      public boolean shouldShow() {
-         return Scoreboard.this.customFont.isEnabled();
-      }
-   });
-
    public final CheckboxSetting hideNumbers = settingManager.register(new CheckboxSetting(this, "Hide Numbers", false));
    public final CheckboxSetting avoidArrayList = settingManager.register(new CheckboxSetting(this, "Avoid ArrayList", true));
 
@@ -57,17 +44,11 @@ public class Scoreboard extends Module {
    }
 
    public FontAdapter getFont() {
-      if (!this.customFont.isEnabled() || "Minecraft".equalsIgnoreCase(this.font.getCurrentElementAsString())) {
-         return VanillaFontAdapter.INSTANCE;
-      }
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), false);
+      return ModuleManager.font != null ? ModuleManager.font.getFont(false) : Fonts.rubikRegularSize16;
    }
 
    public FontAdapter getTitleFont() {
-      if (!this.customFont.isEnabled() || "Minecraft".equalsIgnoreCase(this.font.getCurrentElementAsString())) {
-         return VanillaFontAdapter.INSTANCE;
-      }
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), true);
+      return ModuleManager.font != null ? ModuleManager.font.getFont(true) : Fonts.rubikSemiboldSize16;
    }
 
    public Scoreboard() {

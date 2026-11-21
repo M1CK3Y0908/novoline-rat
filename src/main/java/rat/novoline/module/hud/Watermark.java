@@ -11,8 +11,6 @@ import rat.novoline.utils.render.FontAdapter;
 
 public class Watermark extends Module {
    public final ComboSetting watermark = settingManager.register(new ComboSetting(this, "Type", 0, "Classic", "OneTap", "NeverLose"));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Default", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 20, 10, 24));
    public final CheckboxSetting showTime = settingManager.register(new CheckboxSetting(this, "Show Time", true) {
       @Override
       public boolean shouldShow() {
@@ -27,10 +25,7 @@ public class Watermark extends Module {
    });
 
    public FontAdapter getFont(boolean bold) {
-      if ("Default".equals(this.font.getCurrentElementAsString())) {
-         return null;
-      }
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), bold);
+      return ModuleManager.font != null ? ModuleManager.font.getFont(bold) : Fonts.rubikRegularSize16;
    }
 
    public int getColor() {

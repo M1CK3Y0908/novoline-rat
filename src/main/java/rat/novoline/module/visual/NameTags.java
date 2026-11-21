@@ -31,16 +31,8 @@ import rat.novoline.setting.MultiComboSetting;
 import rat.novoline.utils.render.RenderUtils;
 
 public class NameTags extends Module {
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Minecraft", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
-      @Override
-      public boolean shouldShow() {
-         return !"Minecraft".equals(NameTags.this.font.getCurrentElementAsString());
-      }
-   });
-
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+      return ModuleManager.font != null ? ModuleManager.font.getFont() : Fonts.rubikRegularSize16;
    }
 
    public MultiComboSetting nameTags = settingManager.register(new MultiComboSetting(this, "Hide targets").add("Bots", false).add("Self", false));

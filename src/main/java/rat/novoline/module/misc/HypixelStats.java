@@ -25,6 +25,7 @@ import rat.novoline.event.ServerConnectEvent;
 import rat.novoline.event.ServerDisconnectEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
+import rat.novoline.module.ModuleManager;
 import rat.novoline.setting.CheckboxSetting;
 import rat.novoline.setting.ComboSetting;
 import rat.novoline.setting.NumberSetting;
@@ -39,20 +40,13 @@ import rat.novoline.utils.time.Stopwatch;
 public class HypixelStats extends Module {
    public final CheckboxSetting hypixelStats = settingManager.register(new CheckboxSetting(this, "Check Staff bans", true));
    public final CheckboxSetting showPlayTime = settingManager.register(new CheckboxSetting(this, "Show play time", true));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
-      @Override
-      public boolean shouldShow() {
-         return !"Minecraft".equals(HypixelStats.this.font.getCurrentElementAsString());
-      }
-   });
 
    public FontAdapter getTitleFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue() + 2.0F, true);
+      return ModuleManager.font != null ? ModuleManager.font.getFont(ModuleManager.font.getFontSize() + 2.0F, true) : Fonts.rubikSemiboldSize18;
    }
 
    public FontAdapter getContentFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), false);
+      return ModuleManager.font != null ? ModuleManager.font.getFont(false) : Fonts.rubikRegularSize16;
    }
    private PunishmentStats punishmentStats;
    private final NumberSetting delaySeconds = settingManager.register(new NumberSetting(this, "Delay (seconds)", 120, 30, 600));

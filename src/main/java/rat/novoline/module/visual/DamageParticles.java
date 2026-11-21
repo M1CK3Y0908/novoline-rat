@@ -26,16 +26,9 @@ import rat.novoline.utils.render.RenderUtils;
 
 public class DamageParticles extends Module {
    private final ComboSetting damageParticles = settingManager.register(new ComboSetting(this, "Works on", 0, "All", "Target"));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Minecraft", "Montserrat", "Museo Sans", "Roboto", "Pixel"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 8, 24) {
-      @Override
-      public boolean shouldShow() {
-         return !"Minecraft".equals(DamageParticles.this.font.getCurrentElementAsString());
-      }
-   });
 
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+      return ModuleManager.font != null ? ModuleManager.font.getFont() : Fonts.rubikRegularSize16;
    }
    private final List<DamageParticles.Holder> particles = new ArrayList<>();
    @EventLink

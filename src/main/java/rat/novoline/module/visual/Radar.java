@@ -45,21 +45,8 @@ public class Radar extends Module {
          return Radar.this.circle.isEnabled();
       }
    });
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Minecraft", "Montserrat", "Museo Sans", "Roboto", "Pixel") {
-      @Override
-      public boolean shouldShow() {
-         return Radar.this.direction.isEnabled();
-      }
-   });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 8, 20) {
-      @Override
-      public boolean shouldShow() {
-         return Radar.this.direction.isEnabled() && !"Minecraft".equals(Radar.this.font.getCurrentElementAsString());
-      }
-   });
-
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+      return ModuleManager.font != null ? ModuleManager.font.getFont() : Fonts.rubikRegularSize16;
    }
    private final ColorSetting friendColor = settingManager.register(new ColorSetting(this, "Friend color", -12657535));
    private final ColorSetting targetColor = settingManager.register(new ColorSetting(this, "Target color", -2341314));

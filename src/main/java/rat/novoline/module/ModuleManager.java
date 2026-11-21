@@ -25,6 +25,7 @@ import rat.novoline.module.combat.WTap;
 import rat.novoline.module.hud.ArrayList;
 import rat.novoline.module.hud.ArmorHUD;
 import rat.novoline.module.hud.ClickGui;
+import rat.novoline.module.hud.Font;
 import rat.novoline.module.hud.Hotbar;
 import rat.novoline.module.hud.Information;
 import rat.novoline.module.hud.Notifications;
@@ -132,6 +133,7 @@ public class ModuleManager {
    public static final KeepSprint keepSprint = new KeepSprint();
    public static final ArrayList arrayList = new ArrayList();
    public static final ThemeColor themeColor = new ThemeColor();
+   public static final Font font = new Font();
    public static final Watermark watermark = new Watermark();
    public static final Scoreboard scoreboard = new Scoreboard();
    public static final ArmorHUD armorHUD = new ArmorHUD();

@@ -213,21 +213,9 @@ public class Scaffold extends Module {
    private final CheckboxSetting legitMotion = settingManager.register(new CheckboxSetting(this, "Legit Motion", false));
    private final CheckboxSetting safeWalk = settingManager.register(new CheckboxSetting(this, "Safe Walk", true));
    public final CheckboxSetting blockCounter = settingManager.register(new CheckboxSetting(this, "Block Counter", true));
-   public final ComboSetting blockCounterFont = settingManager.register(new ComboSetting(this, "Counter Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft") {
-      @Override
-      public boolean shouldShow() {
-         return Scaffold.this.blockCounter.isEnabled();
-      }
-   });
-   public final NumberSetting blockCounterFontSize = settingManager.register(new NumberSetting(this, "Counter Size", 16, 10, 24) {
-      @Override
-      public boolean shouldShow() {
-         return Scaffold.this.blockCounter.isEnabled() && Scaffold.this.blockCounterFont.getCurrentElement() != 5;
-      }
-   });
 
    public FontAdapter getCounterFont() {
-      return Fonts.getFont(this.blockCounterFont.getCurrentElementAsString(), this.blockCounterFontSize.getCurrentValue(), true);
+      return ModuleManager.font != null ? ModuleManager.font.getFont(true) : Fonts.rubikSemiboldSize16;
    }
    private final CheckboxSetting silentSwing = settingManager.register(new CheckboxSetting(this, "Silent Swing", false));
    private final CheckboxSetting slowOnEnable = settingManager.register(new CheckboxSetting(this, "Slow On Enable", false));

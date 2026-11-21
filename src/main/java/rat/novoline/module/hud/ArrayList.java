@@ -2,31 +2,18 @@ package rat.novoline.module.hud;
 
 import rat.novoline.Novoline;
 import rat.novoline.Novoline.Fonts;
-import rat.novoline.setting.ComboSetting;
-import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
+import rat.novoline.module.ModuleManager;
 import rat.novoline.setting.CheckboxSetting;
 import rat.novoline.setting.ColorSetting;
 import rat.novoline.setting.MultiComboSetting;
 import rat.novoline.setting.NumberSetting;
+import rat.novoline.utils.render.FontAdapter;
 
 public class ArrayList extends Module {
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft") {
-      @Override
-      public void interactCallback() {
-         Novoline.getNovoline().getModuleManager().updateCachedFeatures();
-      }
-   });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 18, 10, 24) {
-      @Override
-      public void interactCallback() {
-         Novoline.getNovoline().getModuleManager().updateCachedFeatures();
-      }
-   });
-
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+      return ModuleManager.font != null ? ModuleManager.font.getFont() : Fonts.rubikRegularSize16;
    }
 
    public final MultiComboSetting arrayList = settingManager.register((new MultiComboSetting(this, "Limitations") {

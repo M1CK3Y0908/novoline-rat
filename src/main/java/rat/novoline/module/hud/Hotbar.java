@@ -3,6 +3,7 @@ package rat.novoline.module.hud;
 import rat.novoline.Novoline.Fonts;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
+import rat.novoline.module.ModuleManager;
 import rat.novoline.setting.CheckboxSetting;
 import rat.novoline.setting.ComboSetting;
 import rat.novoline.setting.NumberSetting;
@@ -17,14 +18,14 @@ public class Hotbar extends Module {
    );
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", true));
    public final NumberSetting alpha = settingManager.register(new NumberSetting(this, "Alpha", 100, 0, 255));
-   public final ComboSetting font = settingManager.register(
-      new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft")
-   );
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 11, 8, 16));
    public final CheckboxSetting durabilityBar = settingManager.register(new CheckboxSetting(this, "Durability Bar", true));
 
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), true);
+      if (ModuleManager.font != null) {
+         float size = Math.max(8.0F, Math.round(ModuleManager.font.getFontSize() * 11.0F / 16.0F));
+         return ModuleManager.font.getFont(size, true);
+      }
+      return Fonts.rubikSemiboldSize16;
    }
 
    public Hotbar() {

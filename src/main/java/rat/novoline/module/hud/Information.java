@@ -28,10 +28,6 @@ import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.utils.time.Stopwatch;
 
 public class Information extends Module {
-   public final ComboSetting font = settingManager.register(
-      new ComboSetting(this, "Font", 0, "SF", "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Tahoma", "Minecraft")
-   );
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 22));
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", false));
    public final MultiComboSetting elements = settingManager.register(
       new MultiComboSetting(this, "Elements")
@@ -52,7 +48,7 @@ public class Information extends Module {
    private double reach;
 
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+      return ModuleManager.font != null ? ModuleManager.font.getFont() : Fonts.rubikRegularSize16;
    }
 
    public double getReach() {

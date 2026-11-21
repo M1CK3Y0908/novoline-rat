@@ -27,21 +27,9 @@ public class ItemESP extends Module {
       }
    });
    private final CheckboxSetting itemName = settingManager.register(new CheckboxSetting(this, "Item name", false));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft") {
-      @Override
-      public boolean shouldShow() {
-         return ItemESP.this.itemName.isEnabled();
-      }
-   });
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
-      @Override
-      public boolean shouldShow() {
-         return ItemESP.this.itemName.isEnabled() && !"Minecraft".equals(ItemESP.this.font.getCurrentElementAsString());
-      }
-   });
 
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue());
+      return ModuleManager.font != null ? ModuleManager.font.getFont() : Fonts.rubikRegularSize16;
    }
    @EventLink
    public final Listener<RenderWorldEvent> onRenderWorld = renderWorldEvent -> {

@@ -9,6 +9,7 @@ import rat.novoline.event.PacketReceiveEvent;
 import rat.novoline.event.RenderScreenEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
+import rat.novoline.module.ModuleManager;
 import rat.novoline.setting.CheckboxSetting;
 import rat.novoline.setting.ColorSetting;
 import rat.novoline.setting.ComboSetting;
@@ -23,16 +24,9 @@ import rat.novoline.utils.time.Stopwatch;
 
 public class LagDetector extends Module {
    private final NumberSetting lagDetector = settingManager.register(new NumberSetting(this, "Delay (seconds)", 1, 1, 5));
-   public final ComboSetting font = settingManager.register(new ComboSetting(this, "Font", 0, "Rubik", "Montserrat", "Museo Sans", "Roboto", "Pixel", "Minecraft"));
-   public final NumberSetting fontSize = settingManager.register(new NumberSetting(this, "Font Size", 16, 10, 24) {
-      @Override
-      public boolean shouldShow() {
-         return LagDetector.this.font.getCurrentElement() != 5;
-      }
-   });
 
    public FontAdapter getFont() {
-      return Fonts.getFont(this.font.getCurrentElementAsString(), this.fontSize.getCurrentValue(), true);
+      return ModuleManager.font != null ? ModuleManager.font.getFont(true) : Fonts.rubikSemiboldSize16;
    }
    private final CheckboxSetting alphaBlink = settingManager.register(new CheckboxSetting(this, "Alpha blink", true));
    private final CheckboxSetting glow = settingManager.register(new CheckboxSetting(this, "Glow", true));
