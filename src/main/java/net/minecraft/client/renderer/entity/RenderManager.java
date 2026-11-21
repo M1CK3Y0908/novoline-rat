@@ -74,6 +74,7 @@ import net.minecraft.entity.monster.EntitySnowman;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
+import net.gobbob.mobends.AnimatedEntity;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntityCow;
@@ -352,6 +353,23 @@ public class RenderManager {
    }
 
    public <T extends Entity> Render<T> getEntityRenderObject(Entity entityIn) {
+      if (ModuleManager.moBends != null && ModuleManager.moBends.isEnabled()) {
+         if (entityIn instanceof AbstractClientPlayer && ModuleManager.moBends.player.isEnabled()) {
+            return (Render<T>) AnimatedEntity.getPlayerRenderer((AbstractClientPlayer) entityIn);
+         }
+         if (entityIn instanceof EntityZombie && ModuleManager.moBends.zombie.isEnabled()) {
+            AnimatedEntity animated = AnimatedEntity.getByEntity(entityIn);
+            if (animated != null && animated.renderer != null) {
+               return (Render<T>) animated.renderer;
+            }
+         }
+         if (entityIn instanceof EntitySpider && ModuleManager.moBends.spider.isEnabled()) {
+            AnimatedEntity animated = AnimatedEntity.getByEntity(entityIn);
+            if (animated != null && animated.renderer != null) {
+               return (Render<T>) animated.renderer;
+            }
+         }
+      }
       if (entityIn instanceof AbstractClientPlayer) {
          String text = ((AbstractClientPlayer)entityIn).getSkinType();
          RenderPlayer renderPlayer = this.skinMap.get(text);

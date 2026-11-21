@@ -78,6 +78,7 @@ import rat.novoline.module.visual.ItemESP;
 import rat.novoline.module.visual.ItemPhysics;
 import rat.novoline.module.visual.JumpCircle;
 import rat.novoline.module.visual.MobESP;
+import rat.novoline.module.visual.MoBends;
 import rat.novoline.module.visual.NameTags;
 import rat.novoline.module.visual.NightVision;
 import rat.novoline.module.visual.NoHurtCam;
@@ -173,6 +174,7 @@ public class ModuleManager {
    public static final JumpCircle jumpCircle = new JumpCircle();
    public static final Trails trails = new Trails();
    public static final CustomModel customModel = new CustomModel();
+   public static final MoBends moBends = new MoBends();
    public static final NightVision nightVision = new NightVision();
    public static final NoHurtCam noHurtCam = new NoHurtCam();
    public static final SeeInvisibles seeInvisibles = new SeeInvisibles();
