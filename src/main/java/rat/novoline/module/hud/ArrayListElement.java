@@ -47,6 +47,8 @@ public class ArrayListElement extends HudElement {
    private static float cachedPadY = 0.0F;
    private static float cachedLineWidth = 1.0F;
    private static boolean cachedIsLeft = false;
+   private static float cachedBaseX = 0.0F;
+   private static float cachedRightEdge = 0.0F;
 
    public ArrayListElement() {
       super("arraylist", 0.0F, 0.0F, true);
@@ -122,6 +124,8 @@ public class ArrayListElement extends HudElement {
       cachedPadY = textPadY;
       cachedLineWidth = lineWidth;
       cachedIsLeft = isLeft;
+      cachedBaseX = baseX;
+      cachedRightEdge = rightEdge;
 
       float targetOffsetY = 0.0F;
       float totalHeight = 0.0F;
@@ -267,13 +271,24 @@ public class ArrayListElement extends HudElement {
          }
 
          if (drawBottom) {
-            Entry eLast = ENTRIES[entryCount - 1];
-            int col = (!bloom || !glow) ? defaultColor : eLast.nameColor;
-            float x1 = eLast.x - (drawLeft ? lineWidth : 0.0F);
-            float x2 = eLast.x + eLast.width + (drawRight ? lineWidth : 0.0F);
-            float y1 = eLast.y + rowHeight;
-            float y2 = eLast.y + rowHeight + lineWidth;
-            drawSolidQuad(wr, x1, y1, x2, y2, col);
+            Entry eLast = null;
+            for (int j = entryCount - 1; j >= 0; j--) {
+               if (ENTRIES[j].module.isEnabled()) {
+                  eLast = ENTRIES[j];
+                  break;
+               }
+            }
+            if (eLast == null && entryCount > 0) {
+               eLast = ENTRIES[entryCount - 1];
+            }
+            if (eLast != null) {
+               int col = (!bloom || !glow) ? defaultColor : eLast.nameColor;
+               float x1 = eLast.x - (drawLeft ? lineWidth : 0.0F);
+               float x2 = cachedIsLeft ? (eLast.x + eLast.width + (drawRight ? lineWidth : 0.0F)) : cachedRightEdge;
+               float y1 = eLast.y + rowHeight;
+               float y2 = eLast.y + rowHeight + lineWidth;
+               drawSolidQuad(wr, x1, y1, x2, y2, col);
+            }
          }
 
          if (drawLeft) {
@@ -286,13 +301,23 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, col);
 
-               if (!cachedIsLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
+               if (!cachedIsLeft && i < entryCount - 1) {
                   Entry next = ENTRIES[i + 1];
-                  int nextCol = (!bloom || !glow) ? defaultColor : next.nameColor;
-                  if (e.x < next.x) {
-                     drawSolidQuad(wr, e.x - lineWidth, e.y + rowHeight, next.x - lineWidth, e.y + rowHeight + lineWidth, col);
-                  } else if (e.x > next.x) {
-                     drawSolidQuad(wr, next.x - lineWidth, e.y + rowHeight - lineWidth, e.x - lineWidth, e.y + rowHeight, nextCol);
+                  Entry nextEnabled = null;
+                  for (int j = i + 1; j < entryCount; j++) {
+                     if (ENTRIES[j].module.isEnabled()) {
+                        nextEnabled = ENTRIES[j];
+                        break;
+                     }
+                  }
+                  float stepRight = next.x;
+                  if (!next.module.isEnabled() && nextEnabled != null) {
+                     stepRight = Math.min(stepRight, nextEnabled.x);
+                  }
+                  stepRight = Math.min(stepRight, cachedRightEdge - (drawRight ? lineWidth : 0.0F));
+
+                  if (e.x < stepRight) {
+                     drawSolidQuad(wr, e.x - lineWidth, e.y + rowHeight, stepRight - lineWidth, e.y + rowHeight + lineWidth, col);
                   }
                }
             }
@@ -308,15 +333,25 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, col);
 
-               if (cachedIsLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
+               if (cachedIsLeft && i < entryCount - 1) {
                   Entry next = ENTRIES[i + 1];
-                  int nextCol = (!bloom || !glow) ? defaultColor : next.nameColor;
+                  Entry nextEnabled = null;
+                  for (int j = i + 1; j < entryCount; j++) {
+                     if (ENTRIES[j].module.isEnabled()) {
+                        nextEnabled = ENTRIES[j];
+                        break;
+                     }
+                  }
                   float rCurr = e.x + e.width;
                   float rNext = next.x + next.width;
-                  if (rCurr > rNext) {
-                     drawSolidQuad(wr, rNext + lineWidth, e.y + rowHeight, rCurr + lineWidth, e.y + rowHeight + lineWidth, col);
-                  } else if (rCurr < rNext) {
-                     drawSolidQuad(wr, rCurr + lineWidth, e.y + rowHeight - lineWidth, rNext + lineWidth, e.y + rowHeight, nextCol);
+                  float stepLeft = rNext;
+                  if (!next.module.isEnabled() && nextEnabled != null) {
+                     stepLeft = Math.max(stepLeft, nextEnabled.x + nextEnabled.width);
+                  }
+                  stepLeft = Math.max(stepLeft, cachedBaseX + (drawLeft ? lineWidth : 0.0F));
+
+                  if (rCurr > stepLeft) {
+                     drawSolidQuad(wr, stepLeft + lineWidth, e.y + rowHeight, rCurr + lineWidth, e.y + rowHeight + lineWidth, col);
                   }
                }
             }
@@ -344,6 +379,8 @@ public class ArrayListElement extends HudElement {
       float padY = cachedPadY;
       float lineWidth = cachedLineWidth;
       boolean isLeft = cachedIsLeft;
+      float rightEdge = cachedRightEdge;
+      float baseX = cachedBaseX;
       boolean drawBackground = arrayList2.background.isEnabled();
       boolean drawTop = arrayList2.outline.isSelected("Top");
       boolean drawBottom = arrayList2.outline.isSelected("Bottom");
@@ -391,12 +428,23 @@ public class ArrayListElement extends HudElement {
 
          // 2. Bottom Outline
          if (drawBottom) {
-            Entry eLast = ENTRIES[entryCount - 1];
-            float x1 = eLast.x - (drawLeft ? lineWidth : 0.0F);
-            float x2 = eLast.x + eLast.width + (drawRight ? lineWidth : 0.0F);
-            float y1 = eLast.y + rowHeight;
-            float y2 = eLast.y + rowHeight + lineWidth;
-            drawSolidQuad(wr, x1, y1, x2, y2, eLast.nameColor);
+            Entry eLast = null;
+            for (int j = entryCount - 1; j >= 0; j--) {
+               if (ENTRIES[j].module.isEnabled()) {
+                  eLast = ENTRIES[j];
+                  break;
+               }
+            }
+            if (eLast == null && entryCount > 0) {
+               eLast = ENTRIES[entryCount - 1];
+            }
+            if (eLast != null) {
+               float x1 = eLast.x - (drawLeft ? lineWidth : 0.0F);
+               float x2 = isLeft ? (eLast.x + eLast.width + (drawRight ? lineWidth : 0.0F)) : rightEdge;
+               float y1 = eLast.y + rowHeight;
+               float y2 = eLast.y + rowHeight + lineWidth;
+               drawSolidQuad(wr, x1, y1, x2, y2, eLast.nameColor);
+            }
          }
 
          // 3. Left Outline
@@ -409,22 +457,27 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, e.nameColor);
 
-               if (!isLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
+               if (!isLeft && i < entryCount - 1) {
                   Entry next = ENTRIES[i + 1];
-                  if (e.x < next.x) {
-                     // Current row is wider to the left; step is below current row
+                  Entry nextEnabled = null;
+                  for (int j = i + 1; j < entryCount; j++) {
+                     if (ENTRIES[j].module.isEnabled()) {
+                        nextEnabled = ENTRIES[j];
+                        break;
+                     }
+                  }
+                  float stepRight = next.x;
+                  if (!next.module.isEnabled() && nextEnabled != null) {
+                     stepRight = Math.min(stepRight, nextEnabled.x);
+                  }
+                  stepRight = Math.min(stepRight, rightEdge - (drawRight ? lineWidth : 0.0F));
+
+                  if (e.x < stepRight) {
                      float sx1 = e.x - lineWidth;
-                     float sx2 = next.x - lineWidth;
+                     float sx2 = stepRight - lineWidth;
                      float sy1 = e.y + rowHeight;
                      float sy2 = e.y + rowHeight + lineWidth;
                      drawSolidQuad(wr, sx1, sy1, sx2, sy2, e.nameColor);
-                  } else if (e.x > next.x) {
-                     // Next row is wider to the left; step is above next row
-                     float sx1 = next.x - lineWidth;
-                     float sx2 = e.x - lineWidth;
-                     float sy1 = e.y + rowHeight - lineWidth;
-                     float sy2 = e.y + rowHeight;
-                     drawSolidQuad(wr, sx1, sy1, sx2, sy2, next.nameColor);
                   }
                }
             }
@@ -440,24 +493,29 @@ public class ArrayListElement extends HudElement {
                float y2 = e.y + rowHeight;
                drawSolidQuad(wr, x1, y1, x2, y2, e.nameColor);
 
-               if (isLeft && i < entryCount - 1 && !e.animating && !ENTRIES[i + 1].animating) {
+               if (isLeft && i < entryCount - 1) {
                   Entry next = ENTRIES[i + 1];
+                  Entry nextEnabled = null;
+                  for (int j = i + 1; j < entryCount; j++) {
+                     if (ENTRIES[j].module.isEnabled()) {
+                        nextEnabled = ENTRIES[j];
+                        break;
+                     }
+                  }
                   float rCurr = e.x + e.width;
                   float rNext = next.x + next.width;
-                  if (rCurr > rNext) {
-                     // Current row is wider to the right; step is below current row
-                     float sx1 = rNext + lineWidth;
+                  float stepLeft = rNext;
+                  if (!next.module.isEnabled() && nextEnabled != null) {
+                     stepLeft = Math.max(stepLeft, nextEnabled.x + nextEnabled.width);
+                  }
+                  stepLeft = Math.max(stepLeft, baseX + (drawLeft ? lineWidth : 0.0F));
+
+                  if (rCurr > stepLeft) {
+                     float sx1 = stepLeft + lineWidth;
                      float sx2 = rCurr + lineWidth;
                      float sy1 = e.y + rowHeight;
                      float sy2 = e.y + rowHeight + lineWidth;
                      drawSolidQuad(wr, sx1, sy1, sx2, sy2, e.nameColor);
-                  } else if (rCurr < rNext) {
-                     // Next row is wider to the right; step is above next row
-                     float sx1 = rCurr + lineWidth;
-                     float sx2 = rNext + lineWidth;
-                     float sy1 = e.y + rowHeight - lineWidth;
-                     float sy2 = e.y + rowHeight;
-                     drawSolidQuad(wr, sx1, sy1, sx2, sy2, next.nameColor);
                   }
                }
             }
