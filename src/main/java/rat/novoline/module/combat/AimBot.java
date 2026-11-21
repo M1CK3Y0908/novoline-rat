@@ -31,6 +31,10 @@ public class AimBot extends Module {
    private final ComboSetting aimBot = settingManager.register(new ComboSetting(this, "Works on", 0, "Always", "LMB"));
    private final ComboSetting sortBy = settingManager.register(new ComboSetting(this, "Sort by", 0, "FOV", "Health", "Random"));
    private EntityPlayer entityPlayer;
+
+   public EntityPlayer getEntityPlayer() {
+      return this.entityPlayer;
+   }
    private final MultiComboSetting addons = settingManager.register(
       new MultiComboSetting(this, "Addons")
          .add("Save target", true)
