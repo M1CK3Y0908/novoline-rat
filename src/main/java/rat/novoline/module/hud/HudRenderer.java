@@ -48,6 +48,9 @@ public class HudRenderer {
          if (ModuleManager.armorHUD != null && ModuleManager.armorHUD.isEnabled()) {
             ArmorHudElement.updateArmorHud(scaledResolution);
          }
+         if (ModuleManager.hotbar != null && ModuleManager.hotbar.isEnabled()) {
+            HotbarElement.updateHotbar(scaledResolution);
+         }
 
          if (ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled()) {
             ModuleManager.postProcessing.blurScreen();

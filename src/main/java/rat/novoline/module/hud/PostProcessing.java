@@ -138,6 +138,10 @@ public class PostProcessing extends Module {
          ArmorHudElement.renderArmorHudEffects(bloom, glow, sr);
       }
 
+      if (ModuleManager.hotbar != null && ModuleManager.hotbar.isEnabled()) {
+         HotbarElement.renderHotbarEffects(bloom, glow, sr);
+      }
+
       if (ModuleManager.notifications != null && ModuleManager.notifications.isEnabled()) {
          Novoline.getNovoline().getNotificationManager().renderEffects(bloom, glow, sr);
       }

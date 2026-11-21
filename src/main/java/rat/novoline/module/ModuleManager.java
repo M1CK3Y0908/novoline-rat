@@ -26,6 +26,7 @@ import rat.novoline.module.hud.ArrayList;
 import rat.novoline.module.hud.ArmorHUD;
 import rat.novoline.module.hud.ClickGui;
 import rat.novoline.module.hud.HUD;
+import rat.novoline.module.hud.Hotbar;
 import rat.novoline.module.hud.Notifications;
 import rat.novoline.module.hud.PostProcessing;
 import rat.novoline.module.hud.Scoreboard;
@@ -133,6 +134,7 @@ public class ModuleManager {
    public static final Watermark watermark = new Watermark();
    public static final Scoreboard scoreboard = new Scoreboard();
    public static final ArmorHUD armorHUD = new ArmorHUD();
+   public static final Hotbar hotbar = new Hotbar();
    public static final ClickGui clickGui = new ClickGui();
    public static final PostProcessing postProcessing = new PostProcessing();
    public static final Notifications notifications = new Notifications();

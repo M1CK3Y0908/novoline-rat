@@ -32,6 +32,7 @@ public class HudManager {
       this.register(new BlockCounterElement());
       this.register(new ScoreboardElement());
       this.register(new ArmorHudElement());
+      this.register(new HotbarElement());
    }
 
    public void register(HudElement hudElement) {

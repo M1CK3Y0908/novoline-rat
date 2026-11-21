@@ -81,7 +81,7 @@ public class ArrayListElement extends HudElement {
 
    public static boolean isFilteredOut(boolean hideVisuals, boolean boundOnly, Module module) {
       if (module instanceof ArrayList || module instanceof Watermark || module instanceof Notifications
-            || module instanceof TargetHUD || module instanceof PostProcessing || module instanceof ClickGui || module instanceof Scoreboard || module instanceof ArmorHUD) {
+            || module instanceof TargetHUD || module instanceof PostProcessing || module instanceof ClickGui || module instanceof Scoreboard || module instanceof ArmorHUD || module instanceof Hotbar) {
          return true;
       }
       return (boundOnly && module.getKeyBind() == 0)

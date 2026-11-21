@@ -254,6 +254,9 @@ public class GuiIngame extends Gui {
    }
 
    protected void renderTooltip(ScaledResolution sr, float partialTicks) {
+      if (ModuleManager.hotbar != null && ModuleManager.hotbar.isEnabled()) {
+         return;
+      }
       if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
          GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          this.mc.getTextureManager().bindTexture(widgetsTexPath);
