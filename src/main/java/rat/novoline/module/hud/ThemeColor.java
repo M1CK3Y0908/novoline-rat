@@ -10,14 +10,13 @@ import rat.novoline.utils.render.RenderUtils;
 
 public class ThemeColor extends Module {
    public final ComboSetting mode = settingManager.register(
-      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo", "Dynamic")
+      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
    );
    public final ComboSetting animationMode = settingManager.register(
       new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing") {
          @Override
          public boolean shouldShow() {
-            String m = ThemeColor.this.mode.getCurrentElementAsString();
-            return !m.equals("Single Color") && !m.equals("Dynamic");
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color");
          }
       }
    );
@@ -26,7 +25,7 @@ public class ThemeColor extends Module {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
-            return m.equals("Single Color") || m.equals("Double Color") || m.equals("Triple Color") || m.equals("Dynamic");
+            return m.equals("Single Color") || m.equals("Double Color") || m.equals("Triple Color");
          }
       }
    );
@@ -51,9 +50,7 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Gradient Speed", 3.0F, 0.5F, 10.0F) {
          @Override
          public boolean shouldShow() {
-            String m = ThemeColor.this.mode.getCurrentElementAsString();
-            if (m.equals("Dynamic")) return true;
-            return !m.equals("Single Color")
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
@@ -62,9 +59,7 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Gradient Length", 50, 0, 100, "%") {
          @Override
          public boolean shouldShow() {
-            String m = ThemeColor.this.mode.getCurrentElementAsString();
-            if (m.equals("Dynamic")) return true;
-            return !m.equals("Single Color")
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
@@ -73,9 +68,7 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Angle", 0.0F, 0.0F, 360.0F) {
          @Override
          public boolean shouldShow() {
-            String m = ThemeColor.this.mode.getCurrentElementAsString();
-            if (m.equals("Dynamic")) return true;
-            return !m.equals("Single Color")
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Gradient");
          }
       }
@@ -84,8 +77,7 @@ public class ThemeColor extends Module {
       new NumberSetting(this, "Breathing Speed", 1.5F, 0.2F, 5.0F) {
          @Override
          public boolean shouldShow() {
-            String m = ThemeColor.this.mode.getCurrentElementAsString();
-            return !m.equals("Single Color") && !m.equals("Dynamic")
+            return !ThemeColor.this.mode.getCurrentElementAsString().equals("Single Color")
                && ThemeColor.this.animationMode.getCurrentElementAsString().equals("Breathing");
          }
       }
@@ -161,7 +153,7 @@ public class ThemeColor extends Module {
 
       String animMode = this.animationMode.getCurrentElementAsString();
 
-      if (animMode.equals("Breathing") && !m.equals("Dynamic")) {
+      if (animMode.equals("Breathing")) {
          long breathMs = Math.max(200L, (long)(4000.0F / Math.max(0.1F, this.breathingSpeed.getCurrentValue())));
          double timeProgress = (double)(System.currentTimeMillis() % breathMs) / (double)breathMs;
          float factor = (float)((1.0 - Math.cos(timeProgress * 2.0 * Math.PI)) / 2.0);
@@ -214,17 +206,6 @@ public class ThemeColor extends Module {
             int step = row - timeStep;
 
             return switch (m) {
-               case "Dynamic" -> {
-                  float[] hsb = Color.RGBtoHSB(
-                     (this.firstColor.getColor() >> 16) & 0xFF,
-                     (this.firstColor.getColor() >> 8) & 0xFF,
-                     this.firstColor.getColor() & 0xFF,
-                     null
-                  );
-                  int k = (step % 4 + 4) % 4;
-                  float bri = 1.0F - (k / 3.0F) * 0.6F;
-                  yield Color.HSBtoRGB(hsb[0], hsb[1], bri * hsb[2]);
-               }
                case "Double Color" -> {
                   int k = (step % 2 + 2) % 2;
                   yield k == 0 ? this.firstColor.getColor() : this.secondColor.getColor();
@@ -271,17 +252,6 @@ public class ThemeColor extends Module {
          }
 
          return switch (m) {
-            case "Dynamic" -> {
-               float[] hsb = Color.RGBtoHSB(
-                  (this.firstColor.getColor() >> 16) & 0xFF,
-                  (this.firstColor.getColor() >> 8) & 0xFF,
-                  this.firstColor.getColor() & 0xFF,
-                  null
-               );
-               float factor = Math.abs((float)Math.sin(progress * 2.0 * Math.PI));
-               float brightness = 1.0F - factor * 0.6F;
-               yield Color.HSBtoRGB(hsb[0], hsb[1], brightness * hsb[2]);
-            }
             case "Double Color" -> {
                float factor = (float)((1.0 - Math.cos(progress * 2.0 * Math.PI)) / 2.0);
                yield RenderUtils.lerpColor(this.firstColor.getColor(), this.secondColor.getColor(), factor);
