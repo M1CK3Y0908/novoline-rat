@@ -19,6 +19,7 @@ import rat.novoline.event.PreUpdateEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
 import rat.novoline.setting.CheckboxSetting;
+import rat.novoline.setting.MultiComboSetting;
 import rat.novoline.setting.NumberSetting;
 import rat.novoline.utils.player.ItemUtils;
 
@@ -26,170 +27,180 @@ public class InventoryManager extends Module {
    public final CheckboxSetting closeInventory = settingManager.register(new CheckboxSetting(this, "Close inventory", false));
    public final CheckboxSetting disableInLobby = settingManager.register(new CheckboxSetting(this, "Disable in lobby", true));
 
-   public final CheckboxSetting autoSort = settingManager.register(new CheckboxSetting(this, "Auto Sort", true));
+   public final MultiComboSetting function = settingManager.register(
+      new MultiComboSetting(this, "Functions")
+         .add("Sort", true)
+         .add("Clean", true)
+   );
+
    public final NumberSetting sortDelay = settingManager.register(new NumberSetting(this, "Sort delay", 1, 0, 20, " ticks") {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort");
+      }
+   });
+
+   public final NumberSetting cleanDelay = settingManager.register(new NumberSetting(this, "Clean delay", 1, 0, 20, " ticks") {
+      @Override
+      public boolean shouldShow() {
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
    public final NumberSetting sword = settingManager.register(new NumberSetting(this, "Sword", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort");
       }
    });
 
    public final NumberSetting bow = settingManager.register(new NumberSetting(this, "Bow", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort");
       }
    });
 
    public final NumberSetting blocks = settingManager.register(new NumberSetting(this, "Blocks", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort");
       }
    });
 
    public final NumberSetting goldenApple = settingManager.register(new NumberSetting(this, "Golden apple", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort");
       }
    });
 
    public final NumberSetting projectile = settingManager.register(new NumberSetting(this, "Projectile/Rod", 0, 0, 9) {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
-      }
-   });
-
-   public final NumberSetting speedPotion = settingManager.register(new NumberSetting(this, "Speed potion", 0, 0, 9) {
-      @Override
-      public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
-      }
-   });
-
-   public final NumberSetting enderPearl = settingManager.register(new NumberSetting(this, "Ender pearl", 0, 0, 9) {
-      @Override
-      public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
-      }
-   });
-
-   public final NumberSetting waterBucket = settingManager.register(new NumberSetting(this, "Water bucket", 0, 0, 9) {
-      @Override
-      public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
-      }
-   });
-
-   public final NumberSetting lavaBucket = settingManager.register(new NumberSetting(this, "Lava bucket", 0, 0, 9) {
-      @Override
-      public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort");
       }
    });
 
    public final CheckboxSetting rodOverProjectile = settingManager.register(new CheckboxSetting(this, "Rod over projectile", true) {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort") && Math.round(InventoryManager.this.projectile.getCurrentValue()) != 0;
       }
    });
 
-   public final CheckboxSetting onlyWithKnockback = settingManager.register(new CheckboxSetting(this, "^ Only with knockback", true) {
+   public final CheckboxSetting onlyWithKnockback = settingManager.register(new CheckboxSetting(this, "Only with knockback", true) {
       @Override
       public boolean shouldShow() {
-         return InventoryManager.this.autoSort.isEnabled() && InventoryManager.this.rodOverProjectile.isEnabled();
+         return InventoryManager.this.function.isSelected("Sort")
+               && Math.round(InventoryManager.this.projectile.getCurrentValue()) != 0
+               && InventoryManager.this.rodOverProjectile.isEnabled();
       }
    });
 
-   public final NumberSetting inventoryCleaner = settingManager.register(
-      new NumberSetting(this, "Inventory cleaner", -1, -1, 20, " ticks").addLabel(-1.0f, "§cDisabled")
-   );
+   public final NumberSetting speedPotion = settingManager.register(new NumberSetting(this, "Speed potion", 0, 0, 9) {
+      @Override
+      public boolean shouldShow() {
+         return InventoryManager.this.function.isSelected("Sort");
+      }
+   });
+
+   public final NumberSetting enderPearl = settingManager.register(new NumberSetting(this, "Ender pearl", 0, 0, 9) {
+      @Override
+      public boolean shouldShow() {
+         return InventoryManager.this.function.isSelected("Sort");
+      }
+   });
+
+   public final NumberSetting waterBucket = settingManager.register(new NumberSetting(this, "Water bucket", 0, 0, 9) {
+      @Override
+      public boolean shouldShow() {
+         return InventoryManager.this.function.isSelected("Sort");
+      }
+   });
+
+   public final NumberSetting lavaBucket = settingManager.register(new NumberSetting(this, "Lava bucket", 0, 0, 9) {
+      @Override
+      public boolean shouldShow() {
+         return InventoryManager.this.function.isSelected("Sort");
+      }
+   });
 
    // --- Inventory Cleaner Quantity Limits ---
-   public final NumberSetting maxBlocks = settingManager.register(new NumberSetting(this, "Max blocks", 128, 0, 512) {
+   public final NumberSetting maxBlocks = settingManager.register(new NumberSetting(this, "Max blocks", 256, 0, 512) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxGoldenApples = settingManager.register(new NumberSetting(this, "Max golden apples", 32, 0, 512) {
+   public final NumberSetting maxGoldenApples = settingManager.register(new NumberSetting(this, "Max golden apples", 64, 0, 512) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
    public final NumberSetting maxEnderPearls = settingManager.register(new NumberSetting(this, "Max ender pearls", 16, 0, 512) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxProjectiles = settingManager.register(new NumberSetting(this, "Max projectiles", 32, 0, 512) {
+   public final NumberSetting maxProjectiles = settingManager.register(new NumberSetting(this, "Max projectiles", 0, 0, 512) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxArrows = settingManager.register(new NumberSetting(this, "Max arrows", 64, 0, 512) {
+   public final NumberSetting maxArrows = settingManager.register(new NumberSetting(this, "Max arrows", 0, 0, 512) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
    public final NumberSetting maxPotions = settingManager.register(new NumberSetting(this, "Max potions", 4, 0, 16) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxWaterBuckets = settingManager.register(new NumberSetting(this, "Max water buckets", 1, 0, 16) {
+   public final NumberSetting maxWaterBuckets = settingManager.register(new NumberSetting(this, "Max water buckets", 0, 0, 16) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxLavaBuckets = settingManager.register(new NumberSetting(this, "Max lava buckets", 1, 0, 16) {
+   public final NumberSetting maxLavaBuckets = settingManager.register(new NumberSetting(this, "Max lava buckets", 0, 0, 16) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxFishingRods = settingManager.register(new NumberSetting(this, "Max fishing rods", 1, 0, 16) {
+   public final NumberSetting maxFishingRods = settingManager.register(new NumberSetting(this, "Max fishing rods", 0, 0, 16) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxFlintAndSteel = settingManager.register(new NumberSetting(this, "Max flint and steel", 1, 0, 16) {
+   public final NumberSetting maxFlintAndSteel = settingManager.register(new NumberSetting(this, "Max flint and steel", 0, 0, 16) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
-   public final NumberSetting maxShears = settingManager.register(new NumberSetting(this, "Max shears", 1, 0, 16) {
+   public final NumberSetting maxShears = settingManager.register(new NumberSetting(this, "Max shears", 0, 0, 16) {
       @Override
       public boolean shouldShow() {
-         return Math.round(InventoryManager.this.inventoryCleaner.getCurrentValue()) >= 0;
+         return InventoryManager.this.function.isSelected("Clean");
       }
    });
 
@@ -199,7 +210,7 @@ public class InventoryManager extends Module {
       long getDelay(InventoryManager inv) {
          switch (this) {
             case SORT: return Math.round(inv.sortDelay.getCurrentValue());
-            default: return Math.round(inv.inventoryCleaner.getCurrentValue());
+            default: return Math.round(inv.cleanDelay.getCurrentValue());
          }
       }
    }
@@ -262,8 +273,8 @@ public class InventoryManager extends Module {
             return;
          }
 
-         boolean hasSort = this.autoSort.isEnabled();
-         boolean hasCleaner = Math.round(this.inventoryCleaner.getCurrentValue()) >= 0;
+         boolean hasSort = this.function.isSelected("Sort");
+         boolean hasCleaner = this.function.isSelected("Clean");
 
          if (hasSort || hasCleaner) {
             updateArmor();
