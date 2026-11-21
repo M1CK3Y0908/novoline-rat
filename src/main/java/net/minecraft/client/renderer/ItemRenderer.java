@@ -388,14 +388,14 @@ public class ItemRenderer {
          this.setupArmChams(chams2);
       }
 
-      float rightPunchDist = (isRightPunch && swingProgress > 0.0F) ? punch * -0.28F : 0.0F;
-      float rightPunchInward = (isRightPunch && swingProgress > 0.0F) ? punch * -0.08F : 0.0F;
-      float rightPunchUp = (isRightPunch && swingProgress > 0.0F) ? punch * 0.04F : 0.0F;
-      float rightRecoil = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.03F : 0.0F;
+      float rightPunchDist = (isRightPunch && swingProgress > 0.0F) ? punch * -0.36F : 0.0F;
+      float rightPunchInward = (isRightPunch && swingProgress > 0.0F) ? punch * -0.10F : 0.0F;
+      float rightPunchUp = (isRightPunch && swingProgress > 0.0F) ? punch * 0.08F : 0.0F;
+      float rightRecoil = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.04F : 0.0F;
 
-      float rX = 0.28F + rightPunchInward;
-      float rY = -0.34F + rightPunchUp + (isBlocking ? 0.06F : 0.0F);
-      float rZ = -0.42F + rightPunchDist + rightRecoil + (isBlocking ? -0.06F : 0.0F);
+      float rX = 0.32F + rightPunchInward;
+      float rY = -0.50F + rightPunchUp + (isBlocking ? 0.08F : 0.0F);
+      float rZ = -0.26F + rightPunchDist + rightRecoil + (isBlocking ? -0.06F : 0.0F);
 
       GlStateManager.translate(rX, rY, rZ);
       GlStateManager.scale(-1.0F, -1.0F, 1.0F);
@@ -415,14 +415,14 @@ public class ItemRenderer {
          this.setupArmChams(chams2);
       }
 
-      float leftPunchDist = (!isRightPunch && swingProgress > 0.0F) ? punch * -0.28F : 0.0F;
-      float leftPunchInward = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.08F : 0.0F;
-      float leftPunchUp = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.04F : 0.0F;
-      float leftRecoil = (isRightPunch && swingProgress > 0.0F) ? punch * 0.03F : 0.0F;
+      float leftPunchDist = (!isRightPunch && swingProgress > 0.0F) ? punch * -0.36F : 0.0F;
+      float leftPunchInward = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.10F : 0.0F;
+      float leftPunchUp = (!isRightPunch && swingProgress > 0.0F) ? punch * 0.08F : 0.0F;
+      float leftRecoil = (isRightPunch && swingProgress > 0.0F) ? punch * 0.04F : 0.0F;
 
-      float lX = -0.28F + leftPunchInward;
-      float lY = -0.34F + leftPunchUp + (isBlocking ? 0.06F : 0.0F);
-      float lZ = -0.42F + leftPunchDist + leftRecoil + (isBlocking ? -0.06F : 0.0F);
+      float lX = -0.32F + leftPunchInward;
+      float lY = -0.50F + leftPunchUp + (isBlocking ? 0.08F : 0.0F);
+      float lZ = -0.26F + leftPunchDist + leftRecoil + (isBlocking ? -0.06F : 0.0F);
 
       GlStateManager.translate(lX, lY, lZ);
       GlStateManager.scale(-1.0F, -1.0F, 1.0F);

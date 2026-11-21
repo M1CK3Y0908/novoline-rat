@@ -30,12 +30,16 @@ public class SwordTrail {
     }
 
     public void render(ModelBendsPlayer model) {
+        if (this.trailPartList.isEmpty()) {
+            return;
+        }
         Minecraft.getMinecraft().getTextureManager().bindTexture(ClientProxy.texture_NULL);
         GL11.glDepthFunc((int)515);
         GL11.glEnable((int)3042);
         GL11.glBlendFunc((int)770, (int)771);
         GL11.glDisable((int)2884);
         GL11.glDisable((int)2896);
+        GL11.glDepthMask(false);
         GL11.glHint((int)3152, (int)4354);
         GL11.glShadeModel((int)7425);
         GL11.glPushMatrix();
@@ -96,8 +100,11 @@ public class SwordTrail {
         }
         GL11.glEnd();
         GL11.glPopMatrix();
+        GL11.glDepthMask(true);
+        GL11.glShadeModel((int)7424);
         GL11.glEnable((int)3553);
-        GL11.glDisable((int)2884);
+        GL11.glDisable((int)3042);
+        GL11.glEnable((int)2884);
         GL11.glEnable((int)2896);
     }
 

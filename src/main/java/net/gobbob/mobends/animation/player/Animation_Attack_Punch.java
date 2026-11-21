@@ -16,9 +16,6 @@ public class Animation_Attack_Punch {
         if (data.ticksAfterPunch < 0.5f) {
             model.swordTrail.reset();
         }
-        if (data.ticksAfterPunch < 4.0f) {
-            model.swordTrail.add(model);
-        }
         if (data.motion.x == 0.0f & data.motion.z == 0.0f) {
             model.renderRotation.setSmoothY(20.0f);
             model.renderOffset.setSmoothY(-2.0f);

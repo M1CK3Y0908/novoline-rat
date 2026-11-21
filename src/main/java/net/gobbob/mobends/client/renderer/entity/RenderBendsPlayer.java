@@ -108,13 +108,17 @@ public class RenderBendsPlayer extends RenderPlayer {
         ((ModelBendsPlayer)this.mainModel).updateWithEntityData(p_77041_1_);
         ((ModelBendsPlayer)this.mainModel).postRenderTranslate(0.0625f);
         Data_Player data = Data_Player.get(p_77041_1_.getEntityId());
-        if (((SettingsBoolean)SettingsNode.getSetting("swordTrail")).data) {
+        boolean kungfu = rat.novoline.module.ModuleManager.chineseKungfu != null
+            && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+            && p_77041_1_ == Minecraft.getMinecraft().thePlayer;
+        if (((SettingsBoolean)SettingsNode.getSetting("swordTrail")).data && !kungfu) {
             GL11.glPushMatrix();
             float f5 = 0.0625f;
             GL11.glScalef(-f5, -f5, f5);
             data.swordTrail.render((ModelBendsPlayer)this.mainModel);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             GL11.glPopMatrix();
+            this.bindTexture(this.getEntityTexture(p_77041_1_));
         }
         ((ModelBendsPlayer)this.mainModel).postRenderRotate(0.0625f);
     }
@@ -300,11 +304,11 @@ public class RenderBendsPlayer extends RenderPlayer {
             rightForeArm.rotationPointZ = 2.0f;
 
             if (isPunching) {
-                float elbowBend = -75.0f + punch * 75.0f;
+                float elbowBend = -70.0f + punch * 70.0f;
                 rightForeArm.rotation.set(elbowBend, 0.0f, 0.0f);
                 rightForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
 
-                float armX = -85.0f - punch * 5.0f;
+                float armX = -68.0f - punch * 20.0f;
                 float armY = -12.0f + punch * 12.0f;
                 float armZ = 18.0f - punch * 18.0f;
                 rightArm.rotation.set(armX, armY, armZ);
@@ -315,9 +319,9 @@ public class RenderBendsPlayer extends RenderPlayer {
                 rightArm.rotation.set(-80.0f, -25.0f, 25.0f);
                 rightArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
             } else {
-                rightForeArm.rotation.set(-75.0f, 0.0f, 0.0f);
+                rightForeArm.rotation.set(-70.0f, 0.0f, 0.0f);
                 rightForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
-                rightArm.rotation.set(-80.0f, -12.0f, 18.0f);
+                rightArm.rotation.set(-68.0f, -12.0f, 18.0f);
                 rightArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
             }
 
@@ -382,11 +386,11 @@ public class RenderBendsPlayer extends RenderPlayer {
             leftForeArm.rotationPointZ = 2.0f;
 
             if (isPunching) {
-                float elbowBend = -75.0f + punch * 75.0f;
+                float elbowBend = -70.0f + punch * 70.0f;
                 leftForeArm.rotation.set(elbowBend, 0.0f, 0.0f);
                 leftForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
 
-                float armX = -85.0f - punch * 5.0f;
+                float armX = -68.0f - punch * 20.0f;
                 float armY = 12.0f - punch * 12.0f;
                 float armZ = -18.0f + punch * 18.0f;
                 leftArm.rotation.set(armX, armY, armZ);
@@ -397,9 +401,9 @@ public class RenderBendsPlayer extends RenderPlayer {
                 leftArm.rotation.set(-80.0f, 25.0f, -25.0f);
                 leftArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
             } else {
-                leftForeArm.rotation.set(-75.0f, 0.0f, 0.0f);
+                leftForeArm.rotation.set(-70.0f, 0.0f, 0.0f);
                 leftForeArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
-                leftArm.rotation.set(-80.0f, 12.0f, -18.0f);
+                leftArm.rotation.set(-68.0f, 12.0f, -18.0f);
                 leftArm.pre_rotation.set(0.0f, 0.0f, 0.0f);
             }
 
