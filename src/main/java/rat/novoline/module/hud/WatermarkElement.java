@@ -89,23 +89,17 @@ public class WatermarkElement extends HudElement {
             this.watermarkText = stringBuilder.toString();
             FontAdapter customFont = ModuleManager.watermark.getFont(false);
             FontAdapter cFontRenderer = customFont != null ? customFont : Fonts.robotoRegularSize14;
-            int c1 = ModuleManager.themeColor.getColor(this.getX(), this.getY());
-            int c2 = ModuleManager.themeColor.getColor(this.getX() + this.getWidth(), this.getY());
             boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
             if (!postProcessingActive) {
                RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 1.5F, 1610612736);
             }
             int bgColor = ModuleManager.themeColor.getBackgroundColor();
             RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), bgColor);
-            RenderUtils.drawGradientLine(
+            RenderUtils.drawThemeGradientBar(
                this.getX(),
                this.getY(),
                this.getX() + this.getWidth(),
-               this.getY(),
-               3.0F,
-               c1,
-               c2,
-               false
+               this.getY() + 2.0F
             );
             cFontRenderer.drawStringWithShadow(
                this.watermarkText,
@@ -201,9 +195,7 @@ public class WatermarkElement extends HudElement {
          }
       } else {
          if ("OneTap".equalsIgnoreCase(type)) {
-            int c1 = ModuleManager.themeColor.getColor(x, y);
-            int c2 = ModuleManager.themeColor.getColor(x + w, y);
-            RenderUtils.drawGradientLine(x, y, x + w, y, 3.0F, c1, c2, false);
+            RenderUtils.drawThemeGradientBar(x, y, x + w, y + 2.0F);
          } else if ("NeverLose".equalsIgnoreCase(type)) {
             int cTheme = ModuleManager.themeColor.getColor(x, y);
             FilledPolygonRenderer fpr = new FilledPolygonRenderer();

@@ -22,17 +22,11 @@ public class HypixelStatsElement extends HudElement {
       if (this.hypixelStats.isEnabled() && this.hypixelStats.isVisible()) {
          RenderUtils.drawShadow(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 1.5F, 1610612736);
          RenderUtils.drawRect(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), -1155456735);
-         int c1 = ModuleManager.themeColor.getColor(this.getX(), this.getY());
-         int c2 = ModuleManager.themeColor.getColor(this.getX() + this.getWidth(), this.getY());
-         RenderUtils.drawGradientLine(
+         RenderUtils.drawThemeGradientBar(
             this.getX(),
             this.getY(),
             this.getX() + this.getWidth(),
-            this.getY(),
-            3.0F,
-            c1,
-            c2,
-            false
+            this.getY() + 2.0F
          );
          FontAdapter titleFont = this.hypixelStats.getTitleFont();
          titleFont.drawStringWithShadow("Hypixel Stats", this.getX() + 3.0F, this.getY() + 7.0F, -1);

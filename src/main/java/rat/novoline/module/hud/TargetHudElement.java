@@ -494,18 +494,17 @@ public class TargetHudElement extends HudElement {
             y + 29.0F + 1.5F + 0.5F,
             1342177280
          );
-         int c1;
-         int c2;
          if (isThemeHealthColor()) {
-            c1 = ModuleManager.themeColor.getColor(x + 2.0F, y + 29.0F);
-            c2 = ModuleManager.themeColor.getColor(x + 2.0F + f4, y + 29.0F);
+            RenderUtils.drawThemeGradientBar(
+               x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F
+            );
          } else {
-            c1 = getHealthColor(entry.animatedHealth, maxHealth);
-            c2 = getHealthSecondaryColor(entry.animatedHealth, maxHealth);
+            int c1 = getHealthColor(entry.animatedHealth, maxHealth);
+            int c2 = getHealthSecondaryColor(entry.animatedHealth, maxHealth);
+            RenderUtils.drawHorizontalGradientRect(
+               x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F, c1, c2
+            );
          }
-         RenderUtils.drawHorizontalGradientRect(
-            x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F, c1, c2
-         );
          RenderUtils.drawRect(
             x + 2.0F - 0.5F,
             y + 29.0F + 3.0F - 0.5F,
@@ -551,18 +550,17 @@ public class TargetHudElement extends HudElement {
             y + 24.0F + 1.5F + 0.5F,
             1342177280
          );
-         int c1;
-         int c2;
          if (isThemeHealthColor()) {
-            c1 = ModuleManager.themeColor.getColor(x + 28.0F, y + 21.0F);
-            c2 = ModuleManager.themeColor.getColor(x + 28.0F + f7, y + 21.0F);
+            RenderUtils.drawThemeGradientBar(
+               x + 28.0F, y + 21.0F, x + 28.0F + f7, y + 24.0F + 1.5F
+            );
          } else {
-            c1 = getHealthColor(entry.animatedHealth, maxHealth2);
-            c2 = getHealthSecondaryColor(entry.animatedHealth, maxHealth2);
+            int c1 = getHealthColor(entry.animatedHealth, maxHealth2);
+            int c2 = getHealthSecondaryColor(entry.animatedHealth, maxHealth2);
+            RenderUtils.drawHorizontalGradientRect(
+               x + 28.0F, y + 21.0F, x + 28.0F + f7, y + 24.0F + 1.5F, c1, c2
+            );
          }
-         RenderUtils.drawHorizontalGradientRect(
-            x + 28.0F, y + 21.0F, x + 28.0F + f7, y + 24.0F + 1.5F, c1, c2
-         );
       } else if (currentElement == 2) {
          float maxHealth3 = player.getMaxHealth();
          entry.animatedHealth = SmoothingUtils.approachWithMinimumStep(entry.animatedHealth, Math.max(0.0F, player.getHealth()), 10.0F, 0.01F);
@@ -592,20 +590,32 @@ public class TargetHudElement extends HudElement {
          float f8 = width - 34.0F - 4.0F;
          float f9 = f8 * MathHelper.clamp_float(entry.animatedHealth / maxHealth3, 0.0F, 1.0F);
          RenderUtils.drawRect(x + 34.0F, y + 24.5F, x + width - 4.0F, y + 26.5F + 1.5F, -1876942816);
-         int barColor = isThemeHealthColor()
-            ? ModuleManager.themeColor.getColor(x + 34.0F, y + 24.5F)
-            : getHealthColor(entry.animatedHealth, maxHealth3);
-         if (!postProcessingActive) {
-            RenderUtils.drawShadow(
-               x + 34.0F,
-               y + 24.5F,
-               x + 34.0F + f9,
-               y + 26.5F + 1.5F,
-               2.0F,
-               RenderUtils.withAlphaFraction(barColor, 0.4F)
-            );
+         if (isThemeHealthColor()) {
+            if (!postProcessingActive) {
+               RenderUtils.drawShadow(
+                  x + 34.0F,
+                  y + 24.5F,
+                  x + 34.0F + f9,
+                  y + 26.5F + 1.5F,
+                  2.0F,
+                  RenderUtils.withAlphaFraction(ModuleManager.themeColor.getColor(x + 34.0F, y + 24.5F), 0.4F)
+               );
+            }
+            RenderUtils.drawThemeGradientBar(x + 34.0F, y + 24.5F, x + 34.0F + f9, y + 26.5F + 1.5F);
+         } else {
+            int barColor = getHealthColor(entry.animatedHealth, maxHealth3);
+            if (!postProcessingActive) {
+               RenderUtils.drawShadow(
+                  x + 34.0F,
+                  y + 24.5F,
+                  x + 34.0F + f9,
+                  y + 26.5F + 1.5F,
+                  2.0F,
+                  RenderUtils.withAlphaFraction(barColor, 0.4F)
+               );
+            }
+            RenderUtils.drawRect(x + 34.0F, y + 24.5F, x + 34.0F + f9, y + 26.5F + 1.5F, barColor);
          }
-         RenderUtils.drawRect(x + 34.0F, y + 24.5F, x + 34.0F + f9, y + 26.5F + 1.5F, barColor);
       } else if (currentElement == 3) {
          float hp = Math.max(0.0F, player.getHealth() + player.getAbsorptionAmount());
          float maxHP = player.getMaxHealth() + player.getAbsorptionAmount() - 0.05F;
@@ -650,14 +660,20 @@ public class TargetHudElement extends HudElement {
          float barStartX = x + 40.0F;
          float barY1 = y + 18.0F;
          float barY2 = y + 28.8F;
-         int hudColor = isThemeHealthColor()
-            ? ModuleManager.themeColor.getColor(barStartX, barY1)
-            : getHealthColor(health, maxHP);
-         int darkerHudColor = new Color(hudColor).darker().getRGB();
 
          RenderUtils.drawRect(barStartX, barY1, barStartX + 100.0F * space, barY2, new Color(0, 0, 0, 50).getRGB());
-         RenderUtils.drawRect(barStartX, barY1, barStartX + percent * space, barY2, hudColor);
-         RenderUtils.drawRect(barStartX + percent * space, barY1, barStartX + (float)((double)percent + entry.diffP) * space, barY2, darkerHudColor);
+         if (isThemeHealthColor()) {
+            RenderUtils.drawThemeGradientBar(barStartX, barY1, barStartX + percent * space, barY2);
+            if (entry.diffP > 0.0) {
+               int darkerHudColor = new Color(ModuleManager.themeColor.getColor(barStartX + percent * space, barY1)).darker().getRGB();
+               RenderUtils.drawRect(barStartX + percent * space, barY1, barStartX + (float)((double)percent + entry.diffP) * space, barY2, darkerHudColor);
+            }
+         } else {
+            int hudColor = getHealthColor(health, maxHP);
+            int darkerHudColor = new Color(hudColor).darker().getRGB();
+            RenderUtils.drawRect(barStartX, barY1, barStartX + percent * space, barY2, hudColor);
+            RenderUtils.drawRect(barStartX + percent * space, barY1, barStartX + (float)((double)percent + entry.diffP) * space, barY2, darkerHudColor);
+         }
 
          String text = String.format(Locale.ENGLISH, "%.1f%%", percent);
          float textX = barStartX + 50.0F * space - (float)minecraft.fontRendererObj.getInt3(text) / 2.0F;

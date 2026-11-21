@@ -25,6 +25,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
+import rat.novoline.module.ModuleManager;
 import rat.novoline.utils.math.SmoothingUtils;
 
 public class RenderUtils {
@@ -279,6 +280,110 @@ public class RenderUtils {
 
       GlStateManager.enableTexture2D();
       GlStateManager.disableBlend();
+   }
+
+   public static void drawThemeGradientBar(float left, float top, float right, float bottom) {
+      drawThemeGradientBar(left, top, right, bottom, 1.0F);
+   }
+
+   public static void drawThemeGradientBar(float left, float top, float right, float bottom, float alpha) {
+      if (left == right || top == bottom || alpha <= 0.0F) {
+         return;
+      }
+      float minX = Math.min(left, right);
+      float maxX = Math.max(left, right);
+      float minY = Math.min(top, bottom);
+      float maxY = Math.max(top, bottom);
+      float w = maxX - minX;
+      float h = maxY - minY;
+
+      if (ModuleManager.themeColor == null) {
+         drawRect(minX, minY, maxX, maxY, withAlphaFraction(-1, alpha));
+         return;
+      }
+
+      String animMode = ModuleManager.themeColor.animationMode.getCurrentElementAsString();
+      String mode = ModuleManager.themeColor.mode.getCurrentElementAsString();
+      float gLen = ModuleManager.themeColor.gradientLength.getCurrentValue();
+
+      if (mode.equals("Single Color") || animMode.equals("Breathing") || gLen <= 0.0F) {
+         int col = ModuleManager.themeColor.getColor(minX, minY);
+         if (alpha < 1.0F) {
+            col = withAlphaFraction(col, alpha);
+         }
+         drawRect(minX, minY, maxX, maxY, col);
+         return;
+      }
+
+      GlStateManager.disableTexture2D();
+      GlStateManager.enableBlend();
+      GlStateManager.disableAlpha();
+      applyBlendFunc();
+      GlStateManager.shadeModel(7425);
+
+      Tessellator instance = Tessellator.getInstance();
+      WorldRenderer wr = instance.getWorldRenderer();
+      wr.begin(7, DefaultVertexFormats.POSITION_COLOR);
+
+      if (w >= h) {
+         float step = Math.max(1.0F, Math.min(3.0F, w / 40.0F));
+         float curX = minX;
+         int c1 = ModuleManager.themeColor.getColor(curX, minY);
+         while (curX < maxX) {
+            float nextX = Math.min(maxX, curX + step);
+            int c2 = ModuleManager.themeColor.getColor(nextX, minY);
+
+            float r1 = (c1 >> 16 & 0xFF) / 255.0F;
+            float g1 = (c1 >> 8 & 0xFF) / 255.0F;
+            float b1 = (c1 & 0xFF) / 255.0F;
+            float a1 = ((c1 >> 24 & 0xFF) / 255.0F) * alpha;
+
+            float r2 = (c2 >> 16 & 0xFF) / 255.0F;
+            float g2 = (c2 >> 8 & 0xFF) / 255.0F;
+            float b2 = (c2 & 0xFF) / 255.0F;
+            float a2 = ((c2 >> 24 & 0xFF) / 255.0F) * alpha;
+
+            wr.pos(nextX, minY, 0.0).color(r2, g2, b2, a2).endVertex();
+            wr.pos(curX, minY, 0.0).color(r1, g1, b1, a1).endVertex();
+            wr.pos(curX, maxY, 0.0).color(r1, g1, b1, a1).endVertex();
+            wr.pos(nextX, maxY, 0.0).color(r2, g2, b2, a2).endVertex();
+
+            curX = nextX;
+            c1 = c2;
+         }
+      } else {
+         float step = Math.max(1.0F, Math.min(3.0F, h / 40.0F));
+         float curY = minY;
+         int c1 = ModuleManager.themeColor.getColor(minX, curY);
+         while (curY < maxY) {
+            float nextY = Math.min(maxY, curY + step);
+            int c2 = ModuleManager.themeColor.getColor(minX, nextY);
+
+            float r1 = (c1 >> 16 & 0xFF) / 255.0F;
+            float g1 = (c1 >> 8 & 0xFF) / 255.0F;
+            float b1 = (c1 & 0xFF) / 255.0F;
+            float a1 = ((c1 >> 24 & 0xFF) / 255.0F) * alpha;
+
+            float r2 = (c2 >> 16 & 0xFF) / 255.0F;
+            float g2 = (c2 >> 8 & 0xFF) / 255.0F;
+            float b2 = (c2 & 0xFF) / 255.0F;
+            float a2 = ((c2 >> 24 & 0xFF) / 255.0F) * alpha;
+
+            wr.pos(maxX, curY, 0.0).color(r1, g1, b1, a1).endVertex();
+            wr.pos(minX, curY, 0.0).color(r1, g1, b1, a1).endVertex();
+            wr.pos(minX, nextY, 0.0).color(r2, g2, b2, a2).endVertex();
+            wr.pos(maxX, nextY, 0.0).color(r2, g2, b2, a2).endVertex();
+
+            curY = nextY;
+            c1 = c2;
+         }
+      }
+
+      instance.draw();
+      GlStateManager.shadeModel(7424);
+      GlStateManager.disableBlend();
+      GlStateManager.enableAlpha();
+      GlStateManager.enableTexture2D();
    }
 
    public static void drawBoxFilled(AxisAlignedBB axisAlignedBB, float f, float f2, float f3, float f4) {

@@ -239,7 +239,11 @@ public class ArmorHudElement extends HudElement {
          RenderUtils.drawRect(barX, lineY, barX + barWidth, lineY + lineWidth, 0x40000000);
          // Durability bar
          if (currentLineWidth > 0.0F) {
-            RenderUtils.drawRect(barX, lineY, barX + currentLineWidth, lineY + lineWidth, color);
+            if (isTheme) {
+               RenderUtils.drawThemeGradientBar(barX, lineY, barX + currentLineWidth, lineY + lineWidth);
+            } else {
+               RenderUtils.drawRect(barX, lineY, barX + currentLineWidth, lineY + lineWidth, color);
+            }
          }
       }
    }

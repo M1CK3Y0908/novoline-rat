@@ -231,7 +231,7 @@ public class ThemeColor extends Module {
             } else {
                double rad = Math.toRadians(this.angle.getCurrentValue());
                double projected = x * Math.cos(rad) + y * Math.sin(rad);
-               double waveLength = Math.max(10.0, 300.0 * (gLen / 50.0));
+               double waveLength = Math.max(10.0, 120.0 * (gLen / 50.0));
                spatialProgress = projected / waveLength;
             }
          }

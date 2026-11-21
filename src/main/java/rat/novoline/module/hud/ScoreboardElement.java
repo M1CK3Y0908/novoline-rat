@@ -383,22 +383,20 @@ public class ScoreboardElement extends HudElement {
          boolean drawLeft = scoreboardMod.outline.isSelected("Left");
          boolean drawRight = scoreboardMod.outline.isSelected("Right");
 
-         int outlineColor = ModuleManager.themeColor.getColor(x, y);
-
          float topX1 = x - (drawLeft ? lw : 0.0F);
          float topX2 = x + w + (drawRight ? lw : 0.0F);
 
          if (drawTop) {
-            RenderUtils.drawRect(topX1, y - lw, topX2, y, outlineColor);
+            RenderUtils.drawThemeGradientBar(topX1, y - lw, topX2, y);
          }
          if (drawBottom) {
-            RenderUtils.drawRect(topX1, y + h, topX2, y + h + lw, outlineColor);
+            RenderUtils.drawThemeGradientBar(topX1, y + h, topX2, y + h + lw);
          }
          if (drawLeft) {
-            RenderUtils.drawRect(x - lw, y, x, y + h, outlineColor);
+            RenderUtils.drawThemeGradientBar(x - lw, y, x, y + h);
          }
          if (drawRight) {
-            RenderUtils.drawRect(x + w, y, x + w + lw, y + h, outlineColor);
+            RenderUtils.drawThemeGradientBar(x + w, y, x + w + lw, y + h);
          }
       }
 
@@ -466,21 +464,35 @@ public class ScoreboardElement extends HudElement {
       }
 
       if (hasOutline) {
-         int outlineColor = (!bloom || !glow) ? -16777216 : ModuleManager.themeColor.getColor(x, y);
          float topX1 = x - (drawLeft ? lw : 0.0F);
          float topX2 = x + w + (drawRight ? lw : 0.0F);
 
-         if (drawTop) {
-            RenderUtils.drawRect(topX1, y - lw, topX2, y, outlineColor);
-         }
-         if (drawBottom) {
-            RenderUtils.drawRect(topX1, y + h, topX2, y + h + lw, outlineColor);
-         }
-         if (drawLeft) {
-            RenderUtils.drawRect(x - lw, y, x, y + h, outlineColor);
-         }
-         if (drawRight) {
-            RenderUtils.drawRect(x + w, y, x + w + lw, y + h, outlineColor);
+         if (!bloom || !glow) {
+            if (drawTop) {
+               RenderUtils.drawRect(topX1, y - lw, topX2, y, -16777216);
+            }
+            if (drawBottom) {
+               RenderUtils.drawRect(topX1, y + h, topX2, y + h + lw, -16777216);
+            }
+            if (drawLeft) {
+               RenderUtils.drawRect(x - lw, y, x, y + h, -16777216);
+            }
+            if (drawRight) {
+               RenderUtils.drawRect(x + w, y, x + w + lw, y + h, -16777216);
+            }
+         } else {
+            if (drawTop) {
+               RenderUtils.drawThemeGradientBar(topX1, y - lw, topX2, y);
+            }
+            if (drawBottom) {
+               RenderUtils.drawThemeGradientBar(topX1, y + h, topX2, y + h + lw);
+            }
+            if (drawLeft) {
+               RenderUtils.drawThemeGradientBar(x - lw, y, x, y + h);
+            }
+            if (drawRight) {
+               RenderUtils.drawThemeGradientBar(x + w, y, x + w + lw, y + h);
+            }
          }
       }
    }
@@ -545,21 +557,20 @@ public class ScoreboardElement extends HudElement {
          boolean drawBottom = scoreboardMod.outline.isSelected("Bottom");
          boolean drawLeft = scoreboardMod.outline.isSelected("Left");
          boolean drawRight = scoreboardMod.outline.isSelected("Right");
-         int outlineColor = ModuleManager.themeColor.getColor(x, y);
          float topX1 = x - (drawLeft ? lw : 0.0F);
          float topX2 = x + w + (drawRight ? lw : 0.0F);
 
          if (drawTop) {
-            RenderUtils.drawRect(topX1, y - lw, topX2, y, outlineColor);
+            RenderUtils.drawThemeGradientBar(topX1, y - lw, topX2, y);
          }
          if (drawBottom) {
-            RenderUtils.drawRect(topX1, y + h, topX2, y + h + lw, outlineColor);
+            RenderUtils.drawThemeGradientBar(topX1, y + h, topX2, y + h + lw);
          }
          if (drawLeft) {
-            RenderUtils.drawRect(x - lw, y, x, y + h, outlineColor);
+            RenderUtils.drawThemeGradientBar(x - lw, y, x, y + h);
          }
          if (drawRight) {
-            RenderUtils.drawRect(x + w, y, x + w + lw, y + h, outlineColor);
+            RenderUtils.drawThemeGradientBar(x + w, y, x + w + lw, y + h);
          }
       }
 
