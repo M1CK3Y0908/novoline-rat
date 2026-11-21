@@ -122,6 +122,13 @@ extends EntityData {
         if (this.ticksAfterThrowup - this.ticksPerFrame == 0.0f) {
             this.sprintJumpLeg = !this.sprintJumpLeg;
         }
+        boolean kungfu = rat.novoline.module.ModuleManager.chineseKungfu != null
+            && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+            && this.getEntity() == Minecraft.getMinecraft().thePlayer;
+        if (kungfu && this.ticksAfterPunch >= 4.0f && (this.getEntity().isSwingInProgress || this.getEntity().swingProgress > 0.0f)) {
+            this.fistPunchArm = !this.fistPunchArm;
+            this.ticksAfterPunch = 0.0f;
+        }
     }
 
     @Override
@@ -149,6 +156,11 @@ extends EntityData {
                     }
                     this.ticksAfterPunch = 0.0f;
                 }
+            }
+        } else if (kungfu) {
+            if (this.ticksAfterPunch >= 4.0f) {
+                this.fistPunchArm = !this.fistPunchArm;
+                this.ticksAfterPunch = 0.0f;
             }
         } else {
             this.fistPunchArm = !this.fistPunchArm;

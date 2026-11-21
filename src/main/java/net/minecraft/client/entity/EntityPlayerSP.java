@@ -21,6 +21,7 @@ import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.client.gui.inventory.GuiFurnace;
 import net.minecraft.client.gui.inventory.GuiScreenHorseInventory;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IMerchant;
@@ -575,6 +576,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
    public void swingItemNoPacket() {
       super.swingItemNoPacket();
       this.sendQueue.addToSendQueue(new C0APacketAnimation());
+      ItemRenderer.onPlayerAttack();
    }
 
    @Override

@@ -1,5 +1,6 @@
 package rat.novoline.module.visual;
 
+import net.minecraft.client.renderer.ItemRenderer;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
 import rat.novoline.setting.CheckboxSetting;
@@ -10,5 +11,10 @@ public class ChineseKungfu extends Module {
 
     public ChineseKungfu() {
         super(Category.VISUAL, "ChineseKungfu", "Hides held items and armor for Kung Fu combat with Mo' Bends effects");
+    }
+
+    @Override
+    public void onDisable() {
+        ItemRenderer.resetKungfuAnimation();
     }
 }
