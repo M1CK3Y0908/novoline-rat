@@ -10,7 +10,7 @@ import rat.novoline.utils.render.RenderUtils;
 
 public class ThemeColor extends Module {
    public final ComboSetting mode = settingManager.register(
-      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo")
+      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo", "Dynamic")
    );
    public final ComboSetting animationMode = settingManager.register(
       new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing") {
@@ -28,7 +28,7 @@ public class ThemeColor extends Module {
          @Override
          public boolean shouldShow() {
             String m = ThemeColor.this.mode.getCurrentElementAsString();
-            return m.equals("Single Color") || m.equals("Double Color") || m.equals("Triple Color");
+            return m.equals("Single Color") || m.equals("Double Color") || m.equals("Triple Color") || m.equals("Dynamic");
          }
       }
    );
@@ -174,6 +174,16 @@ public class ThemeColor extends Module {
          float factor = (float)((1.0 - Math.cos(timeProgress * 2.0 * Math.PI)) / 2.0);
 
          return switch (m) {
+            case "Dynamic" -> {
+               float[] hsb = Color.RGBtoHSB(
+                  (this.firstColor.getColor() >> 16) & 0xFF,
+                  (this.firstColor.getColor() >> 8) & 0xFF,
+                  this.firstColor.getColor() & 0xFF,
+                  null
+               );
+               float brightness = 1.0F - factor * 0.6F;
+               yield Color.HSBtoRGB(hsb[0], hsb[1], Math.max(0.0F, Math.min(1.0F, brightness * hsb[2])));
+            }
             case "Double Color" -> {
                int c1 = this.firstColor.getColor();
                int c2 = this.secondColor.getColor();
@@ -210,37 +220,39 @@ public class ThemeColor extends Module {
          };
       } else {
          float gLen = this.gradientLength.getCurrentValue();
-         long speedMs = Math.max(200L, (long)(10000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
+         long speedMs = Math.max(200L, (long)(18000.0F / Math.max(0.1F, this.gradientSpeed.getCurrentValue())));
          double timeProgress = (double)(System.currentTimeMillis() % (speedMs * 3600000L)) / (double)speedMs;
 
          double spatialProgress = 0.0;
          if (gLen > 0.0F) {
-            double fraction = gLen / 100.0;
             if (index >= 0) {
-               double len = totalLength > 0 ? (double) totalLength : 10.0;
-               spatialProgress = (index / len) / fraction;
+               double step = Math.max(1.0, 20.0 * (gLen / 50.0));
+               spatialProgress = (double) index / step;
             } else {
                double rad = Math.toRadians(this.angle.getCurrentValue());
                double projected = x * Math.cos(rad) + y * Math.sin(rad);
-               double len = totalLength > 0 ? (double) totalLength : 100.0;
-               spatialProgress = (projected / len) / fraction;
+               double waveLength = Math.max(10.0, 300.0 * (gLen / 50.0));
+               spatialProgress = projected / waveLength;
             }
          }
 
-         double progress = timeProgress + spatialProgress;
+         double progress = timeProgress - spatialProgress;
 
          return switch (m) {
+            case "Dynamic" -> {
+               float[] hsb = Color.RGBtoHSB(
+                  (this.firstColor.getColor() >> 16) & 0xFF,
+                  (this.firstColor.getColor() >> 8) & 0xFF,
+                  this.firstColor.getColor() & 0xFF,
+                  null
+               );
+               float factor = Math.abs((float)Math.sin(progress * 2.0 * Math.PI));
+               float brightness = 1.0F - factor * 0.6F;
+               yield Color.HSBtoRGB(hsb[0], hsb[1], Math.max(0.0F, Math.min(1.0F, brightness * hsb[2])));
+            }
             case "Double Color" -> {
-               double p = (progress % 2.0 + 2.0) % 2.0;
-               int c1 = this.firstColor.getColor();
-               int c2 = this.secondColor.getColor();
-               if (p < 1.0) {
-                  float factor = (float)((1.0 - Math.cos(p * Math.PI)) / 2.0);
-                  yield RenderUtils.lerpColor(c1, c2, factor);
-               } else {
-                  float factor = (float)((1.0 - Math.cos((p - 1.0) * Math.PI)) / 2.0);
-                  yield RenderUtils.lerpColor(c2, c1, factor);
-               }
+               float factor = (float)((1.0 - Math.cos(progress * 2.0 * Math.PI)) / 2.0);
+               yield RenderUtils.lerpColor(this.firstColor.getColor(), this.secondColor.getColor(), factor);
             }
             case "Triple Color" -> {
                double p = (progress % 3.0 + 3.0) % 3.0;
@@ -259,15 +271,14 @@ public class ThemeColor extends Module {
                }
             }
             case "Rainbow" -> {
-               double p = ((progress / 6.0) % 1.0 + 1.0) % 1.0;
+               double p = (progress % 1.0 + 1.0) % 1.0;
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
                yield Color.HSBtoRGB((float)p, sat, bri);
             }
             case "Astolfo" -> {
-               double p = (progress % 2.0 + 2.0) % 2.0;
-               float factor = (float)((1.0 - Math.cos(p * Math.PI)) / 2.0);
-               float hue = 0.5F + 0.5F * factor;
+               double p = (progress % 1.0 + 1.0) % 1.0;
+               float hue = (float)(p < 0.5 ? 1.0 - p : p);
                float sat = this.saturation.getCurrentValue() / 100.0F;
                float bri = this.brightness.getCurrentValue() / 100.0F;
                yield Color.HSBtoRGB(hue, sat, bri);
