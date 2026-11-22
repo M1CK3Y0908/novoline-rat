@@ -19,6 +19,7 @@ import net.minecraft.util.MathHelper;
 import net.optifine.CustomColors;
 import org.lwjgl.opengl.GL11;
 import rat.novoline.module.ModuleManager;
+import rat.novoline.utils.math.SmoothingUtils;
 import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.utils.render.RenderUtils;
 
@@ -43,6 +44,13 @@ public class HotbarElement extends HudElement {
    private long fancyHoverStartTime = 0L;
    private float fancyAnimDuration = 180.0F;
    private int fancyLastSlot = -1;
+
+   // Animated length fractions for Fancy status bars
+   private float animExpFraction = -1.0F;
+   private float animHpFraction = -1.0F;
+   private float animFoodFraction = -1.0F;
+   private float animArmorFraction = -1.0F;
+   private float animAirFraction = -1.0F;
 
    // Animation state for Lol "New" mode: slot zoom scale per slot
    private final float[] slotScales = new float[]{1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F};
@@ -471,7 +479,7 @@ public class HotbarElement extends HudElement {
       int selectedSlot = (player != null && player.inventory != null) ? player.inventory.currentItem : 0;
       cachedSelectedSlot = selectedSlot;
 
-      // 2. Smoothly sliding hover box with non-linear transition animation
+      // 2. Smoothly sliding hover box with non-linear transition and length change animation
       float targetOffset = 1.0F + (float) selectedSlot * slotWidth;
       long now = System.currentTimeMillis();
 
@@ -485,20 +493,38 @@ public class HotbarElement extends HudElement {
          this.fancyHoverFromOffset = this.fancyHoverOffset;
          this.fancyHoverTargetOffset = targetOffset;
          int slotDiff = Math.abs(selectedSlot - this.fancyLastSlot);
-         this.fancyAnimDuration = 160.0F + (float) Math.min(8, slotDiff) * 10.0F;
+         this.fancyAnimDuration = 160.0F + (float) Math.min(8, slotDiff) * 12.0F;
          this.fancyLastSlot = selectedSlot;
          this.fancyHoverStartTime = now;
       }
 
       long elapsed = now - this.fancyHoverStartTime;
       float progress = MathHelper.clamp_float((float) elapsed / this.fancyAnimDuration, 0.0F, 1.0F);
-      float eased = easeOutCubic(progress);
-      this.fancyHoverOffset = this.fancyHoverFromOffset + (this.fancyHoverTargetOffset - this.fancyHoverFromOffset) * eased;
 
-      // Draw hover box background (only retain background hover effect, same size as vanilla grid: 20x20)
-      float hoverX = x + this.fancyHoverOffset;
+      float hoverX;
+      float hoverW;
+
+      if (this.fancyHoverTargetOffset >= this.fancyHoverFromOffset) {
+         // Moving right (or idle)
+         float headProgress = easeOutCubic(MathHelper.clamp_float(progress * 1.35F, 0.0F, 1.0F));
+         float tailProgress = easeOutCubic(MathHelper.clamp_float((progress - 0.25F) / 0.75F, 0.0F, 1.0F));
+         float headX = this.fancyHoverFromOffset + slotWidth + (this.fancyHoverTargetOffset - this.fancyHoverFromOffset) * headProgress;
+         float tailX = this.fancyHoverFromOffset + (this.fancyHoverTargetOffset - this.fancyHoverFromOffset) * tailProgress;
+         hoverX = x + tailX;
+         hoverW = Math.max(slotWidth, headX - tailX);
+      } else {
+         // Moving left
+         float headProgress = easeOutCubic(MathHelper.clamp_float(progress * 1.35F, 0.0F, 1.0F));
+         float tailProgress = easeOutCubic(MathHelper.clamp_float((progress - 0.25F) / 0.75F, 0.0F, 1.0F));
+         float headX = this.fancyHoverFromOffset + (this.fancyHoverTargetOffset - this.fancyHoverFromOffset) * headProgress;
+         float tailX = this.fancyHoverFromOffset + slotWidth + (this.fancyHoverTargetOffset - this.fancyHoverFromOffset) * tailProgress;
+         hoverX = x + headX;
+         hoverW = Math.max(slotWidth, tailX - headX);
+      }
+      this.fancyHoverOffset = hoverX - x;
+
+      // Draw hover box background (only retain background hover effect, same size as vanilla grid: 20x20 when idle)
       float hoverY = y + 1.0F;
-      float hoverW = slotWidth;
       float hoverH = 20.0F;
       RenderUtils.drawRect(hoverX, hoverY, hoverX + hoverW, hoverY + hoverH, 0x2CFFFFFF);
 
@@ -550,11 +576,12 @@ public class HotbarElement extends HudElement {
             renderItem.zLevel = 0.0F;
             GlStateManager.disableLighting();
 
-            // White custom font count at bottom-left of the item
+            // White custom font count at bottom-right corner inside the grid slot
             if (itemStack.stackSize > 1) {
                String countStr = String.valueOf(itemStack.stackSize);
-               float textX = itemX + 1.0F;
-               float textY = itemY + 16.0F - (float) font.getHeight() + 1.0F;
+               float textW = font.getStringWidth(countStr);
+               float textX = slotX + slotWidth - textW - 1.0F;
+               float textY = lineTop - (float) font.getHeight() + 1.0F;
                GlStateManager.disableDepth();
                GlStateManager.enableBlend();
                font.drawStringWithShadow(countStr, textX, textY, -1);
@@ -661,7 +688,13 @@ public class HotbarElement extends HudElement {
             level = inEditor ? 35 : 0;
          }
 
-         float fillW = innerW * progress;
+         float fillW;
+         if (this.animExpFraction < 0.0F || inEditor) {
+            this.animExpFraction = progress;
+         } else {
+            this.animExpFraction = SmoothingUtils.approachWithMinimumStep(this.animExpFraction, progress, 12.0F, 0.005F);
+         }
+         fillW = innerW * this.animExpFraction;
          if (fillW > 0.0F) {
             String expColorMode = hotbar.expBarColor.getCurrentElementAsString();
             if (ridingHorse) {
@@ -719,7 +752,12 @@ public class HotbarElement extends HudElement {
          float hp = (player != null) ? Math.max(0.0F, player.getHealth()) : (inEditor ? 16.0F : 20.0F);
          float maxHp = (player != null) ? Math.max(1.0F, player.getMaxHealth()) : 20.0F;
          float hpFraction = MathHelper.clamp_float(hp / maxHp, 0.0F, 1.0F);
-         float hpFillW = healthInnerW * hpFraction;
+         if (this.animHpFraction < 0.0F || inEditor) {
+            this.animHpFraction = hpFraction;
+         } else {
+            this.animHpFraction = SmoothingUtils.approachWithMinimumStep(this.animHpFraction, hpFraction, 12.0F, 0.005F);
+         }
+         float hpFillW = healthInnerW * this.animHpFraction;
 
          if (hpFillW > 0.0F) {
             String hpColorMode = hotbar.healthBarColor.getCurrentElementAsString();
@@ -769,14 +807,24 @@ public class HotbarElement extends HudElement {
             float mountHp = Math.max(0.0F, mount.getHealth());
             float mountMaxHp = Math.max(1.0F, mount.getMaxHealth());
             float mountFraction = MathHelper.clamp_float(mountHp / mountMaxHp, 0.0F, 1.0F);
-            float mountFillW = hungerInnerW * mountFraction;
+            if (this.animFoodFraction < 0.0F || inEditor) {
+               this.animFoodFraction = mountFraction;
+            } else {
+               this.animFoodFraction = SmoothingUtils.approachWithMinimumStep(this.animFoodFraction, mountFraction, 12.0F, 0.005F);
+            }
+            float mountFillW = hungerInnerW * this.animFoodFraction;
             if (mountFillW > 0.0F) {
                RenderUtils.drawRect(hungerInnerX + hungerInnerW - mountFillW, hungerInnerY, hungerInnerX + hungerInnerW, hungerInnerY + hungerInnerH, 0xFFD32F2F);
             }
          } else {
             int foodLevel = (player != null) ? player.getFoodStats().getFoodLevel() : (inEditor ? 18 : 20);
             float foodFraction = MathHelper.clamp_float((float) foodLevel / 20.0F, 0.0F, 1.0F);
-            float foodFillW = hungerInnerW * foodFraction;
+            if (this.animFoodFraction < 0.0F || inEditor) {
+               this.animFoodFraction = foodFraction;
+            } else {
+               this.animFoodFraction = SmoothingUtils.approachWithMinimumStep(this.animFoodFraction, foodFraction, 12.0F, 0.005F);
+            }
+            float foodFillW = hungerInnerW * this.animFoodFraction;
             int foodColor = 0xFFFF8020;
             if (player != null && player.isPotionActive(Potion.hunger)) {
                foodColor = 0xFF506820;
@@ -807,7 +855,12 @@ public class HotbarElement extends HudElement {
             float armorInnerH = armorH - 2.0F;
 
             float armorFraction = MathHelper.clamp_float((float) armorVal / 20.0F, 0.0F, 1.0F);
-            float armorFillW = armorInnerW * armorFraction;
+            if (this.animArmorFraction < 0.0F || inEditor) {
+               this.animArmorFraction = armorFraction;
+            } else {
+               this.animArmorFraction = SmoothingUtils.approachWithMinimumStep(this.animArmorFraction, armorFraction, 12.0F, 0.005F);
+            }
+            float armorFillW = armorInnerW * this.animArmorFraction;
             if (armorFillW > 0.0F) {
                RenderUtils.drawRect(armorInnerX, armorInnerY, armorInnerX + armorFillW, armorInnerY + armorInnerH, 0xFFDCDCDC);
             }
@@ -835,7 +888,12 @@ public class HotbarElement extends HudElement {
             float airInnerH = airH - 2.0F;
 
             float airFraction = MathHelper.clamp_float((float) airVal / 300.0F, 0.0F, 1.0F);
-            float airFillW = airInnerW * airFraction;
+            if (this.animAirFraction < 0.0F || inEditor) {
+               this.animAirFraction = airFraction;
+            } else {
+               this.animAirFraction = SmoothingUtils.approachWithMinimumStep(this.animAirFraction, airFraction, 12.0F, 0.005F);
+            }
+            float airFillW = airInnerW * this.animAirFraction;
             if (airFillW > 0.0F) {
                RenderUtils.drawRect(airInnerX + airInnerW - airFillW, airInnerY, airInnerX + airInnerW, airInnerY + airInnerH, 0xFF00BFFF);
             }

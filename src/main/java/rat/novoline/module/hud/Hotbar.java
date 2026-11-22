@@ -42,11 +42,7 @@ public class Hotbar extends Module {
    public final CheckboxSetting durabilityBar = settingManager.register(new CheckboxSetting(this, "Durability Bar", true));
 
    public FontAdapter getFont() {
-      if (ModuleManager.font != null) {
-         float size = Math.max(8.0F, Math.round(ModuleManager.font.getFontSize() * 11.0F / 16.0F));
-         return ModuleManager.font.getFont(size, true);
-      }
-      return Fonts.rubikSemiboldSize16;
+      return ModuleManager.font != null ? ModuleManager.font.getFont() : Fonts.rubikRegularSize16;
    }
 
    public Hotbar() {
