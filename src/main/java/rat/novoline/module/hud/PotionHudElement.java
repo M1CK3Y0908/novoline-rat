@@ -3,8 +3,6 @@ package rat.novoline.module.hud;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
@@ -12,7 +10,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import rat.novoline.module.ModuleManager;
@@ -34,18 +31,14 @@ public class PotionHudElement extends HudElement {
    private static int cachedPotionCount = 0;
    private static final List<PotionEntry> cachedEntries = new ArrayList<>();
 
-   private static final Map<Integer, Integer> maxDurationMap = new ConcurrentHashMap<>();
-
    public static class PotionEntry {
       public final String name;
       public final String duration;
-      public final float fraction;
       public final Potion potion;
 
-      public PotionEntry(String name, String duration, float fraction, Potion potion) {
+      public PotionEntry(String name, String duration, Potion potion) {
          this.name = name;
          this.duration = duration;
-         this.fraction = fraction;
          this.potion = potion;
       }
    }
@@ -152,18 +145,15 @@ public class PotionHudElement extends HudElement {
             if (potion != null) {
                String fullName = I18n.format(potion.getName()) + getAmplifierString(effect.getAmplifier());
                String duration = Potion.getDurationString(effect);
-               int dur = effect.getDuration();
-               int maxDur = maxDurationMap.compute(effect.getPotionID(), (k, v) -> (v == null || dur > v) ? dur : v);
-               float fraction = MathHelper.clamp_float((float) dur / (float) Math.max(1, maxDur), 0.0F, 1.0F);
-               entries.add(new PotionEntry(fullName, duration, fraction, potion));
+               entries.add(new PotionEntry(fullName, duration, potion));
             }
          }
       }
 
       if (entries.isEmpty() && inEditor) {
-         entries.add(new PotionEntry("Speed II", "01:30", 0.75F, Potion.moveSpeed));
-         entries.add(new PotionEntry("Strength I", "00:45", 0.35F, Potion.damageBoost));
-         entries.add(new PotionEntry("Fire Resistance", "02:15", 0.50F, Potion.fireResistance));
+         entries.add(new PotionEntry("Speed II", "01:30", Potion.moveSpeed));
+         entries.add(new PotionEntry("Strength I", "00:45", Potion.damageBoost));
+         entries.add(new PotionEntry("Fire Resistance", "02:15", Potion.fireResistance));
       }
 
       cachedEntries.clear();
