@@ -10,7 +10,7 @@ import rat.novoline.utils.render.RenderUtils;
 
 public class ThemeColor extends Module {
    public final ComboSetting mode = settingManager.register(
-      new ComboSetting(this, "Mode", 0, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo", "Dynamic")
+      new ComboSetting(this, "Mode", 1, "Single Color", "Double Color", "Triple Color", "Rainbow", "Astolfo", "Dynamic")
    );
    public final ComboSetting animationMode = settingManager.register(
       new ComboSetting(this, "Animation Mode", 0, "Gradient", "Breathing") {

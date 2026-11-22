@@ -494,17 +494,9 @@ public class TargetHudElement extends HudElement {
             y + 29.0F + 1.5F + 0.5F,
             1342177280
          );
-         if (isThemeHealthColor()) {
-            RenderUtils.drawThemeGradientBar(
-               x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F
-            );
-         } else {
-            int c1 = getHealthColor(entry.animatedHealth, maxHealth);
-            int c2 = getHealthSecondaryColor(entry.animatedHealth, maxHealth);
-            RenderUtils.drawHorizontalGradientRect(
-               x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F, c1, c2
-            );
-         }
+         RenderUtils.drawHorizontalGradientRect(
+            x + 2.0F, y + 29.0F, x + 2.0F + f4, y + 29.0F + 1.5F, -16737215, -7405631
+         );
          RenderUtils.drawRect(
             x + 2.0F - 0.5F,
             y + 29.0F + 3.0F - 0.5F,
