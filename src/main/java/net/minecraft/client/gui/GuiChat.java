@@ -2,13 +2,8 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiNewChat.AnimatedLine;
 import net.minecraft.network.play.client.C14PacketTabComplete;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
@@ -20,9 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import client.m1ck3y.novoline.Novoline;
-import client.m1ck3y.novoline.client.discord.GatewayChatMessage;
 import client.m1ck3y.novoline.features.module.modules.hud.HudManager;
-import client.m1ck3y.novoline.util.Room;
 
 public class GuiChat extends GuiScreen {
    protected GuiTextField inputField;
@@ -30,12 +23,10 @@ public class GuiChat extends GuiScreen {
    private String historyBuffer = "";
    private int sentHistoryCursor = -1;
    private int autocompleteIndex;
-   private static final String text = "§7[§r%s§7] §r%s%s §7(%d)§r%s§r: %s";
    private List<String> foundPlayerNames = Lists.newArrayList();
    private static final Logger logger = LogManager.getLogger();
    private boolean playerNamesFound;
    private boolean waitingOnAutocomplete;
-   private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
    private String defaultInputFieldText = "";
 
    public void onAutocompleteResponse(String[] matches) {
@@ -182,54 +173,6 @@ public class GuiChat extends GuiScreen {
 
    @Override
    protected void mouseClicked(int i, int i2, int i3) throws IOException {
-      if (i3 == 0) {
-         ScaledResolution scaledResolution = new ScaledResolution(this.mc);
-         GuiNewChat chatGUI = Minecraft.getMinecraft().ingameGUI.getChatGUI();
-         int scaleFactor = scaledResolution.getScaleFactor();
-         float chatScale = chatGUI.getChatScale();
-         int i4 = Mouse.getX() / scaleFactor - 3;
-         int i5 = Mouse.getY() / scaleFactor - 40;
-         i4 = MathHelper.floor_float(i4 / chatScale);
-         i5 = MathHelper.floor_float(i5 / chatScale);
-         i4 += 3;
-         Collection collection = Novoline.getNovoline().getIrcConnection().getGatewayClient().getRooms().values();
-         float f = 0.0F;
-         f -= chatGUI.getChatHeight() + 4.0F;
-         int i6 = MathHelper.ceiling_float_int(chatGUI.getChatWidth() / chatScale);
-         int i7 = 1 + collection.size();
-         float f2 = (i6 - 2.0F * (i7 - 1)) / i7;
-         float f3 = 0.0F;
-         float f4 = 12.0F;
-         i5 = (int)(i5 + 1.0F);
-         if (i5 > 0) {
-            i5 = -i5;
-         }
-
-         if (i4 > f3 && i4 < f3 + f2 && i5 > f && i5 < f + f4 && GuiNewChat.selectedRoom != 0) {
-            GuiNewChat.selectedRoom = 0;
-            chatGUI.resetScroll();
-         }
-
-         f3 += f2 + 2.0F;
-         int i8 = 1;
-
-         for (Room room : (Iterable<Room>) collection) {
-            if (i4 > f3 && i4 < f3 + f2 && i5 > f && i5 < f + f4 && GuiNewChat.selectedRoom != i8) {
-               GuiNewChat.selectedRoom = i8;
-               GuiNewChat.roomLines.clear();
-
-               for (GatewayChatMessage gatewayChatMessage : room.getMessages().values()) {
-                  GuiNewChat.roomLines.add(createAnimatedLine(gatewayChatMessage));
-               }
-
-               chatGUI.resetScroll();
-            }
-
-            f3 += f2 + 2.0F;
-            i8++;
-         }
-      }
-
       this.commandSuggestions.getHudInputHandler().handleMouseClick(i, i2, i3);
       if (i3 == 0) {
          IChatComponent chatComponent2 = this.mc.ingameGUI.getChatGUI().getChatComponent(Mouse.getX(), Mouse.getY());
@@ -243,22 +186,6 @@ public class GuiChat extends GuiScreen {
    }
 
    public GuiChat() {
-   }
-
-   public static AnimatedLine createAnimatedLine(GatewayChatMessage gatewayChatMessage) {
-      AnimatedLine animatedLine = new AnimatedLine();
-      animatedLine.alpha = 255.0F;
-      animatedLine.createdAt = System.currentTimeMillis();
-      animatedLine.text = "§7[§r%s§7] §r%s%s §7(%d)§r%s§r: %s"
-         .formatted(
-            dateTimeFormatter.format(Instant.ofEpochMilli(gatewayChatMessage.getId().getTimestamp())),
-            gatewayChatMessage.getNamePrefix(),
-            gatewayChatMessage.getSenderUsername(),
-            gatewayChatMessage.getSenderId(),
-            gatewayChatMessage.getNameSuffix(),
-            gatewayChatMessage.getContent()
-         );
-      return animatedLine;
    }
 
    @Override

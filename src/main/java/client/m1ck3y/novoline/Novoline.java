@@ -45,26 +45,11 @@ import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import ru.fals3r.aal.API;
 import client.m1ck3y.novoline.client.ApiClient;
-import client.m1ck3y.novoline.client.GetRoomsRecentMessagesRequest;
 import client.m1ck3y.novoline.client.IrcConnection;
-import client.m1ck3y.novoline.client.PatchUsersSelfPresenceRequest;
 import client.m1ck3y.novoline.client.ApiRequestHandler.BearerTokenHandler;
-import client.m1ck3y.novoline.client.discord.ClientProperties;
-import client.m1ck3y.novoline.client.discord.GatewayChatMessage;
-import client.m1ck3y.novoline.client.discord.GatewayClient;
-import client.m1ck3y.novoline.client.discord.GatewayClientBuilder;
-import client.m1ck3y.novoline.client.discord.GatewayEventAdapter;
-import client.m1ck3y.novoline.client.discord.MessageEvent;
-import client.m1ck3y.novoline.client.discord.PersistenceProfileLoadedEvent;
-import client.m1ck3y.novoline.client.discord.ReadyEvent;
-import client.m1ck3y.novoline.client.discord.RoomListLoadedEvent;
 import client.m1ck3y.novoline.features.command.CommandManager;
-import client.m1ck3y.novoline.enums.ClientState;
-import client.m1ck3y.novoline.enums.UserListType;
 import client.m1ck3y.novoline.event.Event;
-import client.m1ck3y.novoline.event.RunTickEvent;
 import client.m1ck3y.novoline.ui.AltManagerScreen;
-import client.m1ck3y.novoline.ui.BackgroundManager.AbstractTextureChild;
 import client.m1ck3y.novoline.ui.clickgui.ClickGuiScreen;
 import client.m1ck3y.novoline.ui.menu.MenuClickGuiScreen;
 import client.m1ck3y.novoline.lang.AuthException;
@@ -78,7 +63,6 @@ import client.m1ck3y.novoline.scripting.ScriptManager;
 import client.m1ck3y.novoline.setting.SettingManager;
 import client.m1ck3y.novoline.util.AuthenticationResponse;
 import client.m1ck3y.novoline.util.RestClientOptions;
-import client.m1ck3y.novoline.util.Room;
 import client.m1ck3y.novoline.utils.ClientPreferences;
 import client.m1ck3y.novoline.utils.GreetingMessage;
 import client.m1ck3y.novoline.utils.MacroManager;
@@ -115,7 +99,6 @@ public class Novoline {
    public static final String CLIENT_TITLE = "Novoline.Rat - Build " + BUILD_DATE;
    private Bus<? super Event> bus;
    private ClientPreferences clientPreferences;
-   private static final String GATEWAY_KEY = "GEZDyKg*EeS33&m2vZuTTiByQX#NDYZs";
    private TaskScheduler taskScheduler;
    public static final String BUILD_TAG = "burattino@3.0";
    private ScriptManager scriptManager;
@@ -418,112 +401,7 @@ public class Novoline {
 
       String jwtToken = authenticationResponse.getJwtToken();
       apiClient.setApiRequestHandler(new BearerTokenHandler(jwtToken));
-      GatewayEventAdapter gatewayEventAdapter = new GatewayEventAdapter() {
-         private final Set<String> set = ConcurrentHashMap.newKeySet();
-         private final Queue<Novoline.PendingTexture> queue = new ConcurrentLinkedQueue<>();
-         private final ExecutorService executorService = Executors.newFixedThreadPool(8);
-         @EventLink
-         private final Listener<RunTickEvent> onRunTick = runTickEvent -> {
-            if (!this.queue.isEmpty()) {
-               while (!this.queue.isEmpty()) {
-                  Novoline.PendingTexture pendingTexture = this.queue.poll();
-                  if (!Minecraft.getMinecraft().getTextureManager().loadTexture(pendingTexture.getResourceLocation(), pendingTexture.getAbstractTexture())) {
-                     this.set.remove(pendingTexture.getText());
-                  } else {
-                     Novoline.taggedLogger.debug("Loaded texture {}", new Object[]{pendingTexture.getText()});
-                  }
-               }
-            }
-         };
-
-         @Override
-         public void onPersistenceProfileLoaded(PersistenceProfileLoadedEvent persistenceProfileLoadedEvent) {
-            persistenceProfileLoadedEvent.getCollection()
-               .stream()
-               .flatMap(profile -> profile.getCosmetics().stream())
-               .filter(cosmetic2 -> cosmetic2 instanceof CapeCosmetic)
-               .map(CapeCosmetic.class::cast)
-               .map(CapeCosmetic::getTexHash)
-               .distinct()
-               .filter(string -> !this.set.contains(string))
-               .forEach(string -> this.executorService.submit(() -> this.loadTexture(string)));
-         }
-
-         @Override
-         public void onRoomListLoaded(RoomListLoadedEvent roomListLoadedEvent) {
-            roomListLoadedEvent.getCollection()
-               .forEach(
-                  room -> Novoline.this.ircConnection
-                     .getApiClient()
-                     .getRoomRecentMessages(GetRoomsRecentMessagesRequest.createGetRoomsRecentMessagesRequest(room.getId()))
-                     .whenComplete(
-                        (collection, throwable) -> {
-                           if (throwable != null) {
-                              Logger.error(throwable, "Unable to load recent messages in Room {}", room.getId());
-                           } else {
-                              Map map2 = collection.stream()
-                                 .sorted(Comparator.comparingLong(gatewayChatMessage -> gatewayChatMessage.getId().getTimestamp()))
-                                 .collect(
-                                    Collectors.toMap(GatewayChatMessage::getId, Function.identity(), (gatewayChatMessage, gatewayChatMessage2) -> gatewayChatMessage, LinkedHashMap::new)
-                                 );
-                              if (room.getMessages() == null) {
-                                 room.setMessages(new LinkedHashMap<>());
-                              }
-
-                              room.getMessages().putAll(map2);
-                           }
-                        }
-                     )
-               );
-         }
-
-         @Override
-         public void onMessage(MessageEvent messageEvent) {
-            GatewayChatMessage gatewayChatMessage3 = messageEvent.getGatewayChatMessage();
-            if (Minecraft.getMinecraft().thePlayer != null
-               && GuiNewChat.selectedRoom > 0
-               && ((Room)Iterables.get(Novoline.this.ircConnection.getGatewayClient().getRooms().values(), GuiNewChat.selectedRoom - 1))
-                  .getId()
-                  .equals(messageEvent.getRoom().getId())) {
-               GuiNewChat.roomLines.add(GuiChat.createAnimatedLine(gatewayChatMessage3));
-            }
-         }
-
-         @Override
-         public void onReady(ReadyEvent readyEvent) {
-            Novoline.this.ircConnection.getApiClient().updatePresence(PatchUsersSelfPresenceRequest.builder().presenceType(ClientState.IN_MENU).build());
-         }
-
-         private void loadTexture(String text2) {
-            Novoline.taggedLogger.trace("Loading texture {}", new Object[]{text2});
-            this.set.add(text2);
-            Novoline.this.ircConnection.getApiClient().getCosmeticTexture(text2).whenComplete((inputStream, throwable) -> {
-               if (throwable != null) {
-                  Novoline.taggedLogger.error((Throwable)throwable, "Exception occurred while requesting texture {}", text2);
-                  this.set.remove(text2);
-               } else {
-                  try {
-                     byte[] allBytes = ((InputStream) inputStream).readAllBytes();
-                     ResourceLocation resourceLocation3 = new ResourceLocation("nos", "texture/" + text2);
-                     AbstractTextureChild abstractTextureChild = new AbstractTextureChild(allBytes, resourceLocation3);
-                     this.queue.add(new Novoline.PendingTexture(resourceLocation3, abstractTextureChild, text2));
-                  } catch (Exception exception2) {
-                     Novoline.taggedLogger.error(exception2, "Failed to read texture {}", text2);
-                     this.set.remove(text2);
-                  }
-               }
-            });
-         }
-      };
-      this.bus.subscribe(gatewayEventAdapter);
-      GatewayClient gatewayClient = new GatewayClientBuilder(URI.create("wss://nos.novoline.rat/gateway"))
-         .bearerToken(jwtToken)
-         .clientProperties(ClientProperties.builder().clientVersion("3.0").clientChannel("Release").build())
-         .listener(gatewayEventAdapter)
-         .userLists(UserListType.ROOM_EVENTS, UserListType.PRESENCE_EVENTS, UserListType.USER_LIST)
-         .salt("GEZDyKg*EeS33&m2vZuTTiByQX#NDYZs")
-         .getGatewayClient();
-      return new IrcConnection(gatewayClient, apiClient);
+      return new IrcConnection(apiClient);
    }
 
    public NotificationManager getNotificationManager() {
@@ -719,17 +597,5 @@ public class Novoline {
       }
    }
 
-   record PendingTexture(ResourceLocation resourceLocation, AbstractTexture abstractTexture, String text) {
-      public ResourceLocation getResourceLocation() {
-         return this.resourceLocation;
-      }
-
-      public AbstractTexture getAbstractTexture() {
-         return this.abstractTexture;
-      }
-
-      public String getText() {
-         return this.text;
-      }
-   }
 }
+

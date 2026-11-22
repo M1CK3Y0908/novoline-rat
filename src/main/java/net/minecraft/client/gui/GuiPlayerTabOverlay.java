@@ -18,7 +18,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import client.m1ck3y.novoline.Novoline;
 import client.m1ck3y.novoline.features.module.ModuleManager;
 import client.m1ck3y.novoline.features.module.modules.misc.NameProtect;
 import client.m1ck3y.novoline.utils.render.RenderUtils;
@@ -299,9 +298,7 @@ public class GuiPlayerTabOverlay extends Gui {
    }
 
    private boolean checkNetworkPlayerInfo(NetworkPlayerInfo networkPlayerInfo) {
-      String name2 = networkPlayerInfo.getGameProfile().getName();
-      return name2.equals(this.mc.session.getUsername())
-         || Novoline.getNovoline().getIrcConnection().getGatewayClient().getGatewayUserList().getByName(name2) != null;
+      return networkPlayerInfo.getGameProfile().getName().equals(this.mc.session.getUsername());
    }
 
    public String getPlayerName(NetworkPlayerInfo networkPlayerInfoIn) {

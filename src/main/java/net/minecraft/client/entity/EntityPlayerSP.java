@@ -1,6 +1,5 @@
 package net.minecraft.client.entity;
 
-import com.google.common.collect.Iterables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.MovingSoundMinecartRiding;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -8,7 +7,6 @@ import net.minecraft.client.gui.GuiCommandBlock;
 import net.minecraft.client.gui.GuiEnchantment;
 import net.minecraft.client.gui.GuiHopper;
 import net.minecraft.client.gui.GuiMerchant;
-import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiRepair;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiScreenBook;
@@ -56,8 +54,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 import client.m1ck3y.novoline.Novoline;
-import client.m1ck3y.novoline.client.ApiClient;
-import client.m1ck3y.novoline.client.PutRoomsMessagesRequest;
 import client.m1ck3y.novoline.features.command.CommandManager;
 import client.m1ck3y.novoline.event.OnUpdateWalkingPlayerEvent;
 import client.m1ck3y.novoline.event.PlayerMoveEvent;
@@ -65,7 +61,6 @@ import client.m1ck3y.novoline.event.PreUpdateEvent;
 import client.m1ck3y.novoline.event.SlowdownEvent;
 import client.m1ck3y.novoline.event.UpdateEvent;
 import client.m1ck3y.novoline.features.module.ModuleManager;
-import client.m1ck3y.novoline.util.Room;
 import client.m1ck3y.novoline.utils.player.PlayerUtils;
 
 public class EntityPlayerSP extends AbstractClientPlayer {
@@ -306,15 +301,6 @@ public class EntityPlayerSP extends AbstractClientPlayer {
       CommandManager commandManager = Novoline.getNovoline().getCommandManager();
       if (message.startsWith(".")) {
          commandManager.getCommandDispatcher().handle(message);
-      } else if (GuiNewChat.selectedRoom > 0) {
-         ApiClient apiClient = Novoline.getNovoline().getIrcConnection().getApiClient();
-         Room room = (Room)Iterables.get(Novoline.getNovoline().getIrcConnection().getGatewayClient().getRooms().values(), GuiNewChat.selectedRoom - 1);
-         apiClient.sendRoomMessage(PutRoomsMessagesRequest.createPutRoomsMessagesRequest(room.getId(), message)).whenComplete((gatewayChatMessage, throwable) -> {
-            if (throwable != null) {
-               String text2 = throwable.getCause() == null ? throwable.getMessage() : throwable.getCause().getMessage();
-               Novoline.getNovoline().sendChatMessage(EnumChatFormatting.RED + "Error sending message: " + text2);
-            }
-         });
       } else {
          this.sendQueue.addToSendQueue(new C01PacketChatMessage(message));
       }

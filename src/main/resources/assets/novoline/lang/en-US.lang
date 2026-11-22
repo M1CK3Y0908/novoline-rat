@@ -109,7 +109,7 @@ greeting.line_3=To bind modules, type ".bind <module> <key>" in chat
 greeting.line_4=  Additionally, you can bind modules in the ClickGUI
 greeting.line_5=  by pressing the middle mouse button.
 greeting.line_6=For help on commands, type ".help" in chat
-greeting.line_7=To download configs from the Discord server, copy
+greeting.line_7=To download configs, copy
 greeting.line_8=the config link and type ".cfg download <link>" in chat
 
 # Game - Command errors
@@ -243,9 +243,6 @@ feature.lagdetector.msg=Connection problem!
 # Game - AutoHypixel
 feature.autohypixel.auto_play.notification.sending=Sending you to the next game in %sms
 feature.autohypixel.auto_phase.notification.phased=Attempted to phase out of cage
-
-# Game - DiscordRPC
-feature.discordrpc.notification.no_connection=No connection with Discord
 
 # Game - LongJump
 feature.longjump.notification.hypixel_bow.bow_required=Mode "HypixelBow" requires a bow in inventory

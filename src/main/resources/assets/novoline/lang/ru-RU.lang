@@ -109,7 +109,7 @@ greeting.line_3=Чтобы биндить модули, напишите ".bind 
 greeting.line_4=  Также Вы можете биндить модули в ClickGUI
 greeting.line_5=  нажав среднюю кнопку мыши.
 greeting.line_6=Чтобы получить справку по командам, напишите ".help"
-greeting.line_7=Чтобы скачать конфиги с нашего дискорда, скопируйте
+greeting.line_7=Чтобы скачать конфиг, скопируйте
 greeting.line_8=ссылку на конфиг и напишите ".cfg download <link>"
 
 # Game - Command errors
@@ -243,9 +243,6 @@ feature.lagdetector.msg=Ошибка соединения!
 # Game - AutoHypixel
 feature.autohypixel.auto_play.notification.sending=Перенаправление в следующую игру через %sms
 feature.autohypixel.auto_phase.notification.phased=Выход из клетки
-
-# Game - DiscordRPC
-feature.discordrpc.notification.no_connection=Нет подключения с Дискордом
 
 # Game - LongJump
 feature.longjump.notification.hypixel_bow.bow_required=Моду "HypixelBow" требуется лук в инвенторе

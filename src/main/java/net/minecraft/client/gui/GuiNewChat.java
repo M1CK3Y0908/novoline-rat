@@ -2,7 +2,6 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -12,11 +11,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import client.m1ck3y.novoline.Novoline;
-import client.m1ck3y.novoline.Novoline.Fonts;
-import client.m1ck3y.novoline.util.Room;
 import client.m1ck3y.novoline.utils.math.SmoothingUtils;
-import client.m1ck3y.novoline.utils.render.CFontRenderer;
 import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class GuiNewChat extends Gui {
@@ -26,10 +21,8 @@ public class GuiNewChat extends Gui {
    private boolean isScrolled;
    public static int scrollPos;
    private final List<ChatLine> allChatLines = Lists.newArrayList();
-   public static final List<GuiNewChat.AnimatedLine> roomLines = new ArrayList<>();
    private final List<GuiNewChat.AnimatedLine> drawnChatLines = new ArrayList<>();
    private final Minecraft mc;
-   public static int selectedRoom = 0;
 
    public boolean getChatOpen() {
       return this.mc.currentScreen instanceof GuiChat;
@@ -53,7 +46,7 @@ public class GuiNewChat extends Gui {
 
    public void scroll(int amount) {
       scrollPos += amount;
-      int count = selectedRoom > 0 ? roomLines.size() + 1 : this.allChatLines.size();
+      int count = this.allChatLines.size();
       if (scrollPos > count - this.getLineCount()) {
          scrollPos = count - this.getLineCount();
       }
@@ -137,7 +130,7 @@ public class GuiNewChat extends Gui {
       int i2 = this.getChatHeight() - this.mc.fontRendererObj.FONT_HEIGHT;
       boolean flag = this.mc.currentScreen instanceof GuiChat;
       RenderUtils.enableScissor((int)f2, (int)f - i2, (int)(f2 + 320.0F), i2 - 1);
-      List list = selectedRoom == 0 ? this.drawnChatLines : roomLines;
+      List<GuiNewChat.AnimatedLine> list = this.drawnChatLines;
       int color = this.mc.currentScreen instanceof GuiChat ? scrollPos : 0;
       int i3 = 0;
 
@@ -168,37 +161,6 @@ public class GuiNewChat extends Gui {
 
       GlStateManager.disableAlpha();
       RenderUtils.disableScissor();
-      if (flag) {
-         f -= this.getChatHeight() + 4.0F;
-         Collection collection = Novoline.getNovoline().getIrcConnection().getGatewayClient().getRooms().values();
-         i3 = 1 + collection.size();
-         float f3 = (i - 2.0F * (i3 - 1)) / i3;
-         float f4 = 0.0F;
-         float f5 = 12.0F;
-         CFontRenderer cFontRenderer = Fonts.rubikRegularSize14;
-         RenderUtils.drawRect(f4, f, f4 + f3, f + f5, -300608235);
-         float f6 = f4 + f3 / 2.0F - cFontRenderer.getStringWidth("Minecraft") / 2.0F;
-         float f7 = f + f5 / 2.0F - cFontRenderer.getHeight() / 2.0F + 1.0F;
-         int i5 = selectedRoom == 0 ? -1 : -7303024;
-         float f8 = f7;
-         float f9 = f6;
-         cFontRenderer.drawString("Minecraft", f9, f8, i5);
-         f4 += f3 + 2.0F;
-         int i6 = 1;
-
-         for (Room room : (Iterable<Room>) collection) {
-            RenderUtils.drawRect(f4, f, f4 + f3, f + f5, -300608235);
-            String text2 = "IRC - " + room.getDisplayName();
-            f7 = f4 + f3 / 2.0F - cFontRenderer.getStringWidth(text2) / 2.0F;
-            float f10 = f + f5 / 2.0F - cFontRenderer.getHeight() / 2.0F + 1.0F;
-            i5 = selectedRoom == i6 ? -1 : -7303024;
-            f8 = f10;
-            f9 = f7;
-            cFontRenderer.drawString(text2, f9, f8, i5);
-            f4 += f3 + 2.0F;
-            i6++;
-         }
-      }
    }
 
    public static int calculateChatboxWidth(float scale) {

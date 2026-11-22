@@ -12,12 +12,8 @@ import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import client.m1ck3y.novoline.client.PostResourcesRatingsRequest.PositiveType;
-import client.m1ck3y.novoline.client.discord.GatewayChatMessage;
-import client.m1ck3y.novoline.client.discord.GatewayClient;
-import client.m1ck3y.novoline.client.discord.Snowflake;
 import client.m1ck3y.novoline.gson.CosmeticDeserializer;
 import client.m1ck3y.novoline.gson.InstantStringDeserializer;
-import client.m1ck3y.novoline.gson.LongValueTypeAdapter;
 import client.m1ck3y.novoline.util.AuthenticationResponse;
 import client.m1ck3y.novoline.util.Profile;
 import client.m1ck3y.novoline.util.RestClientOptions;
@@ -31,9 +27,7 @@ public class ApiClient {
    private static final Gson gson = new GsonBuilder()
       .registerTypeAdapter(Instant.class, new InstantStringDeserializer())
       .registerTypeAdapter(Cosmetic.class, new CosmeticDeserializer())
-      .registerTypeAdapter(Snowflake.class, new LongValueTypeAdapter())
       .create();
-   private GatewayClient gatewayClient;
    private ApiRequestHandler apiRequestHandler;
    private final ApiHttpDispatcher apiHttpDispatcher;
 
@@ -43,15 +37,6 @@ public class ApiClient {
 
    public RestClientOptions getRestClientOptions() {
       return this.restClientOptions;
-   }
-
-   public void setGatewayClient(GatewayClient gatewayClient2) {
-      this.gatewayClient = gatewayClient2;
-   }
-
-   public CompletableFuture<Collection<GatewayChatMessage>> getRoomRecentMessages(GetRoomsRecentMessagesRequest getRoomsRecentMessagesRequest) {
-      Type type = (new TypeToken<LinkedList<GatewayChatMessage>>() {}).getType();
-      return this.requestJson(getRoomsRecentMessagesRequest, type);
    }
 
    public CompletableFuture<Void> postResourceRating(PostResourcesRatingsRequest postResourcesRatingsRequest) {
@@ -64,14 +49,6 @@ public class ApiClient {
 
    public CompletableFuture deleteResourceRating(String text) {
       return this.deleteResourceRating(DeleteResourcesRatingsRequest.createDeleteResourcesRatingsRequest(text));
-   }
-
-   public CompletableFuture<GatewayChatMessage> sendRoomMessage(PutRoomsMessagesRequest putRoomsMessagesRequest) {
-      return this.requestJson(putRoomsMessagesRequest, GatewayChatMessage.class);
-   }
-
-   public GatewayClient getGatewayClient() {
-      return this.gatewayClient;
    }
 
    public CompletableFuture deleteResource(String text) {
@@ -103,8 +80,7 @@ public class ApiClient {
    }
 
    public CompletableFuture updatePresence(PatchUsersSelfPresenceRequest patchUsersSelfPresenceRequest) {
-      this.requireGatewayConnection();
-      return this.executeVoid(patchUsersSelfPresenceRequest.withSid(this.gatewayClient.getHeartbeatState().getSid()));
+      return CompletableFuture.completedFuture(null);
    }
 
    public CompletableFuture<CloudListResult> listResources(GetResourcesRequest2 getResourcesRequest2) {
@@ -126,12 +102,6 @@ public class ApiClient {
 
    public CompletableFuture<InputStream> getCosmeticTexture(GetProfilesCosmeticsTexturesRequest getProfilesCosmeticsTexturesRequest) {
       return this.dispatch(getProfilesCosmeticsTexturesRequest, java.net.http.HttpResponse.BodyHandlers.ofInputStream(), HttpResponse::body);
-   }
-
-   private void requireGatewayConnection() {
-      if (this.gatewayClient.getHeartbeatState() == null) {
-         throw new IllegalStateException("Not connected to Gateway");
-      }
    }
 
    public CompletableFuture<CloudScript> createResource(PutResourcesRequest putResourcesRequest) {

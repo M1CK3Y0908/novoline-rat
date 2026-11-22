@@ -26,8 +26,6 @@ public class CommandManager {
       this.register(new PluginsCommand());
       this.register(new SettingCommand());
       this.register(new PanicCommand());
-      this.register(new IrcCommand());
-      this.register(new ChatCommand());
    }
 
    public Map<String, Command> getCommandsByAlias() {

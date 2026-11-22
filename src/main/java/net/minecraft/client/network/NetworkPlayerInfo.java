@@ -8,14 +8,8 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
-import client.m1ck3y.novoline.Novoline;
-import client.m1ck3y.novoline.client.IrcConnection;
-import client.m1ck3y.novoline.client.discord.GatewayUser;
-import client.m1ck3y.novoline.cosmetic.CapeCosmeticChild1;
-import client.m1ck3y.novoline.enums.CapeType;
 import client.m1ck3y.novoline.features.module.ModuleManager;
 import client.m1ck3y.novoline.features.module.modules.visual.SkinChanger;
-import client.m1ck3y.novoline.util.Profile;
 
 public class NetworkPlayerInfo {
    private ResourceLocation locationSkin;
@@ -120,26 +114,6 @@ public class NetworkPlayerInfo {
       synchronized (this) {
          if (!this.playerTexturesLoaded) {
             this.playerTexturesLoaded = true;
-            IrcConnection ircConnection = Novoline.getNovoline().getIrcConnection();
-            GatewayUser byName = ircConnection.getGatewayClient().getGatewayUserList().getByName(this.gameProfile.getName());
-            boolean flag = true;
-            if (byName != null) {
-               Profile profile = ircConnection.getGatewayClient().getGatewayPresenceMap().getProfile(byName);
-               if (profile != null) {
-                  CapeCosmeticChild1 capeCosmeticChild1 = profile.getCosmetics()
-                     .stream()
-                     .filter(cosmetic2 -> cosmetic2.getType() == CapeType.CAPE)
-                     .map(CapeCosmeticChild1.class::cast)
-                     .findFirst()
-                     .orElse(null);
-                  if (capeCosmeticChild1 != null) {
-                     this.locationCape = new ResourceLocation("nos", "texture/" + capeCosmeticChild1.getTexHash());
-                     flag = false;
-                  }
-               }
-            }
-
-            boolean flag2 = flag;
             Minecraft.getMinecraft().getSkinManager().loadProfileTextures(this.gameProfile, (type, resourceLocation, minecraftProfileTexture) -> {
                switch (type) {
                   case SKIN:
@@ -150,9 +124,7 @@ public class NetworkPlayerInfo {
                      }
                      break;
                   case CAPE:
-                     if (flag2) {
-                        this.locationCape = resourceLocation;
-                     }
+                     this.locationCape = resourceLocation;
                }
             }, true);
          }

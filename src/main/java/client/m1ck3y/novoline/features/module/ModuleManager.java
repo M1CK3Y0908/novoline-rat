@@ -42,7 +42,6 @@ import client.m1ck3y.novoline.features.module.modules.misc.BetterMinecraft;
 import client.m1ck3y.novoline.features.module.modules.misc.ChatBypass;
 import client.m1ck3y.novoline.features.module.modules.misc.Derp;
 import client.m1ck3y.novoline.features.module.modules.misc.Disabler;
-import client.m1ck3y.novoline.features.module.modules.misc.DiscordRPC;
 import client.m1ck3y.novoline.features.module.modules.misc.HypixelStats;
 import client.m1ck3y.novoline.features.module.modules.misc.Killsults;
 import client.m1ck3y.novoline.features.module.modules.misc.LagDetector;
@@ -151,7 +150,6 @@ public class ModuleManager {
    public static final HypixelStats hypixelStats = new HypixelStats();
    public static final AutoHypixel autoHypixel = new AutoHypixel();
    public static final LagDetector lagDetector = new LagDetector();
-   public static final DiscordRPC discordRPC = new DiscordRPC();
    public static final Killsults killsults = new Killsults();
    public static final PingSpoof pingSpoof = new PingSpoof();
    public static final ChatBypass chatBypass = new ChatBypass();
