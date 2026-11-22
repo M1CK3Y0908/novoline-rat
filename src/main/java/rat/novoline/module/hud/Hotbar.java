@@ -14,7 +14,28 @@ public class Hotbar extends Module {
       new ComboSetting(this, "Mode", 0, "Fancy", "Lol")
    );
    public final ComboSetting lolStyle = settingManager.register(
-      new ComboSetting(this, "Lol Style", 0, "New", "Old")
+      new ComboSetting(this, "Lol Style", 0, "New", "Old") {
+         @Override
+         public boolean shouldShow() {
+            return !"Fancy".equalsIgnoreCase(mode.getCurrentElementAsString());
+         }
+      }
+   );
+   public final ComboSetting expBarColor = settingManager.register(
+      new ComboSetting(this, "Exp Bar Color", 0, "Vanilla", "Gradient", "Theme") {
+         @Override
+         public boolean shouldShow() {
+            return "Fancy".equalsIgnoreCase(mode.getCurrentElementAsString());
+         }
+      }
+   );
+   public final ComboSetting healthBarColor = settingManager.register(
+      new ComboSetting(this, "Health Bar Color", 0, "Vanilla", "Value") {
+         @Override
+         public boolean shouldShow() {
+            return "Fancy".equalsIgnoreCase(mode.getCurrentElementAsString());
+         }
+      }
    );
    public final CheckboxSetting background = settingManager.register(new CheckboxSetting(this, "Background", true));
    public final NumberSetting alpha = settingManager.register(new NumberSetting(this, "Alpha", 100, 0, 255));

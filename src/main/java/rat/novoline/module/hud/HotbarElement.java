@@ -1,16 +1,19 @@
 package rat.novoline.module.hud;
 
 import java.awt.Color;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
 import net.minecraft.src.Config;
 import net.minecraft.util.MathHelper;
 import net.optifine.CustomColors;
@@ -334,7 +337,7 @@ public class HotbarElement extends HudElement {
       // 1. Dark translucent background
       if (hotbar.background.isEnabled()) {
          int alpha = (int) hotbar.alpha.getCurrentValue();
-         int bgColor = RenderUtils.withAlpha(0, alpha);
+         int bgColor = RenderUtils.withAlpha(ModuleManager.themeColor.getBackgroundColor(), alpha);
          RenderUtils.drawRoundedRect(x, y, 181.0F, 22.5F, 2.0F, bgColor);
       }
 
@@ -603,6 +606,241 @@ public class HotbarElement extends HudElement {
             }
          }
       }
+
+      // 5. Fancy bars (Exp, Health, Hunger, Armor, Air)
+      drawFancyBars(hotbar, player, inEditor);
+   }
+
+   private void drawFancyBars(Hotbar hotbar, EntityPlayerSP player, boolean inEditor) {
+      boolean shouldDrawHud = inEditor || (minecraft.playerController != null && minecraft.playerController.shouldDrawHUD());
+      boolean shouldDrawExp = inEditor || (minecraft.playerController != null && (minecraft.playerController.gameIsSurvivalOrAdventure() || (player != null && player.isRidingHorse())));
+
+      if (!shouldDrawHud && !shouldDrawExp) {
+         return;
+      }
+
+      float x = cachedX;
+      float y = cachedY;
+
+      int alpha = (int) hotbar.alpha.getCurrentValue();
+      int bgColor = RenderUtils.withAlpha(ModuleManager.themeColor.getBackgroundColor(), alpha);
+      boolean postProcessingActive = ModuleManager.postProcessing != null && ModuleManager.postProcessing.isEnabled();
+
+      GlStateManager.disableLighting();
+      GlStateManager.enableBlend();
+
+      // 1. Exp Bar (182x5 at y - 7)
+      if (shouldDrawExp) {
+         float expX = x;
+         float expY = y - 7.0F;
+         float expW = 182.0F;
+         float expH = 5.0F;
+
+         if (hotbar.background.isEnabled()) {
+            if (!postProcessingActive) {
+               RenderUtils.drawShadow(expX, expY, expX + expW, expY + expH, 1.5F, 1610612736);
+            }
+            RenderUtils.drawRect(expX, expY, expX + expW, expY + expH, bgColor);
+         }
+
+         float innerX = expX + 1.0F;
+         float innerY = expY + 1.0F;
+         float innerW = expW - 2.0F;
+         float innerH = expH - 2.0F;
+
+         boolean ridingHorse = player != null && player.isRidingHorse();
+         float progress;
+         int level = 0;
+         if (ridingHorse) {
+            progress = MathHelper.clamp_float(player.getHorseJumpPower(), 0.0F, 1.0F);
+         } else if (player != null) {
+            progress = MathHelper.clamp_float(player.experience, 0.0F, 1.0F);
+            level = player.experienceLevel;
+         } else {
+            progress = inEditor ? 0.65F : 0.0F;
+            level = inEditor ? 35 : 0;
+         }
+
+         float fillW = innerW * progress;
+         if (fillW > 0.0F) {
+            String expColorMode = hotbar.expBarColor.getCurrentElementAsString();
+            if (ridingHorse) {
+               RenderUtils.drawRect(innerX, innerY, innerX + fillW, innerY + innerH, 0xFF55FFFF);
+            } else if ("Theme".equalsIgnoreCase(expColorMode)) {
+               RenderUtils.drawThemeGradientBar(innerX, innerY, innerX + fillW, innerY + innerH);
+            } else if ("Gradient".equalsIgnoreCase(expColorMode)) {
+               RenderUtils.drawHorizontalGradientRect(innerX, innerY, innerX + fillW, innerY + innerH, 0xFF80FF20, 0xFF00AA20);
+            } else {
+               // Vanilla green
+               RenderUtils.drawRect(innerX, innerY, innerX + fillW, innerY + innerH, 0xFF7EFC20);
+            }
+         }
+
+         // Exp Level: horizontally centered, 1 line width (1.0F) above the exp bar
+         if (level > 0 && !ridingHorse) {
+            FontAdapter font = hotbar.getFont();
+            String levelStr = String.valueOf(level);
+            float textW = font.getStringWidth(levelStr);
+            float textH = font.getHeight();
+            float levelX = expX + (expW - textW) / 2.0F;
+            float levelY = expY - textH - 1.0F;
+
+            int levelColor = 0x80FF20;
+            if ("Theme".equalsIgnoreCase(hotbar.expBarColor.getCurrentElementAsString())) {
+               levelColor = ModuleManager.themeColor.getColor(levelX, levelY);
+            }
+            GlStateManager.disableDepth();
+            GlStateManager.enableBlend();
+            font.drawStringWithShadow(levelStr, levelX, levelY, levelColor);
+            GlStateManager.enableDepth();
+         }
+      }
+
+      // 2. Player Stats (Health, Hunger, Armor, Air)
+      if (shouldDrawHud) {
+         // --- Health Bar (81x9 at y - 17) ---
+         float healthX = x;
+         float healthY = y - 17.0F;
+         float healthW = 81.0F;
+         float healthH = 9.0F;
+
+         if (hotbar.background.isEnabled()) {
+            if (!postProcessingActive) {
+               RenderUtils.drawShadow(healthX, healthY, healthX + healthW, healthY + healthH, 1.5F, 1610612736);
+            }
+            RenderUtils.drawRect(healthX, healthY, healthX + healthW, healthY + healthH, bgColor);
+         }
+
+         float healthInnerX = healthX + 1.0F;
+         float healthInnerY = healthY + 1.0F;
+         float healthInnerW = healthW - 2.0F;
+         float healthInnerH = healthH - 2.0F;
+
+         float hp = (player != null) ? Math.max(0.0F, player.getHealth()) : (inEditor ? 16.0F : 20.0F);
+         float maxHp = (player != null) ? Math.max(1.0F, player.getMaxHealth()) : 20.0F;
+         float hpFraction = MathHelper.clamp_float(hp / maxHp, 0.0F, 1.0F);
+         float hpFillW = healthInnerW * hpFraction;
+
+         if (hpFillW > 0.0F) {
+            String hpColorMode = hotbar.healthBarColor.getCurrentElementAsString();
+            int hpColor;
+            if ("Value".equalsIgnoreCase(hpColorMode)) {
+               hpColor = TargetHudElement.getHealthColor(hp, maxHp);
+            } else {
+               if (player != null && player.isPotionActive(Potion.wither)) {
+                  hpColor = 0xFF333333;
+               } else if (player != null && player.isPotionActive(Potion.poison)) {
+                  hpColor = 0xFF667722;
+               } else {
+                  hpColor = 0xFFFF3333;
+               }
+            }
+            RenderUtils.drawRect(healthInnerX, healthInnerY, healthInnerX + hpFillW, healthInnerY + healthInnerH, hpColor);
+         }
+
+         if (player != null && player.getAbsorptionAmount() > 0.0F) {
+            float absFraction = MathHelper.clamp_float(player.getAbsorptionAmount() / maxHp, 0.0F, 1.0F);
+            float absFillW = healthInnerW * absFraction;
+            if (absFillW > 0.0F) {
+               RenderUtils.drawRect(healthInnerX, healthInnerY, healthInnerX + absFillW, healthInnerY + healthInnerH, 0x90FFD700);
+            }
+         }
+
+         // --- Hunger Bar (81x9 at x + 101, y - 17) ---
+         float hungerX = x + 101.0F;
+         float hungerY = y - 17.0F;
+         float hungerW = 81.0F;
+         float hungerH = 9.0F;
+
+         if (hotbar.background.isEnabled()) {
+            if (!postProcessingActive) {
+               RenderUtils.drawShadow(hungerX, hungerY, hungerX + hungerW, hungerY + hungerH, 1.5F, 1610612736);
+            }
+            RenderUtils.drawRect(hungerX, hungerY, hungerX + hungerW, hungerY + hungerH, bgColor);
+         }
+
+         float hungerInnerX = hungerX + 1.0F;
+         float hungerInnerY = hungerY + 1.0F;
+         float hungerInnerW = hungerW - 2.0F;
+         float hungerInnerH = hungerH - 2.0F;
+
+         if (player != null && player.ridingEntity instanceof EntityLivingBase) {
+            EntityLivingBase mount = (EntityLivingBase) player.ridingEntity;
+            float mountHp = Math.max(0.0F, mount.getHealth());
+            float mountMaxHp = Math.max(1.0F, mount.getMaxHealth());
+            float mountFraction = MathHelper.clamp_float(mountHp / mountMaxHp, 0.0F, 1.0F);
+            float mountFillW = hungerInnerW * mountFraction;
+            if (mountFillW > 0.0F) {
+               RenderUtils.drawRect(hungerInnerX + hungerInnerW - mountFillW, hungerInnerY, hungerInnerX + hungerInnerW, hungerInnerY + hungerInnerH, 0xFFD32F2F);
+            }
+         } else {
+            int foodLevel = (player != null) ? player.getFoodStats().getFoodLevel() : (inEditor ? 18 : 20);
+            float foodFraction = MathHelper.clamp_float((float) foodLevel / 20.0F, 0.0F, 1.0F);
+            float foodFillW = hungerInnerW * foodFraction;
+            int foodColor = 0xFFFF8020;
+            if (player != null && player.isPotionActive(Potion.hunger)) {
+               foodColor = 0xFF506820;
+            }
+            if (foodFillW > 0.0F) {
+               RenderUtils.drawRect(hungerInnerX + hungerInnerW - foodFillW, hungerInnerY, hungerInnerX + hungerInnerW, hungerInnerY + hungerInnerH, foodColor);
+            }
+         }
+
+         // --- Armor Bar (81x9 at y - 27) ---
+         int armorVal = (player != null) ? player.getTotalArmorValue() : (inEditor ? 15 : 0);
+         if (armorVal > 0) {
+            float armorX = x;
+            float armorY = y - 27.0F;
+            float armorW = 81.0F;
+            float armorH = 9.0F;
+
+            if (hotbar.background.isEnabled()) {
+               if (!postProcessingActive) {
+                  RenderUtils.drawShadow(armorX, armorY, armorX + armorW, armorY + armorH, 1.5F, 1610612736);
+               }
+               RenderUtils.drawRect(armorX, armorY, armorX + armorW, armorY + armorH, bgColor);
+            }
+
+            float armorInnerX = armorX + 1.0F;
+            float armorInnerY = armorY + 1.0F;
+            float armorInnerW = armorW - 2.0F;
+            float armorInnerH = armorH - 2.0F;
+
+            float armorFraction = MathHelper.clamp_float((float) armorVal / 20.0F, 0.0F, 1.0F);
+            float armorFillW = armorInnerW * armorFraction;
+            if (armorFillW > 0.0F) {
+               RenderUtils.drawRect(armorInnerX, armorInnerY, armorInnerX + armorFillW, armorInnerY + armorInnerH, 0xFFDCDCDC);
+            }
+         }
+
+         // --- Drown / Air Bar (81x9 at x + 101, y - 27) ---
+         int airVal = (player != null) ? player.getAir() : 300;
+         boolean showAir = (player != null && (player.isInsideOfMaterial(Material.water) || airVal < 300));
+         if (showAir) {
+            float airX = x + 101.0F;
+            float airY = y - 27.0F;
+            float airW = 81.0F;
+            float airH = 9.0F;
+
+            if (hotbar.background.isEnabled()) {
+               if (!postProcessingActive) {
+                  RenderUtils.drawShadow(airX, airY, airX + airW, airY + airH, 1.5F, 1610612736);
+               }
+               RenderUtils.drawRect(airX, airY, airX + airW, airY + airH, bgColor);
+            }
+
+            float airInnerX = airX + 1.0F;
+            float airInnerY = airY + 1.0F;
+            float airInnerW = airW - 2.0F;
+            float airInnerH = airH - 2.0F;
+
+            float airFraction = MathHelper.clamp_float((float) airVal / 300.0F, 0.0F, 1.0F);
+            float airFillW = airInnerW * airFraction;
+            if (airFillW > 0.0F) {
+               RenderUtils.drawRect(airInnerX + airInnerW - airFillW, airInnerY, airInnerX + airInnerW, airInnerY + airInnerH, 0xFF00BFFF);
+            }
+         }
+      }
    }
 
    public static void renderHotbarEffects(boolean bloom, boolean glow, ScaledResolution sr) {
@@ -625,6 +863,21 @@ public class HotbarElement extends HudElement {
          if (hotbar.background.isEnabled()) {
             if ("Fancy".equalsIgnoreCase(mode) || "ArmorHUD".equalsIgnoreCase(mode)) {
                RenderUtils.drawRect(x, y, x + w, y + h, -16777216);
+               boolean shouldDrawHud = (minecraft.playerController != null && minecraft.playerController.shouldDrawHUD());
+               boolean shouldDrawExp = (minecraft.playerController != null && (minecraft.playerController.gameIsSurvivalOrAdventure() || (minecraft.thePlayer != null && minecraft.thePlayer.isRidingHorse())));
+               if (shouldDrawExp) {
+                  RenderUtils.drawRect(x, y - 7.0F, x + 182.0F, y - 2.0F, -16777216);
+               }
+               if (shouldDrawHud) {
+                  RenderUtils.drawRect(x, y - 17.0F, x + 81.0F, y - 8.0F, -16777216);
+                  RenderUtils.drawRect(x + 101.0F, y - 17.0F, x + 182.0F, y - 8.0F, -16777216);
+                  if (minecraft.thePlayer != null && minecraft.thePlayer.getTotalArmorValue() > 0) {
+                     RenderUtils.drawRect(x, y - 27.0F, x + 81.0F, y - 18.0F, -16777216);
+                  }
+                  if (minecraft.thePlayer != null && (minecraft.thePlayer.isInsideOfMaterial(Material.water) || minecraft.thePlayer.getAir() < 300)) {
+                     RenderUtils.drawRect(x + 101.0F, y - 27.0F, x + 182.0F, y - 18.0F, -16777216);
+                  }
+               }
             } else {
                String style = hotbar.lolStyle.getCurrentElementAsString();
                if ("Old".equalsIgnoreCase(style) || "Classic".equalsIgnoreCase(style)) {
@@ -648,6 +901,19 @@ public class HotbarElement extends HudElement {
             for (int i = 0; i < 9; i++) {
                float slotX = x + 1.0F + (float) i * 20.0F;
                RenderUtils.drawThemeGradientBar(slotX + 1.0F, lineTop, slotX + 19.0F, lineBottom);
+            }
+            if ("Theme".equalsIgnoreCase(hotbar.expBarColor.getCurrentElementAsString())) {
+               boolean shouldDrawExp = (minecraft.playerController != null && minecraft.playerController.gameIsSurvivalOrAdventure());
+               if (shouldDrawExp && minecraft.thePlayer != null && !minecraft.thePlayer.isRidingHorse()) {
+                  float innerX = x + 1.0F;
+                  float innerY = y - 7.0F + 1.0F;
+                  float innerW = 180.0F;
+                  float innerH = 3.0F;
+                  float fillW = innerW * MathHelper.clamp_float(minecraft.thePlayer.experience, 0.0F, 1.0F);
+                  if (fillW > 0.0F) {
+                     RenderUtils.drawThemeGradientBar(innerX, innerY, innerX + fillW, innerY + innerH);
+                  }
+               }
             }
          } else {
             String style = hotbar.lolStyle.getCurrentElementAsString();

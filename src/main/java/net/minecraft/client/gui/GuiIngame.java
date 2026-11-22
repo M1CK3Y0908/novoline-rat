@@ -148,6 +148,9 @@ public class GuiIngame extends Gui {
    }
 
    public void renderExpBar(ScaledResolution scaledRes, int x) {
+      if (ModuleManager.hotbar != null && ModuleManager.hotbar.isEnabled() && "Fancy".equalsIgnoreCase(ModuleManager.hotbar.mode.getCurrentElementAsString())) {
+         return;
+      }
       this.mc.mcProfiler.startSection("expBar");
       this.mc.getTextureManager().bindTexture(Gui.icons);
       if (this.mc.thePlayer.xpBarCap() > 0) {
@@ -418,6 +421,9 @@ public class GuiIngame extends Gui {
    }
 
    private void renderPlayerStats(ScaledResolution scaledRes) {
+      if (ModuleManager.hotbar != null && ModuleManager.hotbar.isEnabled() && "Fancy".equalsIgnoreCase(ModuleManager.hotbar.mode.getCurrentElementAsString())) {
+         return;
+      }
       if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
          EntityPlayer entityPlayer2 = (EntityPlayer)this.mc.getRenderViewEntity();
          int i = MathHelper.ceiling_float_int(entityPlayer2.getHealth());
@@ -903,6 +909,9 @@ public class GuiIngame extends Gui {
    }
 
    public void renderHorseJumpBar(ScaledResolution scaledRes, int x) {
+      if (ModuleManager.hotbar != null && ModuleManager.hotbar.isEnabled() && "Fancy".equalsIgnoreCase(ModuleManager.hotbar.mode.getCurrentElementAsString())) {
+         return;
+      }
       this.mc.mcProfiler.startSection("jumpBar");
       this.mc.getTextureManager().bindTexture(Gui.icons);
       float horseJumpPower = this.mc.thePlayer.getHorseJumpPower();
