@@ -1015,7 +1015,18 @@ public class RenderItem implements IResourceManagerReloadListener {
          itemModel.getItemCameraTransforms().applyTransform(net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.GUI);
       }
 
-      this.renderItem(itemStack, itemModel);
+      boolean depthWasEnabled = org.lwjgl.opengl.GL11.glIsEnabled(org.lwjgl.opengl.GL11.GL_DEPTH_TEST);
+      GlStateManager.enableDepth();
+      GlStateManager.depthFunc(515);
+      GlStateManager.depthMask(true);
+
+      try {
+         this.renderItem(itemStack, itemModel);
+      } finally {
+         if (!depthWasEnabled) {
+            GlStateManager.disableDepth();
+         }
+      }
       GlStateManager.disableAlpha();
       GlStateManager.disableRescaleNormal();
       GlStateManager.disableLighting();

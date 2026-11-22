@@ -223,10 +223,13 @@ public class ArmorHudElement extends HudElement {
          // 3. Render item icon (clean icon only, no vanilla damage bar)
          renderItem.zLevel = 100.0F;
          RenderHelper.enableGUIStandardItemLighting();
+         GlStateManager.enableDepth();
          renderItem.renderItemAndEffectIntoGUI(itemStack, (int)itemX, (int)itemY);
+         GlStateManager.disableDepth();
          RenderHelper.disableStandardItemLighting();
          renderItem.zLevel = 0.0F;
          GlStateManager.disableLighting();
+         GlStateManager.enableAlpha();
 
          // 4. Render durability number
          float textX = barX + (barWidth - font.getStringWidth(text)) / 2.0F;

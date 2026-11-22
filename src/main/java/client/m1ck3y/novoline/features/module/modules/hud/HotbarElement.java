@@ -261,7 +261,7 @@ public class HotbarElement extends HudElement {
          // 2. Render item with scale zoom around slot center
          if (itemStack != null) {
             GlStateManager.pushMatrix();
-            GL11.glScaled(scale, scale, scale);
+            GL11.glScaled(scale, scale, 1.0);
             double itemX = ((double) slotX * (1.0 / (double) scale)) - 6.5;
             double itemY = ((double) slotY * (1.0 / (double) scale)) - 6.0;
 
@@ -277,7 +277,9 @@ public class HotbarElement extends HudElement {
                GlStateManager.translate(-(itemX + 8.0), -(itemY + 12.0), 0.0);
             }
 
+            GlStateManager.enableDepth();
             renderItem.renderItemAndEffectIntoGUI(itemStack, (int) itemX, (int) itemY);
+            GlStateManager.disableDepth();
 
             if (anim > 0.0F) {
                GlStateManager.popMatrix();
@@ -286,6 +288,7 @@ public class HotbarElement extends HudElement {
             RenderHelper.disableStandardItemLighting();
             renderItem.zLevel = 0.0F;
             GlStateManager.disableLighting();
+            GlStateManager.enableAlpha();
 
             // Stack size count
             if (itemStack.stackSize > 1) {
@@ -294,7 +297,6 @@ public class HotbarElement extends HudElement {
                GlStateManager.disableDepth();
                GlStateManager.enableBlend();
                font.drawStringWithShadow(countStr, (float) itemX + offset, (float) itemY + 9.5F, 16777215);
-               GlStateManager.enableDepth();
             }
 
             GlStateManager.popMatrix();
@@ -395,7 +397,9 @@ public class HotbarElement extends HudElement {
                GlStateManager.translate(-(itemX + 8.0F), -(itemY + 12.0F), 0.0F);
             }
 
+            GlStateManager.enableDepth();
             renderItem.renderItemAndEffectIntoGUI(itemStack, (int) itemX, (int) itemY);
+            GlStateManager.disableDepth();
 
             if (anim > 0.0F) {
                GlStateManager.popMatrix();
@@ -404,6 +408,7 @@ public class HotbarElement extends HudElement {
             RenderHelper.disableStandardItemLighting();
             renderItem.zLevel = 0.0F;
             GlStateManager.disableLighting();
+            GlStateManager.enableAlpha();
 
             // Stack count
             if (itemStack.stackSize > 1) {
@@ -413,7 +418,6 @@ public class HotbarElement extends HudElement {
                GlStateManager.disableDepth();
                GlStateManager.enableBlend();
                font.drawStringWithShadow(countStr, itemX + 2.0F + textOffset, y + 12.5F, 16777215);
-               GlStateManager.enableDepth();
             }
          }
 
@@ -566,7 +570,9 @@ public class HotbarElement extends HudElement {
                GlStateManager.translate(-(itemX + 8.0F), -(itemY + 12.0F), 0.0F);
             }
 
+            GlStateManager.enableDepth();
             renderItem.renderItemAndEffectIntoGUI(itemStack, (int) itemX, (int) itemY);
+            GlStateManager.disableDepth();
 
             if (anim > 0.0F) {
                GlStateManager.popMatrix();
@@ -575,6 +581,7 @@ public class HotbarElement extends HudElement {
             RenderHelper.disableStandardItemLighting();
             renderItem.zLevel = 0.0F;
             GlStateManager.disableLighting();
+            GlStateManager.enableAlpha();
 
             // White custom font count at bottom-right corner inside the grid slot
             if (itemStack.stackSize > 1) {
@@ -585,7 +592,6 @@ public class HotbarElement extends HudElement {
                GlStateManager.disableDepth();
                GlStateManager.enableBlend();
                font.drawStringWithShadow(countStr, textX, textY, -1);
-               GlStateManager.enableDepth();
             }
 
             // Normal item durability bar display
@@ -628,8 +634,6 @@ public class HotbarElement extends HudElement {
                GlStateManager.enableBlend();
                GlStateManager.enableAlpha();
                GlStateManager.enableTexture2D();
-               GlStateManager.enableLighting();
-               GlStateManager.enableDepth();
             }
          }
       }
@@ -725,7 +729,6 @@ public class HotbarElement extends HudElement {
             GlStateManager.disableDepth();
             GlStateManager.enableBlend();
             font.drawStringWithShadow(levelStr, levelX, levelY, levelColor);
-            GlStateManager.enableDepth();
          }
       }
 
