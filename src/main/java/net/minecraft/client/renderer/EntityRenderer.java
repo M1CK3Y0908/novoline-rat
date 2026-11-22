@@ -91,17 +91,17 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.Project;
-import rat.novoline.Novoline;
-import rat.novoline.event.RenderWorldEvent;
-import rat.novoline.gui.NovolineMainMenu;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.combat.Reach;
-import rat.novoline.module.visual.CameraClip;
-import rat.novoline.module.visual.FreeLook;
-import rat.novoline.util.GlErrorThrottle;
-import rat.novoline.util.ReportThrottle;
-import rat.novoline.utils.math.SmoothingUtils;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.event.RenderWorldEvent;
+import client.m1ck3y.novoline.ui.NovolineMainMenu;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.combat.Reach;
+import client.m1ck3y.novoline.features.module.modules.visual.CameraClip;
+import client.m1ck3y.novoline.features.module.modules.visual.FreeLook;
+import client.m1ck3y.novoline.util.GlErrorThrottle;
+import client.m1ck3y.novoline.util.ReportThrottle;
+import client.m1ck3y.novoline.utils.math.SmoothingUtils;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class EntityRenderer implements IResourceManagerReloadListener {
    private Random random = new Random();

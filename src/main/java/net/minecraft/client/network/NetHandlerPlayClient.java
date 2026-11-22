@@ -205,7 +205,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import rat.novoline.gui.NovolineMainMenu;
+import client.m1ck3y.novoline.ui.NovolineMainMenu;
 
 public class NetHandlerPlayClient implements INetHandlerPlayClient {
    public final Map<UUID, NetworkPlayerInfo> playerInfoMap = Maps.newHashMap();

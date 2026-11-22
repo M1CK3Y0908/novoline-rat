@@ -1,0 +1,11 @@
+package client.m1ck3y.novoline.api;
+
+public interface ClassNamed<V> {
+   String getName();
+
+   boolean accepts(V value);
+
+   String getValueName(V value);
+
+   Class<V> getType();
+}

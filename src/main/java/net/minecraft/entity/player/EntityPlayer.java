@@ -77,9 +77,9 @@ import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import org.apache.commons.io.IOUtils;
-import rat.novoline.Novoline;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.player.AutoTool;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.player.AutoTool;
 
 public abstract class EntityPlayer extends EntityLivingBase {
    public double chasingPosX;

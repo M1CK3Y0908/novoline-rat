@@ -30,9 +30,9 @@ public class LayerCustomHead implements LayerRenderer<EntityLivingBase> {
    public void doRenderLayer(
       EntityLivingBase entitylivingbaseIn, float f, float f2, float partialTicks, float f3, float f4, float f5, float scale
    ) {
-      if (rat.novoline.module.ModuleManager.chineseKungfu != null
-          && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
-          && rat.novoline.module.ModuleManager.chineseKungfu.hideArmor.isEnabled()
+      if (client.m1ck3y.novoline.features.module.ModuleManager.chineseKungfu != null
+          && client.m1ck3y.novoline.features.module.ModuleManager.chineseKungfu.isEnabled()
+          && client.m1ck3y.novoline.features.module.ModuleManager.chineseKungfu.hideArmor.isEnabled()
           && entitylivingbaseIn == Minecraft.getMinecraft().thePlayer) {
          return;
       }

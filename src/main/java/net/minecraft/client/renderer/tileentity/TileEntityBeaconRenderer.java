@@ -11,7 +11,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.optifine.shaders.Shaders;
 import org.lwjgl.opengl.GL11;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class TileEntityBeaconRenderer extends TileEntitySpecialRenderer<TileEntityBeacon> {
    private static final ResourceLocation beaconBeam = new ResourceLocation("textures/entity/beacon_beam.png");

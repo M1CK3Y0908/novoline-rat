@@ -67,10 +67,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.world.XRay;
-import rat.novoline.util.GlErrorThrottle;
-import rat.novoline.util.ReportThrottle;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.world.XRay;
+import client.m1ck3y.novoline.util.GlErrorThrottle;
+import client.m1ck3y.novoline.util.ReportThrottle;
 
 public class Config {
    public static final String build = "M5";

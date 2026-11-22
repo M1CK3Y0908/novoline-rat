@@ -2,7 +2,7 @@ package net.optifine.reflect;
 
 import java.lang.reflect.Constructor;
 import net.optifine.Log;
-import rat.novoline.utils.ArrayUtils;
+import client.m1ck3y.novoline.utils.ArrayUtils;
 
 public class ReflectorConstructor implements IResolvable {
    private ReflectorClass reflectorClass = null;

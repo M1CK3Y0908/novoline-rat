@@ -12,7 +12,7 @@ import net.minecraft.network.login.client.C00PacketLoginStart;
 import net.minecraft.util.ChatComponentTranslation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import rat.novoline.utils.MinecraftUtils;
+import client.m1ck3y.novoline.utils.MinecraftUtils;
 
 public class RealmsConnect {
    private NetworkManager networkManager;

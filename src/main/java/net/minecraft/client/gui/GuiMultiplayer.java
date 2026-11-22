@@ -12,10 +12,10 @@ import net.minecraft.client.resources.I18n;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
-import rat.novoline.enums.ViaProtocol;
-import rat.novoline.gui.ProxyManagerScreen;
-import rat.novoline.gui.ViaSettingsScreen;
-import rat.novoline.platform.ViaMCP;
+import client.m1ck3y.novoline.enums.ViaProtocol;
+import client.m1ck3y.novoline.ui.ProxyManagerScreen;
+import client.m1ck3y.novoline.ui.ViaSettingsScreen;
+import client.m1ck3y.novoline.platform.ViaMCP;
 
 public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback {
    private boolean initialized;

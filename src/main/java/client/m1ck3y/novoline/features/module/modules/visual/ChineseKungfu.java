@@ -1,0 +1,20 @@
+package client.m1ck3y.novoline.features.module.modules.visual;
+
+import net.minecraft.client.renderer.ItemRenderer;
+import client.m1ck3y.novoline.features.module.Category;
+import client.m1ck3y.novoline.features.module.Module;
+import client.m1ck3y.novoline.setting.CheckboxSetting;
+
+public class ChineseKungfu extends Module {
+    public final CheckboxSetting hideHeldItem = settingManager.register(new CheckboxSetting(this, "Hide Held Item", true));
+    public final CheckboxSetting hideArmor = settingManager.register(new CheckboxSetting(this, "Hide Armor", true));
+
+    public ChineseKungfu() {
+        super(Category.VISUAL, "ChineseKungfu", "Hides held items and armor for Kung Fu combat with Mo' Bends effects");
+    }
+
+    @Override
+    public void onDisable() {
+        ItemRenderer.resetKungfuAnimation();
+    }
+}

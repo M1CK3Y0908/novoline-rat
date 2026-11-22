@@ -5,7 +5,7 @@ import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class GuiButton extends Gui {
    protected int width = 200;

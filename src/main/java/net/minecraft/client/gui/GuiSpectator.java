@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class GuiSpectator extends Gui implements ISpectatorMenuRecipient {
    private static final ResourceLocation WIDGETS_TEX_PATH = new ResourceLocation("textures/gui/widgets.png");

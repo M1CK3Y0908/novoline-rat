@@ -110,8 +110,8 @@ public class RenderBendsPlayer extends RenderPlayer {
         ((ModelBendsPlayer)this.mainModel).updateWithEntityData(p_77041_1_);
         ((ModelBendsPlayer)this.mainModel).postRenderTranslate(0.0625f);
         Data_Player data = Data_Player.get(p_77041_1_.getEntityId());
-        boolean kungfu = rat.novoline.module.ModuleManager.chineseKungfu != null
-            && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+        boolean kungfu = client.m1ck3y.novoline.features.module.ModuleManager.chineseKungfu != null
+            && client.m1ck3y.novoline.features.module.ModuleManager.chineseKungfu.isEnabled()
             && p_77041_1_ == Minecraft.getMinecraft().thePlayer;
         if (((SettingsBoolean)SettingsNode.getSetting("swordTrail")).data && !kungfu) {
             GL11.glPushMatrix();

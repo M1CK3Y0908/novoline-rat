@@ -17,7 +17,7 @@ plugins {
     application
 }
 
-group = "rat.novoline"
+group = "client.m1ck3y.novoline"
 version = "1.0.0"
 
 java {

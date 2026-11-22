@@ -33,8 +33,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import rat.novoline.Novoline;
-import rat.novoline.event.BlockCollisionEvent;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.event.BlockCollisionEvent;
 
 public class Block {
    protected int lightValue;

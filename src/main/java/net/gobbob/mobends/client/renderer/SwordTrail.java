@@ -49,8 +49,8 @@ public class SwordTrail {
             float alpha = part.ticksExisted / 5.0f;
             alpha = GUtil.max(alpha, 1.0f);
             alpha = 1.0f - alpha;
-            int themeRgb = rat.novoline.module.ModuleManager.themeColor != null
-                ? rat.novoline.module.ModuleManager.themeColor.getColor(i * 100)
+            int themeRgb = client.m1ck3y.novoline.features.module.ModuleManager.themeColor != null
+                ? client.m1ck3y.novoline.features.module.ModuleManager.themeColor.getColor(i * 100)
                 : 0xFFFFFF;
             float r = ((themeRgb >> 16) & 0xFF) / 255.0f;
             float g = ((themeRgb >> 8) & 0xFF) / 255.0f;

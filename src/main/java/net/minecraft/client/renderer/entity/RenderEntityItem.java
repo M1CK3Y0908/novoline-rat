@@ -11,8 +11,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class RenderEntityItem extends Render<EntityItem> {
    private Random renderRandom = new Random();

@@ -15,8 +15,8 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ReportedException;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.player.AutoTool;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.player.AutoTool;
 
 public class InventoryPlayer implements IInventory {
    private ItemStack itemStack;

@@ -8,9 +8,9 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.realms.RealmsBridge;
-import rat.novoline.Novoline;
-import rat.novoline.gui.AltManagerScreen;
-import rat.novoline.gui.NovolineMainMenu;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.ui.AltManagerScreen;
+import client.m1ck3y.novoline.ui.NovolineMainMenu;
 
 public class GuiIngameMenu extends GuiScreen {
    private int visibleTime;

@@ -2,7 +2,7 @@ package net.minecraft.client.gui;
 
 import java.io.IOException;
 import net.minecraft.client.resources.I18n;
-import rat.novoline.gui.NovolineMainMenu;
+import client.m1ck3y.novoline.ui.NovolineMainMenu;
 
 public class GuiMemoryErrorScreen extends GuiScreen {
    @Override

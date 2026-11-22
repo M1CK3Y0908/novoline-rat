@@ -48,7 +48,7 @@ import net.optifine.reflect.Reflector;
 import net.optifine.reflect.ReflectorForge;
 import net.optifine.shaders.Shaders;
 import net.optifine.shaders.ShadersRender;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class RenderItem implements IResourceManagerReloadListener {
    private boolean notRenderingEffectsInGUI = true;

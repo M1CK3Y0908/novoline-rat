@@ -114,7 +114,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListener {
    private static final Logger logger = LogManager.getLogger();

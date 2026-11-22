@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
-import rat.novoline.api.Contract2;
+import client.m1ck3y.novoline.api.Contract2;
 
 public class ObjectIntIdentityMap<T> implements Contract2<T> {
    private final IdentityHashMap<T, Integer> identityMap = new IdentityHashMap<>(512);

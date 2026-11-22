@@ -186,16 +186,16 @@ import org.lwjgl.opengl.OpenGLException;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.glu.GLU;
 import ru.fals3r.aal.API;
-import rat.novoline.Novoline;
-import rat.novoline.Novoline.Fonts;
-import rat.novoline.event.DeviceButtonDownEvent;
-import rat.novoline.event.LoadWorldEvent;
-import rat.novoline.event.RunTickEvent;
-import rat.novoline.event.DeviceButtonDownEvent.MouseType;
-import rat.novoline.gui.NovolineMainMenu;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.world.FastPlace;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.Novoline.Fonts;
+import client.m1ck3y.novoline.event.DeviceButtonDownEvent;
+import client.m1ck3y.novoline.event.LoadWorldEvent;
+import client.m1ck3y.novoline.event.RunTickEvent;
+import client.m1ck3y.novoline.event.DeviceButtonDownEvent.MouseType;
+import client.m1ck3y.novoline.ui.NovolineMainMenu;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.world.FastPlace;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class Minecraft implements IThreadListener, IPlayerUsage {
    public MouseHelper mouseHelper;
@@ -1192,7 +1192,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 
    private void createDisplay() throws LWJGLException {
       Display.setResizable(true);
-      Display.setTitle(rat.novoline.Novoline.CLIENT_TITLE);
+      Display.setTitle(client.m1ck3y.novoline.Novoline.CLIENT_TITLE);
 
       try {
          Display.create(new PixelFormat().withDepthBits(24));

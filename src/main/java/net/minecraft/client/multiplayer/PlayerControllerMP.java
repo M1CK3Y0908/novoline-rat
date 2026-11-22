@@ -27,9 +27,9 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import rat.novoline.Novoline;
-import rat.novoline.event.SyncCurrentSlotEvent;
-import rat.novoline.module.ModuleManager;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.event.SyncCurrentSlotEvent;
+import client.m1ck3y.novoline.features.module.ModuleManager;
 
 public class PlayerControllerMP {
    private float curBlockDamageMP;

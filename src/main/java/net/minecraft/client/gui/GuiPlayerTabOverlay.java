@@ -18,10 +18,10 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import rat.novoline.Novoline;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.misc.NameProtect;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.misc.NameProtect;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class GuiPlayerTabOverlay extends Gui {
    public static final Ordering<NetworkPlayerInfo> PLAYER_ORDERING = Ordering.from(new GuiPlayerTabOverlay.PlayerComparator());

@@ -131,8 +131,8 @@ extends EntityData {
 
     @Override
     public void onPunch() {
-        boolean kungfu = rat.novoline.module.ModuleManager.chineseKungfu != null
-            && rat.novoline.module.ModuleManager.chineseKungfu.isEnabled()
+        boolean kungfu = client.m1ck3y.novoline.features.module.ModuleManager.chineseKungfu != null
+            && client.m1ck3y.novoline.features.module.ModuleManager.chineseKungfu.isEnabled()
             && this.getEntity() == Minecraft.getMinecraft().thePlayer;
         if (this.getEntity().getHeldItem() != null && !kungfu) {
             if (this.ticksAfterPunch > 6.0f) {

@@ -43,13 +43,13 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.world.border.WorldBorder;
 import net.optifine.CustomColors;
-import rat.novoline.Novoline;
-import rat.novoline.event.RenderGameOverlayEvent;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.hud.HudRenderer;
-import rat.novoline.module.misc.NameProtect;
-import rat.novoline.utils.NameUtils;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.event.RenderGameOverlayEvent;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.hud.HudRenderer;
+import client.m1ck3y.novoline.features.module.modules.misc.NameProtect;
+import client.m1ck3y.novoline.utils.NameUtils;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 import java.util.Collection;
 
 public class GuiIngame extends Gui {

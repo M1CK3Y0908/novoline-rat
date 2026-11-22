@@ -4,7 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import java.util.Iterator;
 import java.util.Map;
-import rat.novoline.api.Contract2;
+import client.m1ck3y.novoline.api.Contract2;
 
 public class RegistryNamespaced<K, V> extends RegistrySimple<K, V> implements Contract2<V> {
    protected final ObjectIntIdentityMap<V> underlyingIntegerMap = new ObjectIntIdentityMap<>();

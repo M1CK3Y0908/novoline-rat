@@ -30,9 +30,9 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.optifine.reflect.Reflector;
-import rat.novoline.particle.EntityFXChild1.IParticleFactoryImpl2;
-import rat.novoline.particle.EntityFXChild3.IParticleFactoryImpl;
-import rat.novoline.util.FireworkEffects.EntityFXChild3;
+import client.m1ck3y.novoline.particle.EntityFXChild1.IParticleFactoryImpl2;
+import client.m1ck3y.novoline.particle.EntityFXChild3.IParticleFactoryImpl;
+import client.m1ck3y.novoline.util.FireworkEffects.EntityFXChild3;
 
 public class EffectRenderer {
    public List<EntityFX>[][] fxLayers = new List[4][];
@@ -350,15 +350,15 @@ public class EffectRenderer {
 
    private void registerVanillaParticles() {
       this.registerParticle(EnumParticleTypes.EXPLOSION_NORMAL.getParticleID(), new IParticleFactoryImpl());
-      this.registerParticle(EnumParticleTypes.WATER_BUBBLE.getParticleID(), new rat.novoline.particle.EntityFXChild8.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.WATER_BUBBLE.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild8.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.WATER_SPLASH.getParticleID(), new EntitySplashFX.Factory());
-      this.registerParticle(EnumParticleTypes.WATER_WAKE.getParticleID(), new rat.novoline.particle.EntityFXChild7.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.WATER_WAKE.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild7.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.WATER_DROP.getParticleID(), new EntityRainFX.Factory());
       this.registerParticle(EnumParticleTypes.SUSPENDED.getParticleID(), new EntitySuspendFX.Factory());
-      this.registerParticle(EnumParticleTypes.SUSPENDED_DEPTH.getParticleID(), new rat.novoline.particle.EntityFXChild6.IParticleFactoryImpl());
-      this.registerParticle(EnumParticleTypes.CRIT.getParticleID(), new rat.novoline.particle.EntityFXChild1.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.SUSPENDED_DEPTH.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild6.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.CRIT.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild1.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.CRIT_MAGIC.getParticleID(), new IParticleFactoryImpl2());
-      this.registerParticle(EnumParticleTypes.SMOKE_NORMAL.getParticleID(), new rat.novoline.particle.EntityFXChild9.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.SMOKE_NORMAL.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild9.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.SMOKE_LARGE.getParticleID(), new net.minecraft.client.particle.EntityAuraFX.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.SPELL.getParticleID(), new EntitySpellParticleFX.Factory());
       this.registerParticle(EnumParticleTypes.SPELL_INSTANT.getParticleID(), new EntitySpellParticleFX.InstantFactory());
@@ -367,10 +367,10 @@ public class EffectRenderer {
       this.registerParticle(EnumParticleTypes.SPELL_WITCH.getParticleID(), new EntitySpellParticleFX.WitchFactory());
       this.registerParticle(EnumParticleTypes.DRIP_WATER.getParticleID(), new EntityDropParticleFX.WaterFactory());
       this.registerParticle(EnumParticleTypes.DRIP_LAVA.getParticleID(), new EntityDropParticleFX.LavaFactory());
-      this.registerParticle(EnumParticleTypes.VILLAGER_ANGRY.getParticleID(), new rat.novoline.particle.EntityFXChild5.IParticleFactoryImpl());
-      this.registerParticle(EnumParticleTypes.VILLAGER_HAPPY.getParticleID(), new rat.novoline.particle.EntityFXChild6.IParticleFactoryImpl2());
-      this.registerParticle(EnumParticleTypes.TOWN_AURA.getParticleID(), new rat.novoline.particle.EntityFXChild6.IParticleFactoryImpl());
-      this.registerParticle(EnumParticleTypes.NOTE.getParticleID(), new rat.novoline.particle.EntityFXChild2.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.VILLAGER_ANGRY.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild5.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.VILLAGER_HAPPY.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild6.IParticleFactoryImpl2());
+      this.registerParticle(EnumParticleTypes.TOWN_AURA.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild6.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.NOTE.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild2.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.PORTAL.getParticleID(), new EntityPortalFX.Factory());
       this.registerParticle(EnumParticleTypes.ENCHANTMENT_TABLE.getParticleID(), new EntityEnchantmentTableParticleFX.EnchantmentTable());
       this.registerParticle(EnumParticleTypes.FLAME.getParticleID(), new EntityFlameFX.Factory());
@@ -379,16 +379,16 @@ public class EffectRenderer {
       this.registerParticle(EnumParticleTypes.CLOUD.getParticleID(), new EntityCloudFX.Factory());
       this.registerParticle(EnumParticleTypes.REDSTONE.getParticleID(), new EntityReddustFX.Factory());
       this.registerParticle(EnumParticleTypes.SNOWBALL.getParticleID(), new EntityBreakingFX.SnowballFactory());
-      this.registerParticle(EnumParticleTypes.SNOW_SHOVEL.getParticleID(), new rat.novoline.particle.EntityFXChild4.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.SNOW_SHOVEL.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild4.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.SLIME.getParticleID(), new EntityBreakingFX.SlimeFactory());
-      this.registerParticle(EnumParticleTypes.HEART.getParticleID(), new rat.novoline.particle.EntityFXChild5.IParticleFactoryImpl2());
+      this.registerParticle(EnumParticleTypes.HEART.getParticleID(), new client.m1ck3y.novoline.particle.EntityFXChild5.IParticleFactoryImpl2());
       this.registerParticle(EnumParticleTypes.BARRIER.getParticleID(), new Barrier.Factory());
       this.registerParticle(EnumParticleTypes.ITEM_CRACK.getParticleID(), new EntityBreakingFX.Factory());
       this.registerParticle(EnumParticleTypes.BLOCK_CRACK.getParticleID(), new EntityDiggingFX.Factory());
       this.registerParticle(EnumParticleTypes.BLOCK_DUST.getParticleID(), new EntityBlockDustFX.Factory());
       this.registerParticle(EnumParticleTypes.EXPLOSION_HUGE.getParticleID(), new EntityHugeExplodeFX.Factory());
       this.registerParticle(EnumParticleTypes.EXPLOSION_LARGE.getParticleID(), new EntityLargeExplodeFX.Factory());
-      this.registerParticle(EnumParticleTypes.FIREWORKS_SPARK.getParticleID(), new rat.novoline.util.FireworkEffects.IParticleFactoryImpl());
+      this.registerParticle(EnumParticleTypes.FIREWORKS_SPARK.getParticleID(), new client.m1ck3y.novoline.util.FireworkEffects.IParticleFactoryImpl());
       this.registerParticle(EnumParticleTypes.MOB_APPEARANCE.getParticleID(), new MobAppearance.Factory());
    }
 

@@ -19,10 +19,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import rat.novoline.Novoline;
-import rat.novoline.client.discord.GatewayChatMessage;
-import rat.novoline.module.hud.HudManager;
-import rat.novoline.util.Room;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.client.discord.GatewayChatMessage;
+import client.m1ck3y.novoline.features.module.modules.hud.HudManager;
+import client.m1ck3y.novoline.util.Room;
 
 public class GuiChat extends GuiScreen {
    protected GuiTextField inputField;

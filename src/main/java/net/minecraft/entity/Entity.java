@@ -47,12 +47,12 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import rat.novoline.Novoline;
-import rat.novoline.culling.Cullable;
-import rat.novoline.event.MoveEntityEvent;
-import rat.novoline.event.MoveEntityEvent2;
-import rat.novoline.event.MoveFlyingEvent;
-import rat.novoline.module.ModuleManager;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.culling.Cullable;
+import client.m1ck3y.novoline.event.MoveEntityEvent;
+import client.m1ck3y.novoline.event.MoveEntityEvent2;
+import client.m1ck3y.novoline.event.MoveFlyingEvent;
+import client.m1ck3y.novoline.features.module.ModuleManager;
 
 public abstract class Entity implements ICommandSender, Cullable {
    public boolean culled;

@@ -95,9 +95,9 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.optifine.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import rat.novoline.api.ClassNamed;
-import rat.novoline.gui.NovolineMainMenu;
-import rat.novoline.utils.ArrayUtils;
+import client.m1ck3y.novoline.api.ClassNamed;
+import client.m1ck3y.novoline.ui.NovolineMainMenu;
+import client.m1ck3y.novoline.utils.ArrayUtils;
 
 public class Reflector {
    private static final Logger logger = LogManager.getLogger();

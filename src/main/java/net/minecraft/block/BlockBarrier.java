@@ -7,7 +7,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import rat.novoline.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.ModuleManager;
 
 public class BlockBarrier extends Block {
    @Override

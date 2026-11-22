@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.tileentity;
 
-import rat.novoline.culling.Cullable;
-import rat.novoline.module.ModuleManager;
+import client.m1ck3y.novoline.culling.Cullable;
+import client.m1ck3y.novoline.features.module.ModuleManager;
 
 import com.google.common.collect.Maps;
 import java.util.Iterator;

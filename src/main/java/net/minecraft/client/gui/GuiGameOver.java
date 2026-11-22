@@ -6,7 +6,7 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
-import rat.novoline.gui.NovolineMainMenu;
+import client.m1ck3y.novoline.ui.NovolineMainMenu;
 
 public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
    private int enableButtonsTimer;

@@ -51,9 +51,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import rat.novoline.Novoline;
-import rat.novoline.event.JumpEvent;
-import rat.novoline.module.ModuleManager;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.event.JumpEvent;
+import client.m1ck3y.novoline.features.module.ModuleManager;
 
 public abstract class EntityLivingBase extends Entity {
    private static final UUID sprintingSpeedBoostModifierUUID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");

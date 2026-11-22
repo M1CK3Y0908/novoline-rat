@@ -50,15 +50,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import rat.novoline.Novoline;
-import rat.novoline.codec.ViaDecoder;
-import rat.novoline.codec.ViaEncoder;
-import rat.novoline.event.PacketReceiveEvent;
-import rat.novoline.event.PacketSendEvent;
-import rat.novoline.platform.ViaMCP;
-import rat.novoline.util.ViaSettings;
-import rat.novoline.utils.ViaPipelineUtils;
-import rat.novoline.utils.proxy.ProxyList;
+import client.m1ck3y.novoline.Novoline;
+import client.m1ck3y.novoline.codec.ViaDecoder;
+import client.m1ck3y.novoline.codec.ViaEncoder;
+import client.m1ck3y.novoline.event.PacketReceiveEvent;
+import client.m1ck3y.novoline.event.PacketSendEvent;
+import client.m1ck3y.novoline.platform.ViaMCP;
+import client.m1ck3y.novoline.util.ViaSettings;
+import client.m1ck3y.novoline.utils.ViaPipelineUtils;
+import client.m1ck3y.novoline.utils.proxy.ProxyList;
 
 public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.newConcurrentLinkedQueue();

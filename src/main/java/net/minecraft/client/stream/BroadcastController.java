@@ -34,7 +34,7 @@ import tv.twitch.broadcast.StreamInfo;
 import tv.twitch.broadcast.StreamInfoForSetting;
 import tv.twitch.broadcast.UserInfo;
 import tv.twitch.broadcast.VideoParams;
-import rat.novoline.util.RingBuffer;
+import client.m1ck3y.novoline.util.RingBuffer;
 
 public class BroadcastController {
    protected final int intValue = 30;

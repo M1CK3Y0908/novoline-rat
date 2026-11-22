@@ -13,8 +13,8 @@ import net.minecraft.world.gen.ChunkProviderDebug;
 import net.minecraft.world.gen.ChunkProviderFlat;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.FlatGeneratorInfo;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public abstract class WorldProvider {
    protected final float[] lightBrightnessTable = new float[16];

@@ -32,11 +32,11 @@ import net.optifine.DynamicLights;
 import net.optifine.reflect.Reflector;
 import net.optifine.shaders.Shaders;
 import org.lwjgl.opengl.GL11;
-import rat.novoline.module.ModuleManager;
-import rat.novoline.module.visual.Animations;
-import rat.novoline.module.visual.Chams;
-import rat.novoline.module.visual.Animations.ItemTransformState;
-import rat.novoline.utils.render.RenderUtils;
+import client.m1ck3y.novoline.features.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.modules.visual.Animations;
+import client.m1ck3y.novoline.features.module.modules.visual.Chams;
+import client.m1ck3y.novoline.features.module.modules.visual.Animations.ItemTransformState;
+import client.m1ck3y.novoline.utils.render.RenderUtils;
 
 public class ItemRenderer {
    private static final ResourceLocation RES_MAP_BACKGROUND = new ResourceLocation("textures/map/map_background.png");

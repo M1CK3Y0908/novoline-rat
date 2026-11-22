@@ -8,7 +8,7 @@ import net.minecraft.util.MathHelper;
 import net.optifine.reflect.Reflector;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
-import rat.novoline.api.Contract5;
+import client.m1ck3y.novoline.api.Contract5;
 
 public enum ModelRotation implements Contract5, ITransformation {
    X0_Y0(0, 0),

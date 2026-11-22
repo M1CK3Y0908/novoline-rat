@@ -1,7 +1,7 @@
 package net.minecraft.client.particle;
 
 import net.minecraft.world.World;
-import rat.novoline.particle.EntityFXChild9;
+import client.m1ck3y.novoline.particle.EntityFXChild9;
 
 public class EntityAuraFX extends EntityFXChild9 {
    protected EntityAuraFX(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double speedIn) {

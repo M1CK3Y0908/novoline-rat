@@ -1,6 +1,6 @@
 package net.gobbob.mobends.settings;
 
-import rat.novoline.module.ModuleManager;
+import client.m1ck3y.novoline.features.module.ModuleManager;
 
 public abstract class SettingsNode {
     public static SettingsNode[] settings = new SettingsNode[]{
