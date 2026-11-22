@@ -8,10 +8,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 import rat.novoline.module.ModuleManager;
 import rat.novoline.utils.render.FontAdapter;
 import rat.novoline.utils.render.RenderUtils;
@@ -19,6 +22,7 @@ import rat.novoline.utils.render.RenderUtils;
 public class PotionHudElement extends HudElement {
    public static PotionHudElement instance;
    private static final Minecraft minecraft = Minecraft.getMinecraft();
+   private static final ResourceLocation INVENTORY_BACKGROUND = new ResourceLocation("textures/gui/container/inventory.png");
    private boolean hasUserMoved = false;
    private float width = 110.0F;
    private float height = 40.0F;
@@ -36,11 +40,13 @@ public class PotionHudElement extends HudElement {
       public final String name;
       public final String duration;
       public final float fraction;
+      public final Potion potion;
 
-      public PotionEntry(String name, String duration, float fraction) {
+      public PotionEntry(String name, String duration, float fraction, Potion potion) {
          this.name = name;
          this.duration = duration;
          this.fraction = fraction;
+         this.potion = potion;
       }
    }
 
@@ -149,15 +155,15 @@ public class PotionHudElement extends HudElement {
                int dur = effect.getDuration();
                int maxDur = maxDurationMap.compute(effect.getPotionID(), (k, v) -> (v == null || dur > v) ? dur : v);
                float fraction = MathHelper.clamp_float((float) dur / (float) Math.max(1, maxDur), 0.0F, 1.0F);
-               entries.add(new PotionEntry(fullName, duration, fraction));
+               entries.add(new PotionEntry(fullName, duration, fraction, potion));
             }
          }
       }
 
       if (entries.isEmpty() && inEditor) {
-         entries.add(new PotionEntry("Speed II", "01:30", 0.75F));
-         entries.add(new PotionEntry("Strength I", "00:45", 0.35F));
-         entries.add(new PotionEntry("Fire Resistance", "02:15", 0.50F));
+         entries.add(new PotionEntry("Speed II", "01:30", 0.75F, Potion.moveSpeed));
+         entries.add(new PotionEntry("Strength I", "00:45", 0.35F, Potion.damageBoost));
+         entries.add(new PotionEntry("Fire Resistance", "02:15", 0.50F, Potion.fireResistance));
       }
 
       cachedEntries.clear();
@@ -171,18 +177,24 @@ public class PotionHudElement extends HudElement {
       }
 
       FontAdapter font = potionHUD.getFont();
-      float lineHeight = (float) font.getHeight() + (potionHUD.durationBar.isEnabled() ? 6.0F : 4.0F);
+      float fontHeight = (float) font.getHeight();
+      float iconSize = Math.max(10.0F, fontHeight + 1.0F);
+      float iconSpacing = 3.5F;
+      float paddingY = 3.5F;
+      float lineHeight = Math.max(iconSize, fontHeight) + paddingY * 2.0F;
       float spacing = 3.0F;
 
       float maxWidth = 0.0F;
       for (PotionEntry entry : entries) {
-         float w = (float) (font.getStringWidth(entry.name) + font.getStringWidth(": ") + font.getStringWidth(entry.duration));
+         float iconSpace = (entry.potion != null && entry.potion.hasStatusIcon()) ? (iconSize + iconSpacing) : 0.0F;
+         float w = iconSpace + (float) (font.getStringWidth(entry.name) + font.getStringWidth(": ") + font.getStringWidth(entry.duration));
          if (w > maxWidth) {
             maxWidth = w;
          }
       }
 
-      float cardWidth = maxWidth + (potionHUD.background.isEnabled() ? 10.0F : 0.0F);
+      float paddingX = potionHUD.background.isEnabled() ? 5.0F : 2.0F;
+      float cardWidth = maxWidth + paddingX * 2.0F;
       this.width = cardWidth;
       this.height = entries.size() * (lineHeight + spacing) - spacing;
 
@@ -208,12 +220,36 @@ public class PotionHudElement extends HudElement {
             RenderUtils.drawRoundedRect(x, itemY, cardWidth, lineHeight, 3.0F, bgColor);
          }
 
-         // 2. Text layout: Name in Theme Gradient, Colon in Gray, Duration in White
-         float textX = x + (potionHUD.background.isEnabled() ? 5.0F : 0.0F);
-         float textY = itemY + (potionHUD.durationBar.isEnabled() ? 1.5F : 2.0F);
+         // 2. Icon & Text layout
+         float curX = x + paddingX;
+
+         // Potion Icon
+         if (entry.potion != null && entry.potion.hasStatusIcon()) {
+            int statusIconIndex = entry.potion.getStatusIconIndex();
+            float u = (float) (statusIconIndex % 8 * 18);
+            float v = (float) (198 + statusIconIndex / 8 * 18);
+            float iconX = curX;
+            float iconY = itemY + (lineHeight - iconSize) / 2.0F;
+
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            GlStateManager.enableAlpha();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            minecraft.getTextureManager().bindTexture(INVENTORY_BACKGROUND);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+            RenderUtils.drawScaledTexturedRect(iconX, iconY, u, v, 18.0F, 18.0F, iconSize, iconSize, 256.0F, 256.0F);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            GlStateManager.popMatrix();
+
+            curX += iconSize + iconSpacing;
+         }
+
+         float textY = itemY + (lineHeight - fontHeight) / 2.0F;
 
          // Name in theme color gradient
-         float curX = textX;
          for (int c = 0; c < entry.name.length(); c++) {
             String ch = String.valueOf(entry.name.charAt(c));
             int color = ModuleManager.themeColor.getColor((double) curX, (double) textY, c, entry.name.length());
@@ -227,18 +263,6 @@ public class PotionHudElement extends HudElement {
 
          // Duration in white
          font.drawStringWithShadow(entry.duration, curX, textY, -1);
-
-         // 3. Duration progress bar
-         if (potionHUD.durationBar.isEnabled()) {
-            float barX = x + 1.5F;
-            float barY = itemY + lineHeight - 2.0F;
-            float maxBarW = cardWidth - 3.0F;
-            float curBarW = maxBarW * entry.fraction;
-            RenderUtils.drawRect(barX, barY, barX + maxBarW, barY + 1.0F, 0x40000000);
-            if (curBarW > 0.0F) {
-               RenderUtils.drawThemeGradientBar(barX, barY, barX + curBarW, barY + 1.0F);
-            }
-         }
       }
    }
 
@@ -252,7 +276,11 @@ public class PotionHudElement extends HudElement {
 
       PotionHUD potionHUD = ModuleManager.potionHUD;
       FontAdapter font = potionHUD.getFont();
-      float lineHeight = (float) font.getHeight() + (potionHUD.durationBar.isEnabled() ? 6.0F : 4.0F);
+      float fontHeight = (float) font.getHeight();
+      float iconSize = Math.max(10.0F, fontHeight + 1.0F);
+      float iconSpacing = 3.5F;
+      float paddingY = 3.5F;
+      float lineHeight = Math.max(iconSize, fontHeight) + paddingY * 2.0F;
       float spacing = 3.0F;
       float x = cachedX;
       float y = cachedY;
@@ -267,18 +295,21 @@ public class PotionHudElement extends HudElement {
             }
          }
       } else {
-         // Bloom pass: bloom duration bars
-         if (potionHUD.durationBar.isEnabled()) {
-            for (int i = 0; i < cachedEntries.size(); i++) {
-               PotionEntry entry = cachedEntries.get(i);
-               float itemY = y + (float) i * (lineHeight + spacing);
-               float barX = x + 1.5F;
-               float barY = itemY + lineHeight - 2.0F;
-               float maxBarW = cardWidth - 3.0F;
-               float curBarW = maxBarW * entry.fraction;
-               if (curBarW > 0.0F) {
-                  RenderUtils.drawThemeGradientBar(barX, barY, barX + curBarW, barY + 1.0F);
-               }
+         // Bloom pass: bloom theme-colored potion text
+         float paddingX = potionHUD.background.isEnabled() ? 5.0F : 2.0F;
+         for (int i = 0; i < cachedEntries.size(); i++) {
+            PotionEntry entry = cachedEntries.get(i);
+            float itemY = y + (float) i * (lineHeight + spacing);
+            float textY = itemY + (lineHeight - fontHeight) / 2.0F;
+            float curX = x + paddingX;
+            if (entry.potion != null && entry.potion.hasStatusIcon()) {
+               curX += iconSize + iconSpacing;
+            }
+            for (int c = 0; c < entry.name.length(); c++) {
+               String ch = String.valueOf(entry.name.charAt(c));
+               int color = ModuleManager.themeColor.getColor((double) curX, (double) textY, c, entry.name.length());
+               font.drawString(ch, curX, textY, color);
+               curX += (float) font.getStringWidth(ch);
             }
          }
       }
