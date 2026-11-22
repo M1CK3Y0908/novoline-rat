@@ -5,7 +5,7 @@ import io.github.nevalackin.homoBus.annotations.EventLink;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.potion.Potion;
-import rat.novoline.event.UpdateEvent;
+import rat.novoline.event.PreUpdateEvent;
 import rat.novoline.module.Category;
 import rat.novoline.module.Module;
 import rat.novoline.setting.CheckboxSetting;
@@ -30,7 +30,7 @@ public class Regen extends Module {
       new NumberSetting(this, "Delay", 0, 0, 10000)
    );
    private final NumberSetting health = settingManager.register(
-      new NumberSetting(this, "Health", 18, 0, 20)
+      new NumberSetting(this, "Health", 20, 0, 20)
    );
    private final NumberSetting food = settingManager.register(
       new NumberSetting(this, "Food", 18, 0, 20)
@@ -46,7 +46,7 @@ public class Regen extends Module {
    private boolean resetTimer = false;
 
    @EventLink
-   private final Listener<UpdateEvent> onUpdate = updateEvent -> {
+   private final Listener<PreUpdateEvent> onPreUpdate = preUpdateEvent -> {
       if (this.resetTimer) {
          minecraft.timer.timerSpeed = 1.0F;
          this.resetTimer = false;
@@ -62,19 +62,20 @@ public class Regen extends Module {
       if (minecraft.playerController != null && !minecraft.playerController.gameIsSurvivalOrAdventure()) {
          return;
       }
-      if (this.noAir.isEnabled() && !thePlayer.onGround) {
+      if (this.noAir.isEnabled() && !preUpdateEvent.isOnGround()) {
          return;
       }
-      if (thePlayer.getFoodStats().getFoodLevel() <= (int) this.food.getCurrentValue()) {
+      boolean hasRegenPotion = thePlayer.isPotionActive(Potion.regeneration);
+      if (this.potionEffect.isEnabled() && !hasRegenPotion) {
+         return;
+      }
+      if (!hasRegenPotion && thePlayer.getFoodStats().getFoodLevel() < (int) this.food.getCurrentValue()) {
          return;
       }
       if (!thePlayer.isEntityAlive()) {
          return;
       }
       if (thePlayer.getHealth() >= this.health.getCurrentValue()) {
-         return;
-      }
-      if (this.potionEffect.isEnabled() && !thePlayer.isPotionActive(Potion.regeneration)) {
          return;
       }
       if (!this.timer.hasElapsed((long) this.delay.getCurrentValue())) {
@@ -85,12 +86,12 @@ public class Regen extends Module {
       if (currentMode == 0) { // Vanilla
          int packetCount = (int) this.speed.getCurrentValue();
          for (int i = 0; i < packetCount; i++) {
-            this.sendPacketUnregistered(new C03PacketPlayer(thePlayer.onGround));
+            this.sendPacket(new C03PacketPlayer(preUpdateEvent.isOnGround()));
          }
       } else if (currentMode == 1) { // Spartan
-         if (!MoveUtils.isMoving() && thePlayer.onGround) {
+         if (!MoveUtils.isMoving() && preUpdateEvent.isOnGround()) {
             for (int i = 0; i < 9; i++) {
-               this.sendPacketUnregistered(new C03PacketPlayer(thePlayer.onGround));
+               this.sendPacket(new C03PacketPlayer(preUpdateEvent.isOnGround()));
             }
             minecraft.timer.timerSpeed = 0.45F;
             this.resetTimer = true;
