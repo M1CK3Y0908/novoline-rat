@@ -99,12 +99,12 @@ public class WatermarkElement extends HudElement {
                this.getX(),
                this.getY(),
                this.getX() + this.getWidth(),
-               this.getY() + 2.0F
+               this.getY() + 1.0F
             );
             cFontRenderer.drawStringWithShadow(
                this.watermarkText,
                this.getX() + this.getWidth() / 2.0F - cFontRenderer.getStringWidth(this.watermarkText) / 2.0F,
-               this.getY() + this.getHeight() / 2.0F - cFontRenderer.getHeight() / 2.0F + 1.0F,
+               this.getY() + this.getHeight() / 2.0F - cFontRenderer.getHeight() / 2.0F + 0.5F,
                -1
             );
             this.width = cFontRenderer.getStringWidth(this.watermarkText) + 5.0F;
@@ -195,7 +195,7 @@ public class WatermarkElement extends HudElement {
          }
       } else {
          if ("OneTap".equalsIgnoreCase(type)) {
-            RenderUtils.drawThemeGradientBar(x, y, x + w, y + 2.0F);
+            RenderUtils.drawThemeGradientBar(x, y, x + w, y + 1.0F);
          } else if ("NeverLose".equalsIgnoreCase(type)) {
             int cTheme = ModuleManager.themeColor.getColor(x, y);
             FilledPolygonRenderer fpr = new FilledPolygonRenderer();
